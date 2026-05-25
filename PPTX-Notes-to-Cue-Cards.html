@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PPTX Notes to Cue Cards</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --brand-purple: #2a034c;
+      --brand-purple-10: #451284;
+      --brand-violet: #7949f0;
+      --brand-mint: #00ca9f;
+      --brand-mint-dark: #005559;
+      --brand-sky: #41bce5;
+      --brand-mandarin: #fcb12e;
+      --brand-offwhite: #e2e2f2;
+      --brand-graphite: #414156;
+      --brand-graphite-10: #616172;
+      --ink: var(--brand-graphite);
+      --muted: var(--brand-graphite-10);
+      --line: #c7c7dc;
+      --paper: var(--brand-offwhite);
+      --panel: #ffffff;
+      --accent: var(--brand-mint);
+      --accent-dark: var(--brand-mint-dark);
+      --warn: #8a5200;
+      --error: #b42318;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Calibri, "Segoe UI", Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, var(--brand-purple) 0 382px, var(--paper) 382px),
+        linear-gradient(110deg, rgba(69, 18, 132, 0.55) 0 18%, transparent 18%),
+        linear-gradient(125deg, rgba(0, 202, 159, 0.9) 0 7px, transparent 7px),
+        var(--paper);
+      min-height: 100vh;
+    }
+
+    main {
+      width: min(920px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+      font-size: 42px;
+      line-height: 1.05;
+      letter-spacing: 0;
+      color: #ffffff;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .masthead {
+      padding: 28px 0 22px;
+      color: #ffffff;
+    }
+
+    .intro {
+      max-width: 720px;
+      color: #ffffff;
+      font-size: 20px;
+      line-height: 1.4;
+    }
+
+    .panel {
+      margin-top: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 24px 56px rgba(42, 3, 76, 0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 6px;
+      background: linear-gradient(90deg, var(--brand-mint), var(--brand-sky), var(--brand-violet), var(--brand-purple));
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel-heading h2 {
+      margin: 0 0 4px;
+      color: var(--brand-purple);
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .format-pill {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--brand-purple);
+      color: #ffffff;
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .dropzone {
+      display: grid;
+      gap: 12px;
+      place-items: center;
+      min-height: 180px;
+      padding: 24px;
+      border: 2px dashed #a0a0c4;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(0, 202, 159, 0.08), rgba(121, 73, 240, 0.08)),
+        #fbfbff;
+      text-align: center;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: #edf8f6;
+      box-shadow: inset 0 0 0 2px rgba(0, 202, 159, 0.25);
+    }
+
+    .dropzone strong {
+      color: var(--brand-purple);
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+      font-size: 20px;
+    }
+
+    input[type="file"] {
+      width: min(100%, 420px);
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 22px;
+      margin-top: 18px;
+      align-items: center;
+    }
+
+    label {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .size-control {
+      display: grid;
+      gap: 6px;
+    }
+
+    .size-control span {
+      color: var(--brand-purple);
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .size-options {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7f7ff;
+    }
+
+    .size-options label {
+      position: relative;
+      min-height: 34px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      color: var(--brand-purple);
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .size-options input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .size-options label:has(input:checked) {
+      background: var(--brand-purple);
+      color: #ffffff;
+    }
+
+    button {
+      min-height: 42px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: var(--brand-purple);
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(0, 85, 89, 0.18);
+    }
+
+    button:hover {
+      background: var(--brand-mint-dark);
+      color: #ffffff;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      background: #c0c0c7;
+      color: #616172;
+      box-shadow: none;
+    }
+
+    .status {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #f7f7ff;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+
+    .status.error {
+      border-color: #f3b8b2;
+      background: #fff5f4;
+      color: var(--error);
+    }
+
+    .status.warn {
+      border-color: #f0c48d;
+      background: #fff8ed;
+      color: var(--warn);
+    }
+
+    .preview {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .slide {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #ffffff;
+    }
+
+    .slide strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--brand-purple);
+      font-family: Montserrat, "Segoe UI", Arial, sans-serif;
+    }
+
+    .slide div {
+      color: var(--muted);
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+
+    .small {
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        background:
+          linear-gradient(180deg, var(--brand-purple) 0 430px, var(--paper) 430px),
+          var(--paper);
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .intro {
+        font-size: 18px;
+      }
+
+      .panel-heading {
+        display: block;
+      }
+
+      .format-pill {
+        display: inline-flex;
+        margin-top: 12px;
+      }
+
+      .size-options {
+        width: 100%;
+      }
+
+      .size-options label {
+        flex: 1 1 0;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <h1>PPTX Notes to Cue Cards</h1>
+      <p class="intro">Transform speaker notes into a polished Word document, one slide per page, with a local browser workflow.</p>
+    </header>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Build the notes document</h2>
+          <p>Select a PowerPoint file, choose an output size, and download a Word document. Everything runs locally in this browser window.</p>
+        </div>
+        <span id="formatPill" class="format-pill">A5 landscape</span>
+      </div>
+
+      <div id="dropzone" class="dropzone">
+        <div>
+          <p><strong>Choose or drop a .pptx file</strong></p>
+          <p class="small">The original presentation is not uploaded anywhere.</p>
+        </div>
+        <input id="fileInput" type="file" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation">
+      </div>
+
+      <div class="controls">
+        <div class="size-control" aria-labelledby="pageSizeLabel">
+          <span id="pageSizeLabel">Page size</span>
+          <div class="size-options">
+            <label><input type="radio" name="pageSize" value="a5" checked> A5</label>
+            <label><input type="radio" name="pageSize" value="4x6"> 4&quot; x 6&quot;</label>
+            <label><input type="radio" name="pageSize" value="5x8"> 5&quot; x 8&quot;</label>
+          </div>
+        </div>
+        <label><input id="includeEmpty" type="checkbox"> Include slides with no notes</label>
+        <label><input id="includeHeading" type="checkbox" checked> Add slide headings</label>
+        <button id="convertButton" disabled>Convert to DOCX</button>
+      </div>
+
+      <div id="status" class="status">Waiting for a PowerPoint file.</div>
+      <div id="preview" class="preview" hidden></div>
+    </section>
+  </main>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const convertButton = document.getElementById("convertButton");
+    const includeEmpty = document.getElementById("includeEmpty");
+    const includeHeading = document.getElementById("includeHeading");
+    const statusBox = document.getElementById("status");
+    const preview = document.getElementById("preview");
+    const dropzone = document.getElementById("dropzone");
+    const formatPill = document.getElementById("formatPill");
+    const pageSizeInputs = [...document.querySelectorAll("input[name='pageSize']")];
+
+    const PAGE_SIZES = {
+      a5: {
+        label: "A5 landscape",
+        fileLabel: "A5 landscape",
+        widthTwips: 11906,
+        heightTwips: 8391,
+        orient: "landscape"
+      },
+      "4x6": {
+        label: "4\" x 6\" landscape",
+        fileLabel: "4x6 landscape",
+        widthTwips: 8640,
+        heightTwips: 5760,
+        orient: "landscape"
+      },
+      "5x8": {
+        label: "5\" x 8\" landscape",
+        fileLabel: "5x8 landscape",
+        widthTwips: 11520,
+        heightTwips: 7200,
+        orient: "landscape"
+      }
+    };
+
+    let selectedFile = null;
+    let lastSlides = [];
+
+    const textDecoder = new TextDecoder("utf-8");
+    const textEncoder = new TextEncoder();
+
+    pageSizeInputs.forEach(input => {
+      input.addEventListener("change", updateSelectedPageSizeLabel);
+    });
+    updateSelectedPageSizeLabel();
+
+    fileInput.addEventListener("change", () => {
+      selectedFile = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+      convertButton.disabled = !selectedFile;
+      preview.hidden = true;
+      preview.innerHTML = "";
+      setStatus(selectedFile ? `Ready: ${selectedFile.name}` : "Waiting for a PowerPoint file.");
+    });
+
+    for (const eventName of ["dragenter", "dragover"]) {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        dropzone.classList.add("dragover");
+      });
+    }
+
+    for (const eventName of ["dragleave", "drop"]) {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        dropzone.classList.remove("dragover");
+      });
+    }
+
+    dropzone.addEventListener("drop", event => {
+      const file = [...event.dataTransfer.files].find(item => item.name.toLowerCase().endsWith(".pptx"));
+      if (!file) {
+        setStatus("Please drop a .pptx file.", "error");
+        return;
+      }
+      selectedFile = file;
+      fileInput.value = "";
+      convertButton.disabled = false;
+      preview.hidden = true;
+      preview.innerHTML = "";
+      setStatus(`Ready: ${selectedFile.name}`);
+    });
+
+    convertButton.addEventListener("click", async () => {
+      if (!selectedFile) return;
+      convertButton.disabled = true;
+      setStatus("Reading presentation...");
+
+      try {
+        const zip = await ZipReader.fromArrayBuffer(await selectedFile.arrayBuffer());
+        setStatus("Finding slides and speaker notes...");
+        const slides = await extractSlidesWithNotes(zip);
+        lastSlides = slides;
+
+        const exportSlides = includeEmpty.checked ? slides : slides.filter(slide => slide.notes.length > 0);
+        if (!exportSlides.length) {
+          renderPreview(slides);
+          setStatus("No speaker notes were found. Tick \"Include slides with no notes\" if you want a blank-page document.", "warn");
+          return;
+        }
+
+        const pageSize = selectedPageSize();
+        setStatus(`Creating ${pageSize.label} Word document for ${exportSlides.length} slide${exportSlides.length === 1 ? "" : "s"}...`);
+        const docxBlob = createDocx(exportSlides, {
+          includeHeading: includeHeading.checked,
+          sourceName: selectedFile.name,
+          pageSize
+        });
+
+        const baseName = selectedFile.name.replace(/\.pptx$/i, "");
+        downloadBlob(docxBlob, `${baseName} - notes ${pageSize.fileLabel}.docx`);
+        renderPreview(slides);
+        const missing = slides.filter(slide => slide.notes.length === 0).length;
+        const extra = missing ? `\n${missing} slide${missing === 1 ? "" : "s"} had no notes.` : "";
+        setStatus(`Done. Downloaded ${exportSlides.length} ${pageSize.label} page${exportSlides.length === 1 ? "" : "s"}.${extra}`);
+      } catch (error) {
+        console.error(error);
+        setStatus(error && error.message ? error.message : String(error), "error");
+      } finally {
+        convertButton.disabled = !selectedFile;
+      }
+    });
+
+    function setStatus(message, type) {
+      statusBox.textContent = message;
+      statusBox.className = `status${type ? ` ${type}` : ""}`;
+    }
+
+    function selectedPageSize() {
+      const selected = pageSizeInputs.find(input => input.checked);
+      return PAGE_SIZES[selected ? selected.value : "a5"] || PAGE_SIZES.a5;
+    }
+
+    function updateSelectedPageSizeLabel() {
+      formatPill.textContent = selectedPageSize().label;
+    }
+
+    function renderPreview(slides) {
+      preview.innerHTML = "";
+      preview.hidden = false;
+      const shown = slides.slice(0, 8);
+      for (const slide of shown) {
+        const card = document.createElement("div");
+        card.className = "slide";
+        const title = document.createElement("strong");
+        title.textContent = `Slide ${slide.number}`;
+        const body = document.createElement("div");
+        body.textContent = slide.notes.join("\n") || "No notes found.";
+        card.append(title, body);
+        preview.append(card);
+      }
+      if (slides.length > shown.length) {
+        const more = document.createElement("p");
+        more.className = "small";
+        more.textContent = `Previewing ${shown.length} of ${slides.length} slides.`;
+        preview.append(more);
+      }
+    }
+
+    async function extractSlidesWithNotes(zip) {
+      const presentationXml = await zip.text("ppt/presentation.xml");
+      const presentationRelsXml = await zip.text("ppt/_rels/presentation.xml.rels");
+      if (!presentationXml || !presentationRelsXml) {
+        throw new Error("This does not look like a valid .pptx file. Could not find ppt/presentation.xml.");
+      }
+
+      const presentationDoc = parseXml(presentationXml, "presentation.xml");
+      const rels = parseRelationships(presentationRelsXml);
+      const slideIds = byLocalName(presentationDoc, "sldId");
+      const slidePaths = slideIds
+        .map(node => rels.get(node.getAttribute("r:id") || node.getAttribute("id")))
+        .filter(Boolean)
+        .map(rel => normalizeZipPath(resolveTarget("ppt", rel.target)));
+
+      const slides = [];
+      for (let index = 0; index < slidePaths.length; index += 1) {
+        const slidePath = slidePaths[index];
+        const slideRelsPath = relsPathFor(slidePath);
+        const slideRelsXml = await zip.text(slideRelsPath);
+        let notesPath = null;
+
+        if (slideRelsXml) {
+          const slideRels = [...parseRelationships(slideRelsXml).values()];
+          const notesRel = slideRels.find(rel => /\/notesSlide$/i.test(rel.type));
+          if (notesRel) {
+            notesPath = normalizeZipPath(resolveTarget(dirname(slidePath), notesRel.target));
+          }
+        }
+
+        let notes = [];
+        if (notesPath && zip.has(notesPath)) {
+          notes = extractNotesParagraphs(await zip.text(notesPath));
+        }
+
+        slides.push({
+          number: index + 1,
+          slidePath,
+          notesPath,
+          notes
+        });
+      }
+
+      return slides;
+    }
+
+    function parseRelationships(xml) {
+      const doc = parseXml(xml, "relationships");
+      const map = new Map();
+      for (const node of byLocalName(doc, "Relationship")) {
+        map.set(node.getAttribute("Id"), {
+          id: node.getAttribute("Id"),
+          type: node.getAttribute("Type") || "",
+          target: node.getAttribute("Target") || ""
+        });
+      }
+      return map;
+    }
+
+    function extractNotesParagraphs(xml) {
+      const doc = parseXml(xml, "notes slide");
+      const paragraphs = [];
+
+      for (const shape of byLocalName(doc, "sp")) {
+        const placeholders = byLocalName(shape, "ph");
+        const phType = placeholders.length ? (placeholders[0].getAttribute("type") || "") : "";
+        if (["sldImg", "dt", "ftr", "hdr", "sldNum"].includes(phType)) continue;
+
+        const textBodies = byLocalName(shape, "txBody");
+        if (!textBodies.length) continue;
+        if (phType && phType !== "body") continue;
+
+        for (const textBody of textBodies) {
+          for (const paragraphNode of childElementsByLocalName(textBody, "p")) {
+            const text = paragraphText(paragraphNode).trim();
+            if (text) paragraphs.push(text);
+          }
+        }
+      }
+
+      return paragraphs.filter(text => !/^click to add notes$/i.test(text));
+    }
+
+    function paragraphText(paragraphNode) {
+      const pieces = [];
+      walk(paragraphNode, node => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        if (node.localName === "t") pieces.push(node.textContent || "");
+        if (node.localName === "tab") pieces.push("\t");
+        if (node.localName === "br") pieces.push("\n");
+      });
+      return pieces.join("");
+    }
+
+    function createDocx(slides, options) {
+      const files = new Map();
+      files.set("[Content_Types].xml", xmlDecl(`\
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+</Types>`));
+      files.set("_rels/.rels", xmlDecl(`\
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+</Relationships>`));
+      files.set("word/_rels/document.xml.rels", xmlDecl(`\
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>`));
+      files.set("docProps/app.xml", xmlDecl(`\
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <Application>PPTX Notes to Cue Cards</Application>
+</Properties>`));
+      files.set("docProps/core.xml", xmlDecl(`\
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <dc:title>${escapeXml(options.sourceName || "PowerPoint notes")}</dc:title>
+  <dc:creator>PPTX Notes to Cue Cards</dc:creator>
+  <cp:lastModifiedBy>PPTX Notes to Cue Cards</cp:lastModifiedBy>
+  <dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:created>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:modified>
+</cp:coreProperties>`));
+      files.set("word/document.xml", xmlDecl(documentXml(slides, options)));
+      return writeStoredZip(files, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+
+    function documentXml(slides, options) {
+      const body = [];
+      const pageSize = options.pageSize || PAGE_SIZES.a5;
+      slides.forEach((slide, index) => {
+        if (options.includeHeading) {
+          body.push(paragraph(`Slide ${slide.number}`, { bold: true, size: 28, after: 180 }));
+        }
+        if (slide.notes.length) {
+          for (const note of slide.notes) {
+            const lines = note.split(/\r?\n/);
+            lines.forEach(line => body.push(paragraph(line, { size: 22, after: 120 })));
+          }
+        } else {
+          body.push(paragraph("", { size: 22, after: 120 }));
+        }
+        if (index < slides.length - 1) {
+          body.push(`<w:p><w:r><w:br w:type="page"/></w:r></w:p>`);
+        }
+      });
+
+      return `\
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    ${body.join("\n")}
+    <w:sectPr>
+      <w:pgSz w:w="${pageSize.widthTwips}" w:h="${pageSize.heightTwips}" w:orient="${pageSize.orient}"/>
+      <w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="360" w:footer="360" w:gutter="0"/>
+    </w:sectPr>
+  </w:body>
+</w:document>`;
+    }
+
+    function paragraph(text, options) {
+      const properties = [];
+      if (options && options.after !== undefined) {
+        properties.push(`<w:spacing w:after="${options.after}"/>`);
+      }
+      const runProperties = [];
+      if (options && options.bold) runProperties.push("<w:b/>");
+      if (options && options.size) runProperties.push(`<w:sz w:val="${options.size}"/>`);
+      return `\
+<w:p>
+  ${properties.length ? `<w:pPr>${properties.join("")}</w:pPr>` : ""}
+  <w:r>
+    ${runProperties.length ? `<w:rPr>${runProperties.join("")}</w:rPr>` : ""}
+    <w:t xml:space="preserve">${escapeXml(text)}</w:t>
+  </w:r>
+</w:p>`;
+    }
+
+    class ZipReader {
+      constructor(bytes, entries) {
+        this.bytes = bytes;
+        this.entries = entries;
+      }
+
+      static async fromArrayBuffer(buffer) {
+        const bytes = new Uint8Array(buffer);
+        const view = new DataView(buffer);
+        const eocdOffset = findEndOfCentralDirectory(bytes);
+        if (eocdOffset < 0) throw new Error("Could not read the .pptx ZIP directory.");
+
+        const entryCount = view.getUint16(eocdOffset + 10, true);
+        const centralDirOffset = view.getUint32(eocdOffset + 16, true);
+        const entries = new Map();
+        let offset = centralDirOffset;
+
+        for (let i = 0; i < entryCount; i += 1) {
+          if (view.getUint32(offset, true) !== 0x02014b50) {
+            throw new Error("The .pptx ZIP directory is malformed.");
+          }
+          const method = view.getUint16(offset + 10, true);
+          const compressedSize = view.getUint32(offset + 20, true);
+          const uncompressedSize = view.getUint32(offset + 24, true);
+          const nameLength = view.getUint16(offset + 28, true);
+          const extraLength = view.getUint16(offset + 30, true);
+          const commentLength = view.getUint16(offset + 32, true);
+          const localHeaderOffset = view.getUint32(offset + 42, true);
+          const name = textDecoder.decode(bytes.slice(offset + 46, offset + 46 + nameLength));
+          entries.set(normalizeZipPath(name), {
+            name: normalizeZipPath(name),
+            method,
+            compressedSize,
+            uncompressedSize,
+            localHeaderOffset
+          });
+          offset += 46 + nameLength + extraLength + commentLength;
+        }
+
+        return new ZipReader(bytes, entries);
+      }
+
+      has(path) {
+        return this.entries.has(normalizeZipPath(path));
+      }
+
+      async text(path) {
+        const bytes = await this.file(path);
+        return bytes ? textDecoder.decode(bytes) : null;
+      }
+
+      async file(path) {
+        const entry = this.entries.get(normalizeZipPath(path));
+        if (!entry) return null;
+
+        const view = new DataView(this.bytes.buffer, this.bytes.byteOffset, this.bytes.byteLength);
+        const offset = entry.localHeaderOffset;
+        if (view.getUint32(offset, true) !== 0x04034b50) {
+          throw new Error(`Could not read ZIP entry ${entry.name}.`);
+        }
+        const nameLength = view.getUint16(offset + 26, true);
+        const extraLength = view.getUint16(offset + 28, true);
+        const dataStart = offset + 30 + nameLength + extraLength;
+        const compressed = this.bytes.slice(dataStart, dataStart + entry.compressedSize);
+
+        if (entry.method === 0) return compressed;
+        if (entry.method === 8) return inflateRaw(compressed);
+        throw new Error(`Unsupported ZIP compression method ${entry.method} in ${entry.name}.`);
+      }
+    }
+
+    async function inflateRaw(bytes) {
+      if (!("DecompressionStream" in window)) {
+        throw new Error("This browser cannot decompress PPTX files. Try a current version of Microsoft Edge or Chrome.");
+      }
+      try {
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+        return new Uint8Array(await new Response(stream).arrayBuffer());
+      } catch (error) {
+        throw new Error("Could not decompress the PPTX contents. Try opening this page in the latest Microsoft Edge or Chrome.");
+      }
+    }
+
+    function writeStoredZip(files, mimeType) {
+      const chunks = [];
+      const centralChunks = [];
+      let offset = 0;
+      let index = 0;
+
+      for (const [name, content] of files) {
+        const nameBytes = textEncoder.encode(name);
+        const data = typeof content === "string" ? textEncoder.encode(content) : content;
+        const crc = crc32(data);
+
+        const local = new Uint8Array(30 + nameBytes.length);
+        const localView = new DataView(local.buffer);
+        localView.setUint32(0, 0x04034b50, true);
+        localView.setUint16(4, 20, true);
+        localView.setUint16(6, 0, true);
+        localView.setUint16(8, 0, true);
+        localView.setUint16(10, 0, true);
+        localView.setUint16(12, 0, true);
+        localView.setUint32(14, crc, true);
+        localView.setUint32(18, data.length, true);
+        localView.setUint32(22, data.length, true);
+        localView.setUint16(26, nameBytes.length, true);
+        local.set(nameBytes, 30);
+        chunks.push(local, data);
+
+        const central = new Uint8Array(46 + nameBytes.length);
+        const centralView = new DataView(central.buffer);
+        centralView.setUint32(0, 0x02014b50, true);
+        centralView.setUint16(4, 20, true);
+        centralView.setUint16(6, 20, true);
+        centralView.setUint16(8, 0, true);
+        centralView.setUint16(10, 0, true);
+        centralView.setUint16(12, 0, true);
+        centralView.setUint16(14, 0, true);
+        centralView.setUint32(16, crc, true);
+        centralView.setUint32(20, data.length, true);
+        centralView.setUint32(24, data.length, true);
+        centralView.setUint16(28, nameBytes.length, true);
+        centralView.setUint32(42, offset, true);
+        central.set(nameBytes, 46);
+        centralChunks.push(central);
+
+        offset += local.length + data.length;
+        index += 1;
+      }
+
+      const centralOffset = offset;
+      const centralSize = centralChunks.reduce((sum, item) => sum + item.length, 0);
+      chunks.push(...centralChunks);
+
+      const eocd = new Uint8Array(22);
+      const eocdView = new DataView(eocd.buffer);
+      eocdView.setUint32(0, 0x06054b50, true);
+      eocdView.setUint16(8, index, true);
+      eocdView.setUint16(10, index, true);
+      eocdView.setUint32(12, centralSize, true);
+      eocdView.setUint32(16, centralOffset, true);
+      chunks.push(eocd);
+
+      return new Blob(chunks, { type: mimeType });
+    }
+
+    const crcTable = (() => {
+      const table = new Uint32Array(256);
+      for (let i = 0; i < 256; i += 1) {
+        let c = i;
+        for (let k = 0; k < 8; k += 1) {
+          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        }
+        table[i] = c >>> 0;
+      }
+      return table;
+    })();
+
+    function crc32(bytes) {
+      let crc = 0xffffffff;
+      for (let i = 0; i < bytes.length; i += 1) {
+        crc = crcTable[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+      }
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    function findEndOfCentralDirectory(bytes) {
+      const min = Math.max(0, bytes.length - 65557);
+      for (let i = bytes.length - 22; i >= min; i -= 1) {
+        if (
+          bytes[i] === 0x50 &&
+          bytes[i + 1] === 0x4b &&
+          bytes[i + 2] === 0x05 &&
+          bytes[i + 3] === 0x06
+        ) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    function parseXml(xml, label) {
+      const doc = new DOMParser().parseFromString(xml, "application/xml");
+      const error = doc.getElementsByTagName("parsererror")[0];
+      if (error) throw new Error(`Could not parse ${label}.`);
+      return doc;
+    }
+
+    function byLocalName(root, localName) {
+      const results = [];
+      walk(root, node => {
+        if (node.nodeType === Node.ELEMENT_NODE && node.localName === localName) {
+          results.push(node);
+        }
+      });
+      return results;
+    }
+
+    function childElementsByLocalName(root, localName) {
+      return [...root.childNodes].filter(node => node.nodeType === Node.ELEMENT_NODE && node.localName === localName);
+    }
+
+    function walk(root, visit) {
+      visit(root);
+      for (let child = root.firstChild; child; child = child.nextSibling) {
+        walk(child, visit);
+      }
+    }
+
+    function dirname(path) {
+      const index = path.lastIndexOf("/");
+      return index >= 0 ? path.slice(0, index) : "";
+    }
+
+    function relsPathFor(path) {
+      const dir = dirname(path);
+      const name = path.slice(dir.length + 1);
+      return `${dir}/_rels/${name}.rels`;
+    }
+
+    function resolveTarget(baseDir, target) {
+      if (!target) return "";
+      if (target.startsWith("/")) return target.slice(1);
+      return `${baseDir}/${target}`;
+    }
+
+    function normalizeZipPath(path) {
+      const parts = [];
+      for (const part of String(path).replace(/\\/g, "/").split("/")) {
+        if (!part || part === ".") continue;
+        if (part === "..") parts.pop();
+        else parts.push(part);
+      }
+      return parts.join("/");
+    }
+
+    function escapeXml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function xmlDecl(xml) {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${xml}`;
+    }
+
+    function downloadBlob(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  </script>
+</body>
+</html>
