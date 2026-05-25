@@ -1,4 +1,4 @@
-[# grahamlehr.github.io](https://grahamlehr.github.io)
+[grahamlehr.github.io](https://grahamlehr.github.io)
 
 Little webtools I've built with AIs to automate tasks, maybe they'll be useful for you too.
 
