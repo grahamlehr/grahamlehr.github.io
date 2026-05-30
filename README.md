@@ -11,3 +11,11 @@ Sometimes you need to stitch two or more PDFs together and don't have access to 
 ## PowerPoint notes to Cue Cards
 [PPTX-Notes-to-Cue-Cards](https://grahamlehr.github.io/PPTX-Notes-to-Cue-Cards.html)
 This one is Niche, but it takes the notes from PowerPoint slides and spits out a word document formatted for different cue card sizes. 
+
+## Image Banner Maker
+A quick way to make images for the SpotMe event app.
+Two versions, one made with Gemini 3.5 Flash in Antigravity and one with GPT5.5 in Codex from the same spec.
+
+[Made with Gemini/Antigravity](https://grahamlehr.github.io/SpotMe-Banner-Gemini.html)
+
+[Made with GPT5.5/Codex](https://grahamlehr.github.io/spotme-banner-GPT5.5.html)
