@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpotMe Banner Generator</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5f6b78;
+      --line: #d7dce0;
+      --paper: #f7f5f0;
+      --surface: #ffffff;
+      --accent: #116a66;
+      --accent-strong: #0c514e;
+      --warm: #df624f;
+      --gold: #f3c969;
+      --shadow: 0 18px 45px rgba(23, 32, 42, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(243, 201, 105, 0.15), transparent 35%),
+        linear-gradient(315deg, rgba(223, 98, 79, 0.12), transparent 32%),
+        var(--paper);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.4;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    button,
+    input[type="file"],
+    input[type="color"],
+    select,
+    label {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 2.4vw, 2.6rem);
+      letter-spacing: 0;
+    }
+
+    .brand {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .brand p {
+      width: 100%;
+      margin: 5px 0 0;
+      max-width: min(680px, 100%);
+      color: var(--muted);
+      font-size: 0.98rem;
+      overflow-wrap: break-word;
+    }
+
+    .privacy-chip {
+      flex: 0 0 auto;
+      padding: 9px 12px;
+      border: 1px solid rgba(17, 106, 102, 0.2);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--accent-strong);
+      font-weight: 700;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .tab-button {
+      flex: 1 1 180px;
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--ink);
+      font-weight: 700;
+      white-space: normal;
+    }
+
+    .tab-button[aria-selected="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+      align-items: start;
+      gap: 18px;
+    }
+
+    .controls,
+    .preview-panel {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      overflow: hidden;
+    }
+
+    .controls-header,
+    .preview-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .controls-header h2,
+    .preview-header h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+    }
+
+    .preset-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .control-stack {
+      display: grid;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    fieldset {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    legend {
+      margin-bottom: 10px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--accent-strong);
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .field label,
+    .inline-label {
+      color: #2c3945;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    textarea,
+    select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid #c6ccd2;
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 9px 10px;
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    input[type="color"] {
+      width: 52px;
+      min-height: 40px;
+      padding: 4px;
+      border: 1px solid #c6ccd2;
+      border-radius: var(--radius);
+      background: white;
+    }
+
+    .range-row,
+    .two-col,
+    .three-col {
+      display: grid;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .range-row {
+      grid-template-columns: minmax(0, 1fr) 82px;
+    }
+
+    .two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .three-col {
+      grid-template-columns: 1fr 1fr auto;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid #c6ccd2;
+      border-radius: var(--radius);
+      background: white;
+    }
+
+    .segmented button {
+      min-height: 38px;
+      border: 0;
+      border-right: 1px solid #c6ccd2;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .segmented button:last-child {
+      border-right: 0;
+    }
+
+    .segmented button[aria-pressed="true"] {
+      background: var(--gold);
+      color: #2f2a17;
+    }
+
+    .checkbox-line {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+      color: #2c3945;
+      font-weight: 700;
+    }
+
+    .checkbox-line input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .download-button,
+    .secondary-button {
+      width: 100%;
+      min-height: 46px;
+      border: 0;
+      border-radius: var(--radius);
+      font-weight: 900;
+    }
+
+    .download-button {
+      background: var(--warm);
+      color: white;
+      box-shadow: 0 10px 22px rgba(223, 98, 79, 0.25);
+    }
+
+    .download-button:hover,
+    .download-button:focus-visible {
+      background: #c94f3e;
+    }
+
+    .secondary-button {
+      border: 1px solid #c6ccd2;
+      background: white;
+      color: var(--accent-strong);
+    }
+
+    .message {
+      min-height: 22px;
+      color: #9b2d22;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .message.ok {
+      color: var(--accent-strong);
+    }
+
+    .preview-panel {
+      min-width: 0;
+    }
+
+    .preview-shell {
+      padding: 18px;
+    }
+
+    .canvas-frame {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid #bfc6cc;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(45deg, #e7eaed 25%, transparent 25%),
+        linear-gradient(-45deg, #e7eaed 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e7eaed 75%),
+        linear-gradient(-45deg, transparent 75%, #e7eaed 75%),
+        #f9fafb;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+      background-size: 20px 20px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: transparent;
+    }
+
+    .safe-overlay {
+      position: absolute;
+      inset: 8%;
+      pointer-events: none;
+      border: 1px dashed rgba(255, 255, 255, 0.88);
+      box-shadow: 0 0 0 999px rgba(23, 32, 42, 0.05);
+    }
+
+    .preview-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .empty-state {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      max-width: min(460px, calc(100% - 28px));
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: var(--radius);
+      background: rgba(23, 32, 42, 0.45);
+      color: #53606c;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .empty-state.is-hidden {
+      display: none;
+    }
+
+    @media (max-width: 940px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .privacy-chip {
+        align-self: flex-start;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        padding: 16px 8px;
+      }
+
+      .controls-header,
+      .preview-header {
+        display: block;
+      }
+
+      .controls-header h2,
+      .preview-header h2 {
+        margin-bottom: 4px;
+      }
+
+      .brand p {
+        max-width: 330px;
+      }
+
+      .two-col,
+      .three-col,
+      .range-row {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-button {
+        flex-basis: 100%;
+      }
+
+      .privacy-chip,
+      .preset-meta {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>SpotMe Banner Generator</h1>
+        <p>Create mobile-ready SpotMe banner PNGs from a background image, text overlay, and optional brand font.</p>
+      </div>
+      <div class="privacy-chip">Local browser export</div>
+    </header>
+
+    <nav class="tabs" id="presetTabs" aria-label="Banner presets"></nav>
+
+    <div class="workspace">
+      <aside class="controls" aria-label="Banner controls">
+        <div class="controls-header">
+          <h2>Controls</h2>
+          <span class="preset-meta" id="presetSize">1000 x 500</span>
+        </div>
+
+        <div class="control-stack">
+          <fieldset>
+            <legend>Background</legend>
+            <div class="field">
+              <label for="backgroundFile">Image file</label>
+              <input id="backgroundFile" type="file" accept="image/jpeg,image/png">
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="imageMode">Image mode</label>
+                <select id="imageMode">
+                  <option value="cover">Cover</option>
+                  <option value="contain">Fit</option>
+                </select>
+              </div>
+              <button class="secondary-button" id="resetImage" type="button">Reset image</button>
+            </div>
+            <div class="field">
+              <label for="imageZoom">Image zoom</label>
+              <div class="range-row">
+                <input id="imageZoom" type="range" min="50" max="250" value="100">
+                <input id="imageZoomNumber" type="number" min="50" max="250" value="100">
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="imageX">Image X</label>
+                <input id="imageX" type="range" min="-100" max="100" value="0">
+              </div>
+              <div class="field">
+                <label for="imageY">Image Y</label>
+                <input id="imageY" type="range" min="-100" max="100" value="0">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Text</legend>
+            <div class="field">
+              <label for="bannerText">Content</label>
+              <textarea id="bannerText" spellcheck="true">Add your banner headline</textarea>
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="fontFamily">Font family</label>
+                <select id="fontFamily"></select>
+              </div>
+              <div class="field">
+                <label for="fontFile">Upload font</label>
+                <input id="fontFile" type="file" accept=".ttf,.otf,font/ttf,font/otf">
+              </div>
+            </div>
+            <div class="three-col">
+              <div class="field">
+                <label for="fontSize">Font size</label>
+                <div class="range-row">
+                  <input id="fontSize" type="range" min="16" max="180" value="64">
+                  <input id="fontSizeNumber" type="number" min="16" max="180" value="64">
+                </div>
+              </div>
+              <div class="field">
+                <label for="fontWeight">Weight</label>
+                <select id="fontWeight">
+                  <option value="400">Regular</option>
+                  <option value="600">Semi Bold</option>
+                  <option value="700" selected>Bold</option>
+                  <option value="800">Extra Bold</option>
+                  <option value="900">Black</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="textColor">Colour</label>
+                <input id="textColor" type="color" value="#ffffff">
+              </div>
+            </div>
+            <div class="field">
+              <span class="inline-label">Alignment</span>
+              <div class="segmented" role="group" aria-label="Text alignment">
+                <button type="button" data-align="left">Left</button>
+                <button type="button" data-align="center" aria-pressed="true">Center</button>
+                <button type="button" data-align="right">Right</button>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="textX">Horizontal position</label>
+                <input id="textX" type="range" min="0" max="100" value="50">
+              </div>
+              <div class="field">
+                <label for="textY">Vertical position</label>
+                <input id="textY" type="range" min="0" max="100" value="52">
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="lineHeight">Line height</label>
+                <input id="lineHeight" type="range" min="80" max="180" value="112">
+              </div>
+              <div class="field">
+                <label for="letterSpacing">Letter spacing</label>
+                <input id="letterSpacing" type="range" min="-4" max="16" value="0">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Readability</legend>
+            <label class="checkbox-line" for="shadowToggle">
+              <input id="shadowToggle" type="checkbox" checked>
+              Text shadow
+            </label>
+            <label class="checkbox-line" for="panelToggle">
+              <input id="panelToggle" type="checkbox">
+              Text panel
+            </label>
+            <div class="two-col">
+              <div class="field">
+                <label for="panelColor">Panel colour</label>
+                <input id="panelColor" type="color" value="#17202a">
+              </div>
+              <div class="field">
+                <label for="panelOpacity">Panel opacity</label>
+                <input id="panelOpacity" type="range" min="0" max="90" value="45">
+              </div>
+            </div>
+            <label class="checkbox-line" for="safeAreaToggle">
+              <input id="safeAreaToggle" type="checkbox" checked>
+              Safe area
+            </label>
+          </fieldset>
+
+          <button class="download-button" id="downloadButton" type="button">Download PNG</button>
+          <div class="message" id="message" role="status" aria-live="polite"></div>
+        </div>
+      </aside>
+
+      <section class="preview-panel" aria-label="Banner preview">
+        <div class="preview-header">
+          <h2>Preview</h2>
+          <span class="preset-meta" id="presetName">Home Feed Banner 2:1</span>
+        </div>
+        <div class="preview-shell">
+          <div class="canvas-frame">
+            <canvas id="previewCanvas" width="1000" height="500"></canvas>
+            <div class="safe-overlay" id="safeOverlay" aria-hidden="true"></div>
+            <div class="empty-state" id="emptyState">Upload a JPEG or PNG background image</div>
+          </div>
+          <div class="preview-footer">
+            <span id="aspectLabel">2:1 canvas</span>
+            <span id="fontStatus">System fonts ready</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const PRESETS = [
+        {
+          id: "home-feed-2-1",
+          name: "Home Feed Banner 2:1",
+          width: 1000,
+          height: 500,
+          defaultText: "Add your banner headline",
+          defaultSize: 64,
+          defaultY: 52,
+          safeInset: 8
+        },
+        {
+          id: "feed-post-4-3",
+          name: "Feed Post Image 4:3",
+          width: 1000,
+          height: 750,
+          defaultText: "Add your post headline",
+          defaultSize: 74,
+          defaultY: 50,
+          safeInset: 7
+        },
+        {
+          id: "session-banner-20-3",
+          name: "Session Banner 20:3",
+          width: 1000,
+          height: 150,
+          defaultText: "Session title",
+          defaultSize: 38,
+          defaultY: 50,
+          safeInset: 6
+        }
+      ];
+
+      const SYSTEM_FONTS = [
+        { label: "Arial", value: "Arial, Helvetica, sans-serif" },
+        { label: "Helvetica", value: "Helvetica, Arial, sans-serif" },
+        { label: "Verdana", value: "Verdana, Geneva, sans-serif" },
+        { label: "Georgia", value: "Georgia, serif" },
+        { label: "Trebuchet MS", value: "'Trebuchet MS', Arial, sans-serif" }
+      ];
+
+      const state = {
+        preset: PRESETS[0],
+        image: null,
+        imageName: "",
+        imageMode: "cover",
+        imageZoom: 100,
+        imageX: 0,
+        imageY: 0,
+        text: PRESETS[0].defaultText,
+        fontFamily: SYSTEM_FONTS[0].value,
+        fontSize: PRESETS[0].defaultSize,
+        fontWeight: "700",
+        textColor: "#ffffff",
+        align: "center",
+        textX: 50,
+        textY: PRESETS[0].defaultY,
+        lineHeight: 112,
+        letterSpacing: 0,
+        shadow: true,
+        panel: false,
+        panelColor: "#17202a",
+        panelOpacity: 45,
+        safeArea: true
+      };
+
+      const el = {
+        tabs: document.getElementById("presetTabs"),
+        canvas: document.getElementById("previewCanvas"),
+        emptyState: document.getElementById("emptyState"),
+        safeOverlay: document.getElementById("safeOverlay"),
+        presetSize: document.getElementById("presetSize"),
+        presetName: document.getElementById("presetName"),
+        aspectLabel: document.getElementById("aspectLabel"),
+        message: document.getElementById("message"),
+        fontStatus: document.getElementById("fontStatus"),
+        backgroundFile: document.getElementById("backgroundFile"),
+        imageMode: document.getElementById("imageMode"),
+        imageZoom: document.getElementById("imageZoom"),
+        imageZoomNumber: document.getElementById("imageZoomNumber"),
+        imageX: document.getElementById("imageX"),
+        imageY: document.getElementById("imageY"),
+        resetImage: document.getElementById("resetImage"),
+        bannerText: document.getElementById("bannerText"),
+        fontFamily: document.getElementById("fontFamily"),
+        fontFile: document.getElementById("fontFile"),
+        fontSize: document.getElementById("fontSize"),
+        fontSizeNumber: document.getElementById("fontSizeNumber"),
+        fontWeight: document.getElementById("fontWeight"),
+        textColor: document.getElementById("textColor"),
+        textX: document.getElementById("textX"),
+        textY: document.getElementById("textY"),
+        lineHeight: document.getElementById("lineHeight"),
+        letterSpacing: document.getElementById("letterSpacing"),
+        shadowToggle: document.getElementById("shadowToggle"),
+        panelToggle: document.getElementById("panelToggle"),
+        panelColor: document.getElementById("panelColor"),
+        panelOpacity: document.getElementById("panelOpacity"),
+        safeAreaToggle: document.getElementById("safeAreaToggle"),
+        downloadButton: document.getElementById("downloadButton")
+      };
+
+      const ctx = el.canvas.getContext("2d");
+      const customFonts = [];
+
+      function init() {
+        if (!ctx) {
+          setMessage("Canvas is not supported in this browser.");
+          el.downloadButton.disabled = true;
+          return;
+        }
+
+        renderTabs();
+        renderFontOptions();
+        bindEvents();
+        applyPreset(PRESETS[0], true);
+
+        if (!("FontFace" in window)) {
+          el.fontStatus.textContent = "Custom font upload unavailable";
+        }
+
+        draw();
+      }
+
+      function renderTabs() {
+        el.tabs.innerHTML = "";
+        PRESETS.forEach((preset) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "tab-button";
+          button.id = `tab-${preset.id}`;
+          button.textContent = preset.name;
+          button.setAttribute("role", "tab");
+          button.setAttribute("aria-selected", preset.id === state.preset.id ? "true" : "false");
+          button.addEventListener("click", () => applyPreset(preset));
+          el.tabs.appendChild(button);
+        });
+      }
+
+      function renderFontOptions() {
+        el.fontFamily.innerHTML = "";
+        [...SYSTEM_FONTS, ...customFonts].forEach((font) => {
+          const option = document.createElement("option");
+          option.value = font.value;
+          option.textContent = font.label;
+          el.fontFamily.appendChild(option);
+        });
+        el.fontFamily.value = state.fontFamily;
+      }
+
+      function bindEvents() {
+        el.backgroundFile.addEventListener("change", handleImageUpload);
+        el.fontFile.addEventListener("change", handleFontUpload);
+        el.imageMode.addEventListener("change", () => updateState("imageMode", el.imageMode.value));
+        bindRangePair(el.imageZoom, el.imageZoomNumber, "imageZoom");
+        bindRangePair(el.fontSize, el.fontSizeNumber, "fontSize");
+        bindRange(el.imageX, "imageX");
+        bindRange(el.imageY, "imageY");
+        bindRange(el.textX, "textX");
+        bindRange(el.textY, "textY");
+        bindRange(el.lineHeight, "lineHeight");
+        bindRange(el.letterSpacing, "letterSpacing");
+        el.bannerText.addEventListener("input", () => updateState("text", el.bannerText.value));
+        el.fontFamily.addEventListener("change", () => updateState("fontFamily", el.fontFamily.value));
+        el.fontWeight.addEventListener("change", () => updateState("fontWeight", el.fontWeight.value));
+        el.textColor.addEventListener("input", () => updateState("textColor", el.textColor.value));
+        el.panelColor.addEventListener("input", () => updateState("panelColor", el.panelColor.value));
+        bindRange(el.panelOpacity, "panelOpacity");
+        el.shadowToggle.addEventListener("change", () => updateState("shadow", el.shadowToggle.checked));
+        el.panelToggle.addEventListener("change", () => updateState("panel", el.panelToggle.checked));
+        el.safeAreaToggle.addEventListener("change", () => updateState("safeArea", el.safeAreaToggle.checked));
+        el.resetImage.addEventListener("click", resetImagePosition);
+        el.downloadButton.addEventListener("click", downloadPng);
+
+        document.querySelectorAll("[data-align]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.align = button.dataset.align;
+            updateAlignmentButtons();
+            draw();
+          });
+        });
+      }
+
+      function bindRange(input, key) {
+        input.addEventListener("input", () => updateState(key, Number(input.value)));
+      }
+
+      function bindRangePair(range, number, key) {
+        const apply = (source, target) => {
+          const value = clamp(Number(source.value), Number(source.min), Number(source.max));
+          source.value = value;
+          target.value = value;
+          updateState(key, value);
+        };
+        range.addEventListener("input", () => apply(range, number));
+        number.addEventListener("input", () => apply(number, range));
+      }
+
+      function updateState(key, value) {
+        state[key] = value;
+        draw();
+      }
+
+      function applyPreset(preset, initial = false) {
+        state.preset = preset;
+        state.text = initial ? state.text : preset.defaultText;
+        state.fontSize = preset.defaultSize;
+        state.textY = preset.defaultY;
+
+        el.canvas.width = preset.width;
+        el.canvas.height = preset.height;
+        el.bannerText.value = state.text;
+        el.fontSize.value = state.fontSize;
+        el.fontSizeNumber.value = state.fontSize;
+        el.textY.value = state.textY;
+        el.presetSize.textContent = `${preset.width} x ${preset.height}`;
+        el.presetName.textContent = preset.name;
+        el.aspectLabel.textContent = `${formatRatio(preset.width, preset.height)} canvas`;
+        el.safeOverlay.style.inset = `${preset.safeInset}%`;
+
+        [...el.tabs.children].forEach((button) => {
+          button.setAttribute("aria-selected", button.id === `tab-${preset.id}` ? "true" : "false");
+        });
+
+        draw();
+      }
+
+      function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!["image/jpeg", "image/png"].includes(file.type)) {
+          setMessage("Please upload a JPEG or PNG background image.");
+          event.target.value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const image = new Image();
+          image.onload = () => {
+            state.image = image;
+            state.imageName = file.name;
+            setMessage(`Loaded ${file.name}.`, true);
+            draw();
+          };
+          image.onerror = () => {
+            setMessage("This image could not be read. Try a different JPEG or PNG file.");
+          };
+          image.src = reader.result;
+        };
+        reader.onerror = () => setMessage("This image could not be loaded.");
+        reader.readAsDataURL(file);
+      }
+
+      async function handleFontUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const extension = file.name.split(".").pop().toLowerCase();
+        if (!["ttf", "otf"].includes(extension)) {
+          setMessage("Please upload a TTF or OTF font file.");
+          event.target.value = "";
+          return;
+        }
+
+        if (!("FontFace" in window)) {
+          setMessage("Custom font loading is not supported in this browser.");
+          return;
+        }
+
+        try {
+          const data = await file.arrayBuffer();
+          const cleanName = file.name.replace(/\.[^.]+$/, "").replace(/[^a-z0-9_-]+/gi, " ").trim() || "Uploaded Font";
+          const familyName = `Uploaded ${cleanName} ${Date.now()}`;
+          const fontFace = new FontFace(familyName, data);
+          await fontFace.load();
+          document.fonts.add(fontFace);
+          customFonts.push({ label: cleanName, value: `"${familyName}", Arial, sans-serif` });
+          state.fontFamily = `"${familyName}", Arial, sans-serif`;
+          renderFontOptions();
+          el.fontStatus.textContent = `${cleanName} loaded`;
+          setMessage(`Loaded font ${cleanName}.`, true);
+          await document.fonts.ready;
+          draw();
+        } catch (error) {
+          setMessage("This font could not be loaded. Try a valid TTF or OTF file.");
+        }
+      }
+
+      function resetImagePosition() {
+        state.imageZoom = 100;
+        state.imageX = 0;
+        state.imageY = 0;
+        el.imageZoom.value = 100;
+        el.imageZoomNumber.value = 100;
+        el.imageX.value = 0;
+        el.imageY.value = 0;
+        draw();
+      }
+
+      function draw() {
+        const { width, height } = state.preset;
+        ctx.clearRect(0, 0, width, height);
+        drawFallback(width, height);
+
+        if (state.image) {
+          drawImageCover(width, height);
+          el.emptyState.classList.add("is-hidden");
+        } else {
+          el.emptyState.classList.remove("is-hidden");
+        }
+
+        drawTextLayer(width, height);
+        el.safeOverlay.style.display = state.safeArea ? "block" : "none";
+      }
+
+      function drawFallback(width, height) {
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, "#116a66");
+        gradient.addColorStop(0.55, "#264653");
+        gradient.addColorStop(1, "#df624f");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      function drawImageCover(width, height) {
+        const imageRatio = state.image.width / state.image.height;
+        const canvasRatio = width / height;
+        let drawWidth;
+        let drawHeight;
+
+        if (state.imageMode === "contain") {
+          if (imageRatio > canvasRatio) {
+            drawWidth = width;
+            drawHeight = width / imageRatio;
+          } else {
+            drawHeight = height;
+            drawWidth = height * imageRatio;
+          }
+        } else if (imageRatio > canvasRatio) {
+          drawHeight = height;
+          drawWidth = height * imageRatio;
+        } else {
+          drawWidth = width;
+          drawHeight = width / imageRatio;
+        }
+
+        const zoom = state.imageZoom / 100;
+        drawWidth *= zoom;
+        drawHeight *= zoom;
+
+        const maxOffsetX = Math.max(0, (drawWidth - width) / 2);
+        const maxOffsetY = Math.max(0, (drawHeight - height) / 2);
+        const x = (width - drawWidth) / 2 + (state.imageX / 100) * maxOffsetX;
+        const y = (height - drawHeight) / 2 + (state.imageY / 100) * maxOffsetY;
+
+        ctx.drawImage(state.image, x, y, drawWidth, drawHeight);
+      }
+
+      function drawTextLayer(width, height) {
+        const text = state.text.trim();
+        if (!text) return;
+
+        const fontSize = scaleTextForPreset(state.fontSize);
+        const lineHeight = fontSize * (state.lineHeight / 100);
+        const maxTextWidth = width * 0.84;
+        const lines = wrapText(text, maxTextWidth, fontSize);
+        const totalHeight = Math.max(lineHeight, lines.length * lineHeight);
+        const x = width * (state.textX / 100);
+        const y = height * (state.textY / 100) - totalHeight / 2 + lineHeight * 0.78;
+
+        ctx.save();
+        ctx.font = `${state.fontWeight} ${fontSize}px ${state.fontFamily}`;
+        ctx.textAlign = state.align;
+        ctx.textBaseline = "alphabetic";
+
+        if (state.panel) {
+          drawTextPanel(lines, x, y, lineHeight, maxTextWidth, width, height);
+        }
+
+        if (state.shadow) {
+          ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+          ctx.shadowBlur = Math.max(8, fontSize * 0.18);
+          ctx.shadowOffsetY = Math.max(2, fontSize * 0.05);
+        }
+
+        ctx.fillStyle = state.textColor;
+        lines.forEach((line, index) => {
+          drawLetterSpacedText(line, x, y + index * lineHeight);
+        });
+        ctx.restore();
+      }
+
+      function drawTextPanel(lines, x, y, lineHeight, maxTextWidth, width, height) {
+        const paddingX = Math.max(20, width * 0.03);
+        const paddingY = Math.max(12, height * 0.06);
+        const measurements = lines.map((line) => measureLetterSpacedText(line));
+        const panelWidth = Math.min(maxTextWidth + paddingX * 2, Math.max(...measurements, 0) + paddingX * 2);
+        const panelHeight = lines.length * lineHeight + paddingY * 1.6;
+        let left = x - panelWidth / 2;
+
+        if (state.align === "left") left = x - paddingX;
+        if (state.align === "right") left = x - panelWidth + paddingX;
+
+        left = clamp(left, width * 0.03, width - panelWidth - width * 0.03);
+        const top = clamp(y - lineHeight * 0.78 - paddingY, height * 0.03, height - panelHeight - height * 0.03);
+
+        ctx.save();
+        ctx.fillStyle = hexToRgba(state.panelColor, state.panelOpacity / 100);
+        roundRect(ctx, left, top, panelWidth, panelHeight, 8);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function wrapText(text, maxWidth, fontSize) {
+        ctx.save();
+        ctx.font = `${state.fontWeight} ${fontSize}px ${state.fontFamily}`;
+        const sourceLines = text.split(/\r?\n/);
+        const lines = [];
+
+        sourceLines.forEach((sourceLine) => {
+          const words = sourceLine.split(/\s+/).filter(Boolean);
+          if (!words.length) {
+            lines.push("");
+            return;
+          }
+
+          let line = "";
+          words.forEach((word) => {
+            const next = line ? `${line} ${word}` : word;
+            if (measureLetterSpacedText(next) <= maxWidth || !line) {
+              line = next;
+            } else {
+              lines.push(line);
+              line = word;
+            }
+          });
+          lines.push(line);
+        });
+
+        ctx.restore();
+        return lines;
+      }
+
+      function drawLetterSpacedText(text, x, y) {
+        if (!state.letterSpacing) {
+          ctx.fillText(text, x, y);
+          return;
+        }
+
+        const width = measureLetterSpacedText(text);
+        let startX = x;
+        if (state.align === "center") startX = x - width / 2;
+        if (state.align === "right") startX = x - width;
+
+        [...text].forEach((char) => {
+          ctx.fillText(char, startX, y);
+          startX += ctx.measureText(char).width + state.letterSpacing;
+        });
+      }
+
+      function measureLetterSpacedText(text) {
+        const base = ctx.measureText(text).width;
+        const gaps = Math.max(0, [...text].length - 1);
+        return base + gaps * state.letterSpacing;
+      }
+
+      function scaleTextForPreset(size) {
+        return Math.round(size * (state.preset.width / 1000));
+      }
+
+      function updateAlignmentButtons() {
+        document.querySelectorAll("[data-align]").forEach((button) => {
+          button.setAttribute("aria-pressed", button.dataset.align === state.align ? "true" : "false");
+        });
+      }
+
+      function downloadPng() {
+        if (!state.image) {
+          setMessage("Please upload a JPEG or PNG background image before downloading.");
+          return;
+        }
+
+        if (!state.text.trim()) {
+          setMessage("Please add text before downloading.");
+          return;
+        }
+
+        try {
+          draw();
+          const link = document.createElement("a");
+          link.download = `spotme-banner-${state.preset.id}.png`;
+          link.href = el.canvas.toDataURL("image/png");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setMessage("PNG downloaded.", true);
+        } catch (error) {
+          setMessage("The PNG could not be generated in this browser.");
+        }
+      }
+
+      function setMessage(text, ok = false) {
+        el.message.textContent = text;
+        el.message.classList.toggle("ok", ok);
+      }
+
+      function formatRatio(width, height) {
+        const divisor = gcd(width, height);
+        return `${width / divisor}:${height / divisor}`;
+      }
+
+      function gcd(a, b) {
+        return b === 0 ? a : gcd(b, a % b);
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function hexToRgba(hex, alpha) {
+        const normalized = hex.replace("#", "");
+        const value = Number.parseInt(normalized, 16);
+        const r = (value >> 16) & 255;
+        const g = (value >> 8) & 255;
+        const b = value & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function roundRect(context, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        context.beginPath();
+        context.moveTo(x + r, y);
+        context.arcTo(x + width, y, x + width, y + height, r);
+        context.arcTo(x + width, y + height, x, y + height, r);
+        context.arcTo(x, y + height, x, y, r);
+        context.arcTo(x, y, x + width, y, r);
+        context.closePath();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
