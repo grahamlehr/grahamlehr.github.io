@@ -703,9 +703,6 @@
     }
 
     .preview-frame {
-      width: 100%;
-      max-width: 800px;
-      max-height: 80vh;
       background-color: #000;
       box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border-light);
       border-radius: var(--radius-sm);
@@ -824,6 +821,34 @@
     .zoom-control-group input[type="range"] {
       width: 80px;
       margin: 0;
+    }
+
+    .zoom-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-color: var(--text-muted);
+    }
+
+    .zoom-btn.active {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+      box-shadow: 0 0 8px var(--accent-teal-glow);
     }
 
     .switch-container {
@@ -1388,7 +1413,8 @@
         </label>
         <div class="zoom-control-group">
           <span>Scale:</span>
-          <input type="range" id="preview-zoom" min="20" max="100" value="100">
+          <button id="zoom-fit-btn" class="zoom-btn active" title="Scale preview to fit viewport">Fit</button>
+          <input type="range" id="preview-zoom" min="10" max="100" value="100">
           <span id="preview-zoom-val">100%</span>
         </div>
       </div>
@@ -1402,6 +1428,7 @@
       preset: 'landscape', // landscape, portrait, landscape4k, portrait4k, custom
       width: 1920,
       height: 1080,
+      zoomMode: 'fit',
       
       bgImage: null, 
       bgImageName: '',
@@ -1537,6 +1564,7 @@
       toggleGrid: document.getElementById('toggle-grid'),
       previewZoom: document.getElementById('preview-zoom'),
       previewZoomVal: document.getElementById('preview-zoom-val'),
+      zoomFitBtn: document.getElementById('zoom-fit-btn'),
       
       // JSON uploader triggers
       loadBtn: document.getElementById('load-btn'),
@@ -1565,6 +1593,42 @@
       const chevron = document.getElementById(chevronId);
       content.classList.toggle('hidden');
       chevron.classList.toggle('rotated');
+    }
+
+    function updateZoomUI() {
+      if (state.zoomMode === 'fit') {
+        el.zoomFitBtn.classList.add('active');
+      } else {
+        el.zoomFitBtn.classList.remove('active');
+      }
+    }
+
+    function fitPreviewToScreen() {
+      if (state.zoomMode !== 'fit') return;
+      
+      const pane = el.previewFrame.parentElement;
+      const paneW = pane.clientWidth;
+      const paneH = pane.clientHeight;
+      
+      // Safety margin for padding (3rem = 48px on each side)
+      const maxW = Math.max(100, paneW - 96);
+      const maxH = Math.max(100, paneH - 96);
+      
+      const frameW = el.previewFrame.offsetWidth;
+      const frameH = el.previewFrame.offsetHeight;
+      if (!frameW || !frameH) return;
+      
+      const scaleX = maxW / frameW;
+      const scaleY = maxH / frameH;
+      const fitScale = Math.min(scaleX, scaleY);
+      
+      const zoomPercent = Math.max(10, Math.min(100, Math.floor(fitScale * 100)));
+      
+      el.previewZoom.value = zoomPercent;
+      el.previewZoomVal.textContent = zoomPercent + '%';
+      el.previewFrame.style.transform = `scale(${zoomPercent / 100})`;
+      
+      updateZoomUI();
     }
 
     // Binary / Base64 serialization conversions
@@ -1847,32 +1911,19 @@
           state.height = PRESETS[state.preset].height;
         }
         
-        // Auto-scale preview zoom on format change to fit screen
-        let defaultZoom = 100;
-        if (state.preset === 'portrait' || state.preset === 'portrait4k') {
-          defaultZoom = 45;
-        }
-        el.previewZoom.value = defaultZoom;
-        el.previewZoomVal.textContent = defaultZoom + '%';
-        el.previewFrame.style.transform = `scale(${defaultZoom / 100})`;
-        
+        state.zoomMode = 'fit';
         updateCanvasDimensions();
+        fitPreviewToScreen();
       });
 
       const onCustomSizeChange = () => {
         if (state.preset === 'custom') {
           state.width = Math.max(100, Math.min(8000, parseInt(el.customW.value) || 1920));
           state.height = Math.max(100, Math.min(8000, parseInt(el.customH.value) || 1080));
-          updateCanvasDimensions();
           
-          // Auto-adjust scale if custom sizes enter portrait mode
-          let defaultZoom = 100;
-          if (state.height > state.width) {
-            defaultZoom = 45;
-          }
-          el.previewZoom.value = defaultZoom;
-          el.previewZoomVal.textContent = defaultZoom + '%';
-          el.previewFrame.style.transform = `scale(${defaultZoom / 100})`;
+          state.zoomMode = 'fit';
+          updateCanvasDimensions();
+          fitPreviewToScreen();
         }
       };
       el.customW.addEventListener('input', onCustomSizeChange);
@@ -2110,9 +2161,16 @@
       });
 
       el.previewZoom.addEventListener('input', (e) => {
+        state.zoomMode = 'manual';
+        updateZoomUI();
         const val = parseInt(e.target.value);
         el.previewZoomVal.textContent = val + '%';
         el.previewFrame.style.transform = `scale(${val / 100})`;
+      });
+
+      el.zoomFitBtn.addEventListener('click', () => {
+        state.zoomMode = 'fit';
+        fitPreviewToScreen();
       });
 
       // JSON save & load buttons
@@ -2138,18 +2196,42 @@
       el.exportBtn.addEventListener('click', exportPNG);
 
       const resizeObserver = new ResizeObserver(() => {
-        updateScaleFactor();
+        updateCanvasDimensions();
+        if (state.zoomMode === 'fit') {
+          fitPreviewToScreen();
+        }
       });
-      resizeObserver.observe(el.previewFrame);
+      resizeObserver.observe(el.previewFrame.parentElement);
 
       // Trigger initial loaders
       renderLayersList();
       syncActiveLayerControls();
+      state.zoomMode = 'fit';
       updateCanvasDimensions();
+      fitPreviewToScreen();
     }
 
     function updateCanvasDimensions() {
-      el.previewFrame.style.aspectRatio = `${state.width} / ${state.height}`;
+      const pane = el.previewFrame.parentElement;
+      const paneW = pane ? pane.clientWidth : (window.innerWidth - 390);
+      const paneH = pane ? pane.clientHeight : (window.innerHeight - 70);
+      
+      const maxW = Math.min(800, Math.max(100, paneW - 96));
+      const maxH = Math.max(100, paneH - 96);
+      
+      const aspect = state.width / state.height;
+      
+      let layoutW = maxW;
+      let layoutH = maxW / aspect;
+      
+      if (layoutH > maxH) {
+        layoutH = maxH;
+        layoutW = maxH * aspect;
+      }
+      
+      el.previewFrame.style.width = `${layoutW}px`;
+      el.previewFrame.style.height = `${layoutH}px`;
+      
       updateScaleFactor();
     }
 
@@ -2392,16 +2474,9 @@
           el.customSizeControls.classList.add('hidden');
         }
 
-        // Auto-scale preview zoom on load
-        let defaultZoom = 100;
-        if (state.preset === 'portrait' || state.preset === 'portrait4k') {
-          defaultZoom = 45;
-        } else if (state.height > state.width) {
-          defaultZoom = 45;
-        }
-        el.previewZoom.value = defaultZoom;
-        el.previewZoomVal.textContent = defaultZoom + '%';
-        el.previewFrame.style.transform = `scale(${defaultZoom / 100})`;
+        state.zoomMode = 'fit';
+        updateCanvasDimensions();
+        fitPreviewToScreen();
 
         // Layers restoration
         state.layers = projectData.layers || [];
