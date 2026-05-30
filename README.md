@@ -19,3 +19,7 @@ Two versions, one made with Gemini 3.5 Flash in Antigravity and one with GPT5.5 
 [Made with Gemini/Antigravity](https://grahamlehr.github.io/SpotMe-Banner-Gemini.html)
 
 [Made with GPT5.5/Codex](https://grahamlehr.github.io/spotme-banner-GPT5.5.html)
+
+## Digital Signage Maker
+A quick way to make PNGs for digital signage at events.
+[Digital Signage Maker](https://grahamlehr.github.io/Digital-Signage-Maker.html)
