@@ -766,9 +766,7 @@
 
     .preview-text-box {
       position: absolute;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 90%;
+      max-width: 80%;
       box-sizing: border-box;
       white-space: pre-wrap;
       word-break: break-word;
@@ -1116,9 +1114,14 @@
             <optgroup label="System Fonts">
               <option value="Verdana">Verdana</option>
               <option value="Arial">Arial</option>
+              <option value="Tahoma">Tahoma</option>
+              <option value="Trebuchet MS">Trebuchet MS</option>
               <option value="Georgia">Georgia</option>
               <option value="Times New Roman">Times New Roman</option>
+              <option value="Garamond">Garamond</option>
+              <option value="Impact">Impact</option>
               <option value="Courier New">Courier New (Monospace)</option>
+              <option value="system-ui">System UI Default</option>
             </optgroup>
           </select>
         </div>
@@ -2137,6 +2140,16 @@
         
         box.style.left = `calc(${layer.textX} * 1%)`;
         box.style.top = `calc(${layer.textY} * 1%)`;
+        
+        // Align-based positioning transform
+        let tx = '-50%';
+        if (layer.textAlign === 'left') {
+          tx = '0%';
+        } else if (layer.textAlign === 'right') {
+          tx = '-100%';
+        }
+        box.style.transform = `translate(${tx}, -50%)`;
+        
         box.style.textAlign = layer.textAlign;
         box.style.fontFamily = `"${layer.textFontFamily}", sans-serif`;
         box.style.fontSize = `${layer.textFontSize * scale}px`;
@@ -2473,7 +2486,12 @@
         const W_box = maxLineWidth + 2 * pad;
         const H_box = totalTextHeight + 2 * pad;
         
-        const X_box = tx - W_box / 2;
+        let X_box = tx - W_box / 2;
+        if (layer.textAlign === 'left') {
+          X_box = tx - pad;
+        } else if (layer.textAlign === 'right') {
+          X_box = tx - W_box + pad;
+        }
         const Y_box = ty - H_box / 2;
 
         // Draw backplate panel
@@ -2498,13 +2516,7 @@
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
           const lineY = startY + (i * lineGap);
-          
-          let lineX = tx;
-          if (layer.textAlign === 'left') {
-            lineX = tx - maxLineWidth / 2;
-          } else if (layer.textAlign === 'right') {
-            lineX = tx + maxLineWidth / 2;
-          }
+          const lineX = tx; // automatically aligned by ctx.textAlign
           
           ctx.fillText(line, lineX, lineY);
         }
