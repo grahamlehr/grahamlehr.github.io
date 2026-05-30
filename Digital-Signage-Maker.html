@@ -1273,12 +1273,12 @@
                 <span class="switch-desc">Blur or drop shadow</span>
               </div>
               <label class="switch">
-                <input type="checkbox" id="enable-shadow" checked>
+                <input type="checkbox" id="enable-shadow">
                 <span class="slider"></span>
               </label>
             </div>
             
-            <div id="shadow-controls-wrapper" style="margin-top: 0.75rem;">
+            <div id="shadow-controls-wrapper" class="hidden" style="margin-top: 0.75rem;">
               <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.5rem;">
                 <input type="color" id="shadow-color" value="#000000">
                 <input type="text" id="shadow-color-hex" value="#000000" style="max-width: 100px;">
@@ -1362,12 +1362,12 @@
               <span class="switch-desc">Applies color filter to background</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="enable-tint" checked>
+              <input type="checkbox" id="enable-tint">
               <span class="slider"></span>
             </label>
           </div>
           
-          <div id="tint-controls-wrapper" style="margin-top: 0.75rem;">
+          <div id="tint-controls-wrapper" class="hidden" style="margin-top: 0.75rem;">
             <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.5rem;">
               <input type="color" id="tint-color" value="#000000">
               <input type="text" id="tint-color-hex" value="#000000" style="max-width: 100px;">
@@ -1438,7 +1438,7 @@
       bgOffsetY: 0,
       
       canvasBgColor: '#0b0f19',
-      enableTint: true,
+      enableTint: false,
       tintColor: '#000000',
       tintOpacity: 40,
       
@@ -1455,7 +1455,7 @@
           textLineHeight: 1.2,
           textLetterSpacing: 1.5,
           textColor: '#ffffff',
-          enableShadow: true,
+          enableShadow: false,
           shadowColor: '#000000',
           shadowBlur: 15,
           shadowX: 3,
@@ -1804,7 +1804,7 @@
         textLineHeight: 1.2,
         textLetterSpacing: 0,
         textColor: '#ffffff',
-        enableShadow: true,
+        enableShadow: false,
         shadowColor: '#000000',
         shadowBlur: 10,
         shadowX: 2,
