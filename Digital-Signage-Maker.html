@@ -783,26 +783,47 @@
       box-shadow: 0 0 15px var(--accent-teal-glow);
     }
 
-    .checkerboard-toggle {
+    .workspace-toolbar {
       position: absolute;
       bottom: 1.5rem;
       right: 1.5rem;
       background-color: var(--bg-panel-solid);
       border: 1px solid var(--border-light);
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem 1rem;
       border-radius: var(--radius-md);
       font-size: 0.75rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
+      gap: 1.5rem;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
       user-select: none;
       z-index: 10;
     }
 
-    .checkerboard-toggle input {
+    .workspace-toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0;
+      color: var(--text-main);
+    }
+
+    .workspace-toolbar input[type="checkbox"] {
       accent-color: var(--accent-teal);
+    }
+
+    .zoom-control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .zoom-control-group input[type="range"] {
+      width: 80px;
+      margin: 0;
     }
 
     .switch-container {
@@ -1360,10 +1381,17 @@
         </div>
       </div>
 
-      <label class="checkerboard-toggle">
-        <input type="checkbox" id="toggle-grid" checked>
-        <span>Show Workspace Grid</span>
-      </label>
+      <div class="workspace-toolbar">
+        <label>
+          <input type="checkbox" id="toggle-grid" checked>
+          <span>Show Workspace Grid</span>
+        </label>
+        <div class="zoom-control-group">
+          <span>Scale:</span>
+          <input type="range" id="preview-zoom" min="20" max="100" value="100">
+          <span id="preview-zoom-val">100%</span>
+        </div>
+      </div>
 
     </div>
   </main>
@@ -1507,6 +1535,8 @@
       previewTint: document.getElementById('preview-tint'),
       previewTextContainer: document.getElementById('preview-text-container'),
       toggleGrid: document.getElementById('toggle-grid'),
+      previewZoom: document.getElementById('preview-zoom'),
+      previewZoomVal: document.getElementById('preview-zoom-val'),
       
       // JSON uploader triggers
       loadBtn: document.getElementById('load-btn'),
@@ -1817,14 +1847,32 @@
           state.height = PRESETS[state.preset].height;
         }
         
+        // Auto-scale preview zoom on format change to fit screen
+        let defaultZoom = 100;
+        if (state.preset === 'portrait' || state.preset === 'portrait4k') {
+          defaultZoom = 45;
+        }
+        el.previewZoom.value = defaultZoom;
+        el.previewZoomVal.textContent = defaultZoom + '%';
+        el.previewFrame.style.transform = `scale(${defaultZoom / 100})`;
+        
         updateCanvasDimensions();
       });
 
       const onCustomSizeChange = () => {
         if (state.preset === 'custom') {
-          state.width = Math.max(100, Math.min(4000, parseInt(el.customW.value) || 1920));
-          state.height = Math.max(100, Math.min(4000, parseInt(el.customH.value) || 1080));
+          state.width = Math.max(100, Math.min(8000, parseInt(el.customW.value) || 1920));
+          state.height = Math.max(100, Math.min(8000, parseInt(el.customH.value) || 1080));
           updateCanvasDimensions();
+          
+          // Auto-adjust scale if custom sizes enter portrait mode
+          let defaultZoom = 100;
+          if (state.height > state.width) {
+            defaultZoom = 45;
+          }
+          el.previewZoom.value = defaultZoom;
+          el.previewZoomVal.textContent = defaultZoom + '%';
+          el.previewFrame.style.transform = `scale(${defaultZoom / 100})`;
         }
       };
       el.customW.addEventListener('input', onCustomSizeChange);
@@ -2059,6 +2107,12 @@
           el.previewFrame.style.setProperty('--checker-color-1', 'transparent');
           el.previewFrame.style.setProperty('--checker-color-2', 'transparent');
         }
+      });
+
+      el.previewZoom.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        el.previewZoomVal.textContent = val + '%';
+        el.previewFrame.style.transform = `scale(${val / 100})`;
       });
 
       // JSON save & load buttons
@@ -2337,6 +2391,17 @@
         } else {
           el.customSizeControls.classList.add('hidden');
         }
+
+        // Auto-scale preview zoom on load
+        let defaultZoom = 100;
+        if (state.preset === 'portrait' || state.preset === 'portrait4k') {
+          defaultZoom = 45;
+        } else if (state.height > state.width) {
+          defaultZoom = 45;
+        }
+        el.previewZoom.value = defaultZoom;
+        el.previewZoomVal.textContent = defaultZoom + '%';
+        el.previewFrame.style.transform = `scale(${defaultZoom / 100})`;
 
         // Layers restoration
         state.layers = projectData.layers || [];
