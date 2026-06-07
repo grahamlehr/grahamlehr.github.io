@@ -23,3 +23,7 @@ Two versions, one made with Gemini 3.5 Flash in Antigravity and one with GPT5.5 
 ## Digital Signage Maker
 A quick way to make PNGs for digital signage at events.
 [Digital Signage Maker](https://grahamlehr.github.io/Digital-Signage-Maker.html)
+
+## Tent Card Studio
+Does what it says on the tin
+[Tent Card Studio](https://grahamlehr.github.io/TentCardGenerator.html)
