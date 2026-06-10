@@ -6,17 +6,20 @@
   <title>QRui</title>
   <style>
     :root {
-      --bg: #f7f4ee;
-      --panel: #fffdfa;
-      --ink: #1d2526;
-      --muted: #63706f;
-      --line: #d8d0c4;
-      --accent: #0f766e;
-      --accent-strong: #0b4f49;
-      --gold: #b7791f;
-      --blue: #245c8f;
-      --danger: #b42318;
-      --shadow: 0 20px 50px rgba(31, 41, 35, 0.12);
+      --bg: #f8f3e6;
+      --panel: #fffaf0;
+      --ink: #13251f;
+      --muted: #5d675f;
+      --line: #d8c9a3;
+      --accent: #006a44;
+      --accent-strong: #00452d;
+      --red: #c8102e;
+      --red-strong: #9e0d24;
+      --gold: #ffcc29;
+      --gold-deep: #b48618;
+      --blue: #0b4f6c;
+      --danger: #c8102e;
+      --shadow: 0 20px 50px rgba(0, 64, 45, 0.14);
     }
 
     * {
@@ -26,8 +29,9 @@
     body {
       margin: 0;
       background:
-        linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 34%),
-        linear-gradient(315deg, rgba(183, 121, 31, 0.10), transparent 30%),
+        linear-gradient(90deg, rgba(0, 106, 68, 0.18) 0 38%, rgba(200, 16, 46, 0.14) 38% 100%),
+        linear-gradient(135deg, rgba(255, 204, 41, 0.16), transparent 32%),
+        linear-gradient(315deg, rgba(0, 106, 68, 0.10), transparent 28%),
         var(--bg);
       color: var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -84,7 +88,7 @@
     }
 
     .panel {
-      background: rgba(255, 253, 250, 0.92);
+      background: rgba(255, 250, 240, 0.94);
       border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: var(--shadow);
@@ -104,7 +108,7 @@
     .segmented {
       display: grid;
       gap: 4px;
-      background: #e9e1d5;
+      background: linear-gradient(90deg, rgba(0, 106, 68, 0.14), rgba(200, 16, 46, 0.12));
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 4px;
@@ -132,7 +136,7 @@
     .segment[aria-pressed="true"] {
       background: var(--panel);
       color: var(--ink);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      box-shadow: inset 0 -3px 0 var(--gold), 0 1px 2px rgba(0, 0, 0, 0.06);
     }
 
     .section {
@@ -160,7 +164,7 @@
       margin: 0;
       font-size: 0.92rem;
       text-transform: uppercase;
-      color: #374240;
+      color: #214035;
       font-weight: 850;
     }
 
@@ -176,7 +180,7 @@
     label {
       display: grid;
       gap: 6px;
-      color: #374240;
+      color: #214035;
       font-size: 0.82rem;
       font-weight: 800;
     }
@@ -188,9 +192,9 @@
     select,
     textarea {
       width: 100%;
-      border: 1px solid #c8bfb2;
+      border: 1px solid #cbb98b;
       border-radius: 6px;
-      background: #fffefd;
+      background: #fffdf7;
       color: var(--ink);
       min-height: 42px;
       padding: 10px 11px;
@@ -206,7 +210,7 @@
     select:focus,
     textarea:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+      box-shadow: 0 0 0 3px rgba(0, 106, 68, 0.18);
     }
 
     .range-row {
@@ -226,7 +230,7 @@
       gap: 10px;
       align-items: center;
       min-height: 42px;
-      color: #374240;
+      color: #214035;
       font-size: 0.88rem;
       font-weight: 800;
     }
@@ -264,20 +268,20 @@
 
     .btn.secondary {
       color: var(--ink);
-      background: #ebe4da;
-      border: 1px solid #cfc5b8;
+      background: #f3e7c9;
+      border: 1px solid #d1b66e;
     }
 
     .btn.secondary:hover {
-      background: #ded4c5;
+      background: #ead59f;
     }
 
     .btn.blue {
-      background: var(--blue);
+      background: var(--red);
     }
 
     .btn.gold {
-      background: var(--gold);
+      background: var(--gold-deep);
     }
 
     .hidden {
@@ -296,11 +300,11 @@
       place-items: center;
       min-height: 390px;
       background:
-        linear-gradient(45deg, #f0ece4 25%, transparent 25%),
-        linear-gradient(-45deg, #f0ece4 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #f0ece4 75%),
-        linear-gradient(-45deg, transparent 75%, #f0ece4 75%),
-        #fffefd;
+        linear-gradient(45deg, rgba(0, 106, 68, 0.08) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(200, 16, 46, 0.07) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(0, 106, 68, 0.08) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(200, 16, 46, 0.07) 75%),
+        #fffdf7;
       background-size: 22px 22px;
       background-position: 0 0, 0 11px, 11px -11px, -11px 0;
       border: 1px solid var(--line);
@@ -314,7 +318,7 @@
       height: auto;
       image-rendering: pixelated;
       background: #fff;
-      box-shadow: 0 12px 30px rgba(28, 38, 35, 0.14);
+      box-shadow: 0 12px 30px rgba(0, 64, 45, 0.18);
     }
 
     .meta {
@@ -329,7 +333,7 @@
     }
 
     .stat {
-      background: #f2ece3;
+      background: linear-gradient(180deg, #fff7dc, #f6ebc8);
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px;
@@ -353,7 +357,7 @@
 
     .encoded-box {
       border: 1px solid var(--line);
-      background: #fffefd;
+      background: #fffdf7;
       border-radius: 8px;
       padding: 10px;
       min-height: 92px;
@@ -361,7 +365,7 @@
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-word;
-      color: #33403e;
+      color: #263b32;
       font: 0.82rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
 
@@ -370,18 +374,18 @@
       display: grid;
       place-items: center;
       min-height: 130px;
-      border: 2px dashed #b8ad9d;
+      border: 2px dashed #b99b36;
       border-radius: 8px;
-      background: #fffefd;
+      background: #fffdf7;
       padding: 16px;
       text-align: center;
-      color: #52605e;
+      color: #42554c;
       font-weight: 800;
     }
 
     .dropzone.dragover {
       border-color: var(--accent);
-      background: rgba(15, 118, 110, 0.08);
+      background: rgba(0, 106, 68, 0.10);
     }
 
     .dropzone input {
@@ -407,7 +411,7 @@
       border-radius: 8px;
       overflow: auto;
       max-height: 330px;
-      background: #fffefd;
+      background: #fffdf7;
     }
 
     table {
@@ -421,22 +425,22 @@
     td {
       text-align: left;
       padding: 10px;
-      border-bottom: 1px solid #ece6dd;
+      border-bottom: 1px solid #eadbb5;
       vertical-align: top;
     }
 
     th {
       position: sticky;
       top: 0;
-      background: #f4eee5;
+      background: #f3e7c9;
       z-index: 1;
       font-size: 0.76rem;
       text-transform: uppercase;
-      color: #4b5654;
+      color: #274339;
     }
 
     tr[data-selected="true"] {
-      background: rgba(15, 118, 110, 0.10);
+      background: linear-gradient(90deg, rgba(0, 106, 68, 0.12), rgba(200, 16, 46, 0.08));
     }
 
     .row-button {
@@ -460,8 +464,8 @@
       min-height: 24px;
       padding: 0 8px;
       border-radius: 999px;
-      background: #e4f0ee;
-      color: #0b4f49;
+      background: #e5f2dc;
+      color: #00593a;
       font-size: 0.76rem;
       font-weight: 850;
       text-transform: uppercase;
