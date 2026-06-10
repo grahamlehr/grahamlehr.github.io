@@ -1,0 +1,1686 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QRui</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --panel: #fffdfa;
+      --ink: #1d2526;
+      --muted: #63706f;
+      --line: #d8d0c4;
+      --accent: #0f766e;
+      --accent-strong: #0b4f49;
+      --gold: #b7791f;
+      --blue: #245c8f;
+      --danger: #b42318;
+      --shadow: 0 20px 50px rgba(31, 41, 35, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 34%),
+        linear-gradient(315deg, rgba(183, 121, 31, 0.10), transparent 30%),
+        var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1420px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.6rem);
+      line-height: 0.92;
+      font-weight: 850;
+    }
+
+    .subhead {
+      color: var(--muted);
+      margin: 10px 0 0;
+      max-width: 760px;
+      font-size: 1rem;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.95fr) minmax(390px, 1.05fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255, 253, 250, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .control-panel {
+      padding: 18px;
+    }
+
+    .preview-panel {
+      padding: 18px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .tabs,
+    .segmented {
+      display: grid;
+      gap: 4px;
+      background: #e9e1d5;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .tabs {
+      grid-template-columns: 1fr 1fr;
+      margin-bottom: 16px;
+    }
+
+    .segmented {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tab,
+    .segment {
+      min-height: 42px;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .tab[aria-selected="true"],
+    .segment[aria-pressed="true"] {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .section {
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+
+    .section:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      color: #374240;
+      font-weight: 850;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #374240;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    input[type="file"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c8bfb2;
+      border-radius: 6px;
+      background: #fffefd;
+      color: var(--ink);
+      min-height: 42px;
+      padding: 10px 11px;
+      outline: 0;
+    }
+
+    textarea {
+      min-height: 116px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .switch-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-height: 42px;
+      color: #374240;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .switch-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-weight: 850;
+      color: #fff;
+      background: var(--accent);
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: var(--accent-strong);
+    }
+
+    .btn.secondary {
+      color: var(--ink);
+      background: #ebe4da;
+      border: 1px solid #cfc5b8;
+    }
+
+    .btn.secondary:hover {
+      background: #ded4c5;
+    }
+
+    .btn.blue {
+      background: var(--blue);
+    }
+
+    .btn.gold {
+      background: var(--gold);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: minmax(210px, 360px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .qr-stage {
+      display: grid;
+      place-items: center;
+      min-height: 390px;
+      background:
+        linear-gradient(45deg, #f0ece4 25%, transparent 25%),
+        linear-gradient(-45deg, #f0ece4 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f0ece4 75%),
+        linear-gradient(-45deg, transparent 75%, #f0ece4 75%),
+        #fffefd;
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(28, 38, 35, 0.14);
+    }
+
+    .meta {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      background: #f2ece3;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 70px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 1.35rem;
+      line-height: 1;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .encoded-box {
+      border: 1px solid var(--line);
+      background: #fffefd;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 92px;
+      max-height: 180px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #33403e;
+      font: 0.82rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .dropzone {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 130px;
+      border: 2px dashed #b8ad9d;
+      border-radius: 8px;
+      background: #fffefd;
+      padding: 16px;
+      text-align: center;
+      color: #52605e;
+      font-weight: 800;
+    }
+
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(15, 118, 110, 0.08);
+    }
+
+    .dropzone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+      min-height: 20px;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 330px;
+      background: #fffefd;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 620px;
+      font-size: 0.84rem;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #ece6dd;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f4eee5;
+      z-index: 1;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      color: #4b5654;
+    }
+
+    tr[data-selected="true"] {
+      background: rgba(15, 118, 110, 0.10);
+    }
+
+    .row-button {
+      color: var(--accent-strong);
+      background: transparent;
+      font-weight: 850;
+      padding: 0;
+      text-align: left;
+    }
+
+    .truncate {
+      max-width: 310px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: #e4f0ee;
+      color: #0b4f49;
+      font-size: 0.76rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 980px) {
+      .workspace,
+      .preview-grid,
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-panel {
+        position: static;
+      }
+
+      .qr-stage {
+        min-height: 320px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app {
+        width: min(100% - 20px, 1420px);
+        padding: 12px 0;
+      }
+
+      .two,
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .segmented {
+        grid-template-columns: 1fr;
+      }
+
+      .range-row {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>QRui</h1>
+        <p class="subhead">Create QR codes from a single entry or a spreadsheet, then export them as PNG or SVG at the size you need.</p>
+      </div>
+      <div class="button-row">
+        <button class="btn secondary" id="loadSampleBtn" type="button">Load sample</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <section class="panel control-panel" aria-label="QR controls">
+        <div class="tabs" role="tablist" aria-label="Input mode">
+          <button class="tab" id="singleTab" type="button" role="tab" aria-selected="true">Single</button>
+          <button class="tab" id="batchTab" type="button" role="tab" aria-selected="false">Batch</button>
+        </div>
+
+        <div id="singlePane">
+          <section class="section">
+            <div class="section-title">
+              <h2>Content</h2>
+            </div>
+            <div class="segmented" aria-label="Content type">
+              <button class="segment" data-type="web" type="button" aria-pressed="true">Web</button>
+              <button class="segment" data-type="wifi" type="button" aria-pressed="false">Wi-Fi</button>
+              <button class="segment" data-type="text" type="button" aria-pressed="false">Text</button>
+            </div>
+
+            <div class="field-grid section" id="webFields">
+              <label>
+                Web address
+                <input id="urlInput" type="text" value="https://example.com" placeholder="https://example.com">
+              </label>
+            </div>
+
+            <div class="field-grid section hidden" id="wifiFields">
+              <label>
+                SSID
+                <input id="ssidInput" type="text" placeholder="Network name">
+              </label>
+              <label>
+                Password
+                <input id="passwordInput" type="password" placeholder="Password">
+              </label>
+              <div class="field-grid two">
+                <label>
+                  Security
+                  <select id="securityInput">
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">Open</option>
+                  </select>
+                </label>
+                <label class="switch-row">
+                  <input id="hiddenInput" type="checkbox">
+                  Hidden network
+                </label>
+              </div>
+            </div>
+
+            <div class="field-grid section hidden" id="textFields">
+              <label>
+                Text
+                <textarea id="textInput" placeholder="Plain text to encode"></textarea>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <div id="batchPane" class="hidden">
+          <section class="section">
+            <div class="section-title">
+              <h2>Import</h2>
+              <span class="badge" id="batchCountBadge">0 rows</span>
+            </div>
+            <div class="dropzone" id="dropzone">
+              <input id="fileInput" type="file" accept=".csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv">
+              <span>Drop CSV or Excel file</span>
+            </div>
+            <p class="status" id="batchStatus"></p>
+          </section>
+
+          <section class="section">
+            <div class="section-title">
+              <h2>Rows</h2>
+              <button class="row-button" id="clearBatchBtn" type="button">Clear</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Encoded content</th>
+                  </tr>
+                </thead>
+                <tbody id="batchBody">
+                  <tr>
+                    <td colspan="3">No rows loaded</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <section class="section">
+          <div class="section-title">
+            <h2>Output</h2>
+          </div>
+          <div class="field-grid">
+            <label>
+              Size
+              <div class="range-row">
+                <input id="sizeRange" type="range" min="128" max="2048" step="16" value="512">
+                <input id="sizeInput" type="number" min="128" max="4096" step="16" value="512">
+              </div>
+            </label>
+            <label>
+              Error correction
+              <select id="errorLevelInput">
+                <option value="1" selected>Medium</option>
+                <option value="0">Low</option>
+                <option value="2">Quartile</option>
+                <option value="3">High</option>
+              </select>
+            </label>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel preview-panel" aria-label="QR preview">
+        <div class="preview-grid">
+          <div class="qr-stage">
+            <canvas id="qrCanvas" width="512" height="512" aria-label="QR code preview"></canvas>
+          </div>
+          <div class="meta">
+            <div class="stat-grid">
+              <div class="stat">
+                <b id="statVersion">-</b>
+                <span>Version</span>
+              </div>
+              <div class="stat">
+                <b id="statBytes">-</b>
+                <span>Bytes</span>
+              </div>
+              <div class="stat">
+                <b id="statModules">-</b>
+                <span>Modules</span>
+              </div>
+              <div class="stat">
+                <b id="statType">Web</b>
+                <span>Type</span>
+              </div>
+            </div>
+            <div>
+              <h3>Encoded</h3>
+              <div class="encoded-box" id="encodedBox"></div>
+            </div>
+            <p class="status" id="previewStatus"></p>
+            <div class="button-row">
+              <button class="btn" id="pngBtn" type="button">Download PNG</button>
+              <button class="btn blue" id="svgBtn" type="button">Download SVG</button>
+              <button class="btn gold hidden" id="zipBtn" type="button">Download ZIP</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const ECC_CODEWORDS_PER_BLOCK = [
+      [7,10,13,17],[10,16,22,28],[15,26,18,22],[20,18,26,16],[26,24,18,22],
+      [18,16,24,28],[20,18,18,26],[24,22,22,26],[30,22,20,24],[18,26,24,28],
+      [20,30,28,24],[24,22,26,28],[26,22,24,22],[30,24,20,24],[22,24,30,24],
+      [24,28,24,30],[28,28,28,28],[30,26,28,28],[28,26,26,26],[28,26,30,28],
+      [28,26,28,30],[28,28,30,24],[30,28,30,30],[30,28,30,30],[26,28,30,30],
+      [28,28,28,30],[30,28,30,30],[30,28,30,30],[30,28,30,30],[30,28,30,30],
+      [30,28,30,30],[30,28,30,30],[30,28,30,30],[30,28,30,30],[30,28,30,30],
+      [30,28,30,30],[30,28,30,30],[30,28,30,30],[30,28,30,30],[30,28,30,30]
+    ];
+
+    const NUM_ERROR_CORRECTION_BLOCKS = [
+      [1,1,1,1],[1,1,1,1],[1,1,2,2],[1,2,2,4],[1,2,4,4],
+      [2,4,4,4],[2,4,6,5],[2,4,6,6],[2,5,8,8],[4,5,8,8],
+      [4,5,8,11],[4,8,10,11],[4,9,12,16],[4,9,16,16],[6,10,12,18],
+      [6,10,17,16],[6,11,16,19],[6,13,18,21],[7,14,21,25],[8,16,20,25],
+      [8,17,23,25],[9,17,23,34],[9,18,25,30],[10,20,27,32],[12,21,29,35],
+      [12,23,34,37],[12,25,34,40],[13,26,35,42],[14,28,38,45],[15,29,40,48],
+      [16,31,43,51],[17,33,45,54],[18,35,48,57],[19,37,51,60],[19,38,53,63],
+      [20,40,56,66],[21,43,59,70],[22,45,62,74],[24,47,65,77],[25,49,68,81]
+    ];
+
+    const FORMAT_BITS = [1, 0, 3, 2];
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    let mode = "single";
+    let contentType = "web";
+    let batchRows = [];
+    let selectedBatchIndex = 0;
+    let currentQr = null;
+
+    const el = {
+      singleTab: document.getElementById("singleTab"),
+      batchTab: document.getElementById("batchTab"),
+      singlePane: document.getElementById("singlePane"),
+      batchPane: document.getElementById("batchPane"),
+      webFields: document.getElementById("webFields"),
+      wifiFields: document.getElementById("wifiFields"),
+      textFields: document.getElementById("textFields"),
+      urlInput: document.getElementById("urlInput"),
+      ssidInput: document.getElementById("ssidInput"),
+      passwordInput: document.getElementById("passwordInput"),
+      securityInput: document.getElementById("securityInput"),
+      hiddenInput: document.getElementById("hiddenInput"),
+      textInput: document.getElementById("textInput"),
+      sizeRange: document.getElementById("sizeRange"),
+      sizeInput: document.getElementById("sizeInput"),
+      errorLevelInput: document.getElementById("errorLevelInput"),
+      canvas: document.getElementById("qrCanvas"),
+      encodedBox: document.getElementById("encodedBox"),
+      previewStatus: document.getElementById("previewStatus"),
+      statVersion: document.getElementById("statVersion"),
+      statBytes: document.getElementById("statBytes"),
+      statModules: document.getElementById("statModules"),
+      statType: document.getElementById("statType"),
+      pngBtn: document.getElementById("pngBtn"),
+      svgBtn: document.getElementById("svgBtn"),
+      zipBtn: document.getElementById("zipBtn"),
+      loadSampleBtn: document.getElementById("loadSampleBtn"),
+      fileInput: document.getElementById("fileInput"),
+      dropzone: document.getElementById("dropzone"),
+      batchStatus: document.getElementById("batchStatus"),
+      batchBody: document.getElementById("batchBody"),
+      batchCountBadge: document.getElementById("batchCountBadge"),
+      clearBatchBtn: document.getElementById("clearBatchBtn")
+    };
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const isSingle = mode === "single";
+      el.singleTab.setAttribute("aria-selected", String(isSingle));
+      el.batchTab.setAttribute("aria-selected", String(!isSingle));
+      el.singlePane.classList.toggle("hidden", !isSingle);
+      el.batchPane.classList.toggle("hidden", isSingle);
+      el.zipBtn.classList.toggle("hidden", isSingle || batchRows.length === 0);
+      updatePreview();
+    }
+
+    function setContentType(type) {
+      contentType = type;
+      document.querySelectorAll(".segment").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.type === type));
+      });
+      el.webFields.classList.toggle("hidden", type !== "web");
+      el.wifiFields.classList.toggle("hidden", type !== "wifi");
+      el.textFields.classList.toggle("hidden", type !== "text");
+      updatePreview();
+    }
+
+    function clampSize(value) {
+      const parsed = Math.round(Number(value) || 512);
+      return Math.min(4096, Math.max(128, parsed));
+    }
+
+    function normalizeUrl(value) {
+      const trimmed = value.trim();
+      if (!trimmed) return "";
+      return /^[a-z][a-z0-9+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    }
+
+    function escapeWifi(value) {
+      return String(value).replace(/([\\;,:"])/g, "\\$1");
+    }
+
+    function buildWifi(ssid, password, security, hidden) {
+      const auth = security || "WPA";
+      const parts = [`T:${auth}`, `S:${escapeWifi(ssid)}`];
+      if (auth !== "nopass") parts.push(`P:${escapeWifi(password)}`);
+      if (hidden) parts.push("H:true");
+      return `WIFI:${parts.join(";")};;`;
+    }
+
+    function currentItem() {
+      if (mode === "batch" && batchRows.length) return batchRows[selectedBatchIndex] || batchRows[0];
+      if (contentType === "web") return { name: "web-address", type: "web", content: normalizeUrl(el.urlInput.value) };
+      if (contentType === "wifi") {
+        return {
+          name: cleanName(el.ssidInput.value || "wifi-network"),
+          type: "wifi",
+          content: buildWifi(el.ssidInput.value.trim(), el.passwordInput.value, el.securityInput.value, el.hiddenInput.checked)
+        };
+      }
+      return { name: "text", type: "text", content: el.textInput.value };
+    }
+
+    function updatePreview() {
+      const item = currentItem();
+      const size = clampSize(el.sizeInput.value);
+      const ecl = Number(el.errorLevelInput.value);
+      el.previewStatus.textContent = "";
+      el.previewStatus.classList.remove("error");
+      el.encodedBox.textContent = item.content || "";
+      el.statType.textContent = titleType(item.type);
+
+      if (!item.content) {
+        clearCanvas(size);
+        currentQr = null;
+        el.statVersion.textContent = "-";
+        el.statBytes.textContent = "0";
+        el.statModules.textContent = "-";
+        return;
+      }
+
+      try {
+        currentQr = QRCode.encodeText(item.content, ecl);
+        renderCanvas(currentQr, el.canvas, size);
+        el.statVersion.textContent = String(currentQr.version);
+        el.statBytes.textContent = String(encoder.encode(item.content).length);
+        el.statModules.textContent = `${currentQr.size} x ${currentQr.size}`;
+      } catch (error) {
+        currentQr = null;
+        clearCanvas(size);
+        el.previewStatus.textContent = error.message;
+        el.previewStatus.classList.add("error");
+        el.statVersion.textContent = "-";
+        el.statBytes.textContent = String(encoder.encode(item.content).length);
+        el.statModules.textContent = "-";
+      }
+    }
+
+    function clearCanvas(size) {
+      el.canvas.width = size;
+      el.canvas.height = size;
+      const ctx = el.canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, size, size);
+    }
+
+    function titleType(type) {
+      if (type === "wifi") return "Wi-Fi";
+      if (type === "web") return "Web";
+      return "Text";
+    }
+
+    function cleanName(value) {
+      const cleaned = String(value || "qr-code").trim().replace(/\.[^.]+$/, "").replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "");
+      return cleaned || "qr-code";
+    }
+
+    function renderCanvas(qr, canvas, pixelSize) {
+      const quiet = 4;
+      const modules = qr.size + quiet * 2;
+      canvas.width = pixelSize;
+      canvas.height = pixelSize;
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, pixelSize, pixelSize);
+      ctx.fillStyle = "#000";
+      const cell = pixelSize / modules;
+      for (let y = 0; y < qr.size; y++) {
+        for (let x = 0; x < qr.size; x++) {
+          if (qr.getModule(x, y)) {
+            const rx = Math.floor((x + quiet) * cell);
+            const ry = Math.floor((y + quiet) * cell);
+            const rw = Math.ceil((x + quiet + 1) * cell) - rx;
+            const rh = Math.ceil((y + quiet + 1) * cell) - ry;
+            ctx.fillRect(rx, ry, rw, rh);
+          }
+        }
+      }
+    }
+
+    function qrToSvg(qr, pixelSize) {
+      const quiet = 4;
+      const modules = qr.size + quiet * 2;
+      const rects = [];
+      for (let y = 0; y < qr.size; y++) {
+        for (let x = 0; x < qr.size; x++) {
+          if (qr.getModule(x, y)) rects.push(`M${x + quiet},${y + quiet}h1v1h-1z`);
+        }
+      }
+      return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${pixelSize}" height="${pixelSize}" viewBox="0 0 ${modules} ${modules}" shape-rendering="crispEdges">\n<rect width="100%" height="100%" fill="#fff"/>\n<path d="${rects.join("")}" fill="#000"/>\n</svg>\n`;
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function downloadCurrent(format) {
+      const item = currentItem();
+      if (!currentQr || !item.content) return;
+      const size = clampSize(el.sizeInput.value);
+      const filename = cleanName(item.name || item.type || "qr-code");
+      if (format === "svg") {
+        downloadBlob(new Blob([qrToSvg(currentQr, size)], { type: "image/svg+xml" }), `${filename}.svg`);
+      } else {
+        el.canvas.toBlob((blob) => {
+          if (blob) downloadBlob(blob, `${filename}.png`);
+        }, "image/png");
+      }
+    }
+
+    async function downloadZip() {
+      if (!batchRows.length) return;
+      const size = clampSize(el.sizeInput.value);
+      const ecl = Number(el.errorLevelInput.value);
+      const files = [];
+      for (let index = 0; index < batchRows.length; index++) {
+        const row = batchRows[index];
+        if (!row.content) continue;
+        const qr = QRCode.encodeText(row.content, ecl);
+        const base = `${String(index + 1).padStart(3, "0")}-${cleanName(row.name || row.type || "qr-code")}`;
+        files.push({
+          name: `png/${base}.png`,
+          data: dataUrlBytes(renderPngDataUrl(qr, size))
+        });
+        files.push({
+          name: `svg/${base}.svg`,
+          data: encoder.encode(qrToSvg(qr, size))
+        });
+      }
+      downloadBlob(new Blob([makeZip(files)], { type: "application/zip" }), "qr-codes.zip");
+    }
+
+    function renderPngDataUrl(qr, pixelSize) {
+      const canvas = document.createElement("canvas");
+      renderCanvas(qr, canvas, pixelSize);
+      return canvas.toDataURL("image/png");
+    }
+
+    function dataUrlBytes(dataUrl) {
+      const base64 = dataUrl.split(",")[1];
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    }
+
+    function makeZip(files) {
+      const chunks = [];
+      const central = [];
+      let offset = 0;
+      for (const file of files) {
+        const name = encoder.encode(file.name);
+        const data = file.data instanceof Uint8Array ? file.data : new Uint8Array(file.data);
+        const crc = crc32(data);
+        const local = new Uint8Array(30 + name.length);
+        const view = new DataView(local.buffer);
+        view.setUint32(0, 0x04034b50, true);
+        view.setUint16(4, 20, true);
+        view.setUint16(8, 0, true);
+        view.setUint16(10, 0, true);
+        view.setUint16(12, 0, true);
+        view.setUint16(14, 0, true);
+        view.setUint32(14, crc, true);
+        view.setUint32(18, data.length, true);
+        view.setUint32(22, data.length, true);
+        view.setUint16(26, name.length, true);
+        local.set(name, 30);
+        chunks.push(local, data);
+
+        const record = new Uint8Array(46 + name.length);
+        const cview = new DataView(record.buffer);
+        cview.setUint32(0, 0x02014b50, true);
+        cview.setUint16(4, 20, true);
+        cview.setUint16(6, 20, true);
+        cview.setUint16(10, 0, true);
+        cview.setUint16(12, 0, true);
+        cview.setUint16(14, 0, true);
+        cview.setUint32(16, crc, true);
+        cview.setUint32(20, data.length, true);
+        cview.setUint32(24, data.length, true);
+        cview.setUint16(28, name.length, true);
+        cview.setUint32(42, offset, true);
+        record.set(name, 46);
+        central.push(record);
+        offset += local.length + data.length;
+      }
+      const centralOffset = offset;
+      const centralSize = central.reduce((sum, part) => sum + part.length, 0);
+      const end = new Uint8Array(22);
+      const endView = new DataView(end.buffer);
+      endView.setUint32(0, 0x06054b50, true);
+      endView.setUint16(8, files.length, true);
+      endView.setUint16(10, files.length, true);
+      endView.setUint32(12, centralSize, true);
+      endView.setUint32(16, centralOffset, true);
+      const total = offset + centralSize + end.length;
+      const output = new Uint8Array(total);
+      let pos = 0;
+      for (const part of chunks.concat(central, end)) {
+        output.set(part, pos);
+        pos += part.length;
+      }
+      return output;
+    }
+
+    function crc32(bytes) {
+      let crc = -1;
+      for (const byte of bytes) {
+        crc ^= byte;
+        for (let i = 0; i < 8; i++) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+      }
+      return (crc ^ -1) >>> 0;
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let quote = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (quote) {
+          if (char === '"' && text[i + 1] === '"') {
+            field += '"';
+            i++;
+          } else if (char === '"') {
+            quote = false;
+          } else {
+            field += char;
+          }
+        } else if (char === '"') {
+          quote = true;
+        } else if (char === ",") {
+          row.push(field);
+          field = "";
+        } else if (char === "\n") {
+          row.push(field);
+          rows.push(row);
+          row = [];
+          field = "";
+        } else if (char !== "\r") {
+          field += char;
+        }
+      }
+      row.push(field);
+      if (row.some((cell) => cell !== "")) rows.push(row);
+      return rows;
+    }
+
+    function rowsToItems(rows) {
+      if (!rows.length) return [];
+      const header = rows[0].map((cell) => String(cell).trim().toLowerCase());
+      const hasHeader = header.some((cell) => [
+        "type", "content_type", "kind", "content", "text", "value", "url", "website", "web_address",
+        "ssid", "password", "security", "encryption", "hidden", "name", "filename", "id"
+      ].includes(cell));
+      const dataRows = hasHeader ? rows.slice(1) : rows;
+      const getIndex = (...names) => names.map((name) => header.indexOf(name)).find((index) => index >= 0);
+      const indexes = {
+        type: getIndex("type", "content_type", "kind"),
+        content: getIndex("content", "text", "value"),
+        url: getIndex("url", "website", "web_address", "link"),
+        ssid: getIndex("ssid", "network", "wifi"),
+        password: getIndex("password", "pass", "wifi_password"),
+        security: getIndex("security", "encryption", "auth"),
+        hidden: getIndex("hidden", "is_hidden"),
+        name: getIndex("name", "filename", "file_name", "id", "label")
+      };
+
+      return dataRows.map((row, index) => {
+        const get = (key) => indexes[key] == null ? "" : String(row[indexes[key]] || "").trim();
+        let type = normalizeType(get("type"));
+        if (!type) {
+          if (get("ssid")) type = "wifi";
+          else if (get("url")) type = "web";
+          else type = "text";
+        }
+        let content = "";
+        if (type === "wifi") {
+          content = buildWifi(get("ssid"), get("password"), get("security") || "WPA", isTruthy(get("hidden")));
+        } else if (type === "web") {
+          content = normalizeUrl(get("url") || get("content") || row[0] || "");
+        } else {
+          content = get("content") || row[0] || "";
+        }
+        return {
+          name: get("name") || `${type}-${index + 1}`,
+          type,
+          content
+        };
+      }).filter((item) => item.content);
+    }
+
+    function normalizeType(value) {
+      const type = String(value || "").trim().toLowerCase();
+      if (["web", "url", "website", "link"].includes(type)) return "web";
+      if (["wifi", "wi-fi", "wireless"].includes(type)) return "wifi";
+      if (["text", "plain", "note"].includes(type)) return "text";
+      return "";
+    }
+
+    function isTruthy(value) {
+      return ["1", "true", "yes", "y"].includes(String(value).trim().toLowerCase());
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+      setBatchStatus(`Reading ${file.name}`);
+      try {
+        let rows;
+        if (/\.xlsx?$/i.test(file.name)) {
+          if (/\.xls$/i.test(file.name) && !/\.xlsx$/i.test(file.name)) throw new Error("Legacy .xls files are not supported. Save as .xlsx or CSV.");
+          rows = await parseXlsx(file);
+        } else {
+          rows = parseCsv(await file.text());
+        }
+        batchRows = rowsToItems(rows);
+        selectedBatchIndex = 0;
+        renderBatchTable();
+        setBatchStatus(batchRows.length ? `${batchRows.length} rows loaded` : "No encodable rows found", !batchRows.length);
+        el.zipBtn.classList.toggle("hidden", mode !== "batch" || batchRows.length === 0);
+        updatePreview();
+      } catch (error) {
+        setBatchStatus(error.message, true);
+      }
+    }
+
+    function setBatchStatus(message, isError = false) {
+      el.batchStatus.textContent = message;
+      el.batchStatus.classList.toggle("error", isError);
+    }
+
+    function renderBatchTable() {
+      el.batchCountBadge.textContent = `${batchRows.length} ${batchRows.length === 1 ? "row" : "rows"}`;
+      if (!batchRows.length) {
+        el.batchBody.innerHTML = '<tr><td colspan="3">No rows loaded</td></tr>';
+        return;
+      }
+      el.batchBody.innerHTML = "";
+      batchRows.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.dataset.selected = String(index === selectedBatchIndex);
+        tr.innerHTML = `
+          <td><button class="row-button" type="button">${escapeHtml(row.name || `Row ${index + 1}`)}</button></td>
+          <td><span class="badge">${escapeHtml(titleType(row.type))}</span></td>
+          <td class="truncate" title="${escapeHtml(row.content)}">${escapeHtml(row.content)}</td>
+        `;
+        tr.querySelector("button").addEventListener("click", () => {
+          selectedBatchIndex = index;
+          renderBatchTable();
+          updatePreview();
+        });
+        el.batchBody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[char]));
+    }
+
+    async function parseXlsx(file) {
+      const entries = await unzip(await file.arrayBuffer());
+      const sharedStrings = parseSharedStrings(entries["xl/sharedStrings.xml"]);
+      const workbook = entries["xl/workbook.xml"];
+      let sheetPath = "xl/worksheets/sheet1.xml";
+      if (workbook && entries["xl/_rels/workbook.xml.rels"]) {
+        const workbookDoc = new DOMParser().parseFromString(decoder.decode(workbook), "application/xml");
+        const firstSheet = workbookDoc.querySelector("sheet");
+        const rid = firstSheet && firstSheet.getAttribute("r:id");
+        if (rid) {
+          const rels = new DOMParser().parseFromString(decoder.decode(entries["xl/_rels/workbook.xml.rels"]), "application/xml");
+          const rel = Array.from(rels.querySelectorAll("Relationship")).find((node) => node.getAttribute("Id") === rid);
+          if (rel) {
+            const target = rel.getAttribute("Target").replace(/^\/?xl\//, "");
+            sheetPath = `xl/${target}`;
+          }
+        }
+      }
+      if (!entries[sheetPath]) throw new Error("No worksheet found in the Excel file.");
+      return parseSheet(entries[sheetPath], sharedStrings);
+    }
+
+    async function unzip(arrayBuffer) {
+      const bytes = new Uint8Array(arrayBuffer);
+      const view = new DataView(arrayBuffer);
+      let eocd = -1;
+      for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 66000); i--) {
+        if (view.getUint32(i, true) === 0x06054b50) {
+          eocd = i;
+          break;
+        }
+      }
+      if (eocd < 0) throw new Error("Invalid Excel file.");
+      const entries = {};
+      const count = view.getUint16(eocd + 10, true);
+      let ptr = view.getUint32(eocd + 16, true);
+      for (let i = 0; i < count; i++) {
+        if (view.getUint32(ptr, true) !== 0x02014b50) throw new Error("Invalid Excel archive.");
+        const method = view.getUint16(ptr + 10, true);
+        const compressedSize = view.getUint32(ptr + 20, true);
+        const nameLength = view.getUint16(ptr + 28, true);
+        const extraLength = view.getUint16(ptr + 30, true);
+        const commentLength = view.getUint16(ptr + 32, true);
+        const localOffset = view.getUint32(ptr + 42, true);
+        const name = decoder.decode(bytes.slice(ptr + 46, ptr + 46 + nameLength));
+        const localNameLength = view.getUint16(localOffset + 26, true);
+        const localExtraLength = view.getUint16(localOffset + 28, true);
+        const start = localOffset + 30 + localNameLength + localExtraLength;
+        const data = bytes.slice(start, start + compressedSize);
+        if (!name.endsWith("/")) entries[name] = await inflateZipEntry(data, method);
+        ptr += 46 + nameLength + extraLength + commentLength;
+      }
+      return entries;
+    }
+
+    async function inflateZipEntry(data, method) {
+      if (method === 0) return data;
+      if (method !== 8) throw new Error("Unsupported Excel compression method.");
+      if (!("DecompressionStream" in window)) throw new Error("This browser cannot read Excel files. Use CSV instead.");
+      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return new Uint8Array(await new Response(stream).arrayBuffer());
+    }
+
+    function parseSharedStrings(bytes) {
+      if (!bytes) return [];
+      const xml = new DOMParser().parseFromString(decoder.decode(bytes), "application/xml");
+      return Array.from(xml.querySelectorAll("si")).map((node) => {
+        return Array.from(node.querySelectorAll("t")).map((t) => t.textContent || "").join("");
+      });
+    }
+
+    function parseSheet(bytes, sharedStrings) {
+      const xml = new DOMParser().parseFromString(decoder.decode(bytes), "application/xml");
+      const rows = [];
+      xml.querySelectorAll("sheetData row").forEach((rowNode) => {
+        const cells = [];
+        rowNode.querySelectorAll("c").forEach((cell) => {
+          const ref = cell.getAttribute("r") || "";
+          const col = columnIndex(ref.replace(/\d+/g, ""));
+          const type = cell.getAttribute("t");
+          let value = "";
+          if (type === "inlineStr") {
+            value = Array.from(cell.querySelectorAll("is t")).map((node) => node.textContent || "").join("");
+          } else {
+            const raw = cell.querySelector("v")?.textContent || "";
+            value = type === "s" ? (sharedStrings[Number(raw)] || "") : raw;
+          }
+          cells[col] = value;
+        });
+        rows.push(cells.map((cell) => cell || ""));
+      });
+      return rows;
+    }
+
+    function columnIndex(label) {
+      let n = 0;
+      for (const char of label) n = n * 26 + char.toUpperCase().charCodeAt(0) - 64;
+      return Math.max(0, n - 1);
+    }
+
+    class BitBuffer {
+      constructor() {
+        this.bits = [];
+      }
+
+      append(value, length) {
+        if (length < 0 || value >>> length !== 0) throw new RangeError("Value out of range");
+        for (let i = length - 1; i >= 0; i--) this.bits.push((value >>> i) & 1);
+      }
+
+      appendBytes(bytes) {
+        for (const byte of bytes) this.append(byte, 8);
+      }
+
+      toCodewords() {
+        const output = [];
+        for (let i = 0; i < this.bits.length; i += 8) {
+          let value = 0;
+          for (let j = 0; j < 8; j++) value = (value << 1) | (this.bits[i + j] || 0);
+          output.push(value);
+        }
+        return output;
+      }
+    }
+
+    class QRCode {
+      constructor(version, ecl, mask, codewords) {
+        this.version = version;
+        this.errorCorrectionLevel = ecl;
+        this.size = version * 4 + 17;
+        this.modules = Array.from({ length: this.size }, () => Array(this.size).fill(false));
+        this.isFunction = Array.from({ length: this.size }, () => Array(this.size).fill(false));
+        this.drawFunctionPatterns();
+        this.drawCodewords(codewords);
+        if (mask < 0) {
+          let minPenalty = Infinity;
+          let best = null;
+          for (let i = 0; i < 8; i++) {
+            const candidate = new QRCode(version, ecl, i, codewords);
+            const penalty = candidate.getPenaltyScore();
+            if (penalty < minPenalty) {
+              minPenalty = penalty;
+              best = candidate;
+              mask = i;
+            }
+          }
+          this.mask = mask;
+          this.modules = best.modules;
+          this.isFunction = best.isFunction;
+          return;
+        }
+        this.mask = mask;
+        this.applyMask(mask);
+        this.drawFormatBits(mask);
+        this.drawVersion();
+      }
+
+      static encodeText(text, ecl = 1) {
+        const data = encoder.encode(text);
+        let version = 1;
+        let capacityBits = 0;
+        for (; version <= 40; version++) {
+          const charCountBits = version <= 9 ? 8 : 16;
+          capacityBits = QRCode.getNumDataCodewords(version, ecl) * 8;
+          const usedBits = 4 + charCountBits + data.length * 8;
+          if (usedBits <= capacityBits) break;
+        }
+        if (version > 40) throw new Error("The content is too large for a QR code.");
+
+        const bitBuffer = new BitBuffer();
+        bitBuffer.append(0x4, 4);
+        bitBuffer.append(data.length, version <= 9 ? 8 : 16);
+        bitBuffer.appendBytes(data);
+        const dataCapacity = QRCode.getNumDataCodewords(version, ecl);
+        const bitCapacity = dataCapacity * 8;
+        bitBuffer.append(0, Math.min(4, bitCapacity - bitBuffer.bits.length));
+        while (bitBuffer.bits.length % 8 !== 0) bitBuffer.append(0, 1);
+        for (let pad = 0xec; bitBuffer.bits.length < bitCapacity; pad ^= 0xec ^ 0x11) bitBuffer.append(pad, 8);
+        const codewords = QRCode.addEccAndInterleave(bitBuffer.toCodewords(), version, ecl);
+        return new QRCode(version, ecl, -1, codewords);
+      }
+
+      static getNumRawDataModules(version) {
+        let result = (16 * version + 128) * version + 64;
+        if (version >= 2) {
+          const numAlign = Math.floor(version / 7) + 2;
+          result -= (25 * numAlign - 10) * numAlign - 55;
+          if (version >= 7) result -= 36;
+        }
+        return result;
+      }
+
+      static getNumDataCodewords(version, ecl) {
+        return Math.floor(QRCode.getNumRawDataModules(version) / 8)
+          - ECC_CODEWORDS_PER_BLOCK[version - 1][ecl] * NUM_ERROR_CORRECTION_BLOCKS[version - 1][ecl];
+      }
+
+      static addEccAndInterleave(data, version, ecl) {
+        const numBlocks = NUM_ERROR_CORRECTION_BLOCKS[version - 1][ecl];
+        const blockEccLen = ECC_CODEWORDS_PER_BLOCK[version - 1][ecl];
+        const rawCodewords = Math.floor(QRCode.getNumRawDataModules(version) / 8);
+        const numShortBlocks = numBlocks - rawCodewords % numBlocks;
+        const shortBlockLen = Math.floor(rawCodewords / numBlocks);
+        const generator = QRCode.reedSolomonComputeDivisor(blockEccLen);
+        const blocks = [];
+        let k = 0;
+        for (let i = 0; i < numBlocks; i++) {
+          const datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
+          const dat = data.slice(k, k + datLen);
+          k += datLen;
+          const ecc = QRCode.reedSolomonComputeRemainder(dat, generator);
+          if (i < numShortBlocks) dat.push(0);
+          blocks.push(dat.concat(ecc));
+        }
+        const result = [];
+        for (let i = 0; i < blocks[0].length; i++) {
+          for (let j = 0; j < blocks.length; j++) {
+            if (i !== shortBlockLen - blockEccLen || j >= numShortBlocks) result.push(blocks[j][i]);
+          }
+        }
+        return result;
+      }
+
+      static reedSolomonComputeDivisor(degree) {
+        const result = Array(degree).fill(0);
+        result[degree - 1] = 1;
+        let root = 1;
+        for (let i = 0; i < degree; i++) {
+          for (let j = 0; j < result.length; j++) {
+            result[j] = QRCode.reedSolomonMultiply(result[j], root);
+            if (j + 1 < result.length) result[j] ^= result[j + 1];
+          }
+          root = QRCode.reedSolomonMultiply(root, 0x02);
+        }
+        return result;
+      }
+
+      static reedSolomonComputeRemainder(data, divisor) {
+        const result = Array(divisor.length).fill(0);
+        for (const byte of data) {
+          const factor = byte ^ result.shift();
+          result.push(0);
+          divisor.forEach((coef, index) => {
+            result[index] ^= QRCode.reedSolomonMultiply(coef, factor);
+          });
+        }
+        return result;
+      }
+
+      static reedSolomonMultiply(x, y) {
+        let z = 0;
+        for (let i = 7; i >= 0; i--) {
+          z = (z << 1) ^ ((z >>> 7) * 0x11d);
+          z ^= ((y >>> i) & 1) * x;
+        }
+        return z & 0xff;
+      }
+
+      getModule(x, y) {
+        return this.modules[y][x];
+      }
+
+      setFunctionModule(x, y, isDark) {
+        this.modules[y][x] = isDark;
+        this.isFunction[y][x] = true;
+      }
+
+      drawFunctionPatterns() {
+        for (let i = 0; i < this.size; i++) {
+          this.setFunctionModule(6, i, i % 2 === 0);
+          this.setFunctionModule(i, 6, i % 2 === 0);
+        }
+        this.drawFinderPattern(3, 3);
+        this.drawFinderPattern(this.size - 4, 3);
+        this.drawFinderPattern(3, this.size - 4);
+        const align = this.getAlignmentPatternPositions();
+        for (const y of align) {
+          for (const x of align) {
+            if (!((x === 6 && y === 6) || (x === 6 && y === this.size - 7) || (x === this.size - 7 && y === 6))) {
+              this.drawAlignmentPattern(x, y);
+            }
+          }
+        }
+        this.drawFormatBits(0);
+        this.drawVersion();
+      }
+
+      drawFinderPattern(cx, cy) {
+        for (let dy = -4; dy <= 4; dy++) {
+          for (let dx = -4; dx <= 4; dx++) {
+            const x = cx + dx;
+            const y = cy + dy;
+            if (x < 0 || y < 0 || x >= this.size || y >= this.size) continue;
+            const dist = Math.max(Math.abs(dx), Math.abs(dy));
+            this.setFunctionModule(x, y, dist !== 2 && dist !== 4);
+          }
+        }
+      }
+
+      drawAlignmentPattern(cx, cy) {
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            this.setFunctionModule(cx + dx, cy + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+          }
+        }
+      }
+
+      getAlignmentPatternPositions() {
+        if (this.version === 1) return [];
+        const numAlign = Math.floor(this.version / 7) + 2;
+        const step = this.version === 32 ? 26 : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2;
+        const result = [6];
+        for (let pos = this.size - 7; result.length < numAlign; pos -= step) result.splice(1, 0, pos);
+        return result;
+      }
+
+      drawFormatBits(mask) {
+        const data = (FORMAT_BITS[this.errorCorrectionLevel] << 3) | mask;
+        let rem = data;
+        for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+        const bits = ((data << 10) | rem) ^ 0x5412;
+        for (let i = 0; i <= 5; i++) this.setFunctionModule(8, i, getBit(bits, i));
+        this.setFunctionModule(8, 7, getBit(bits, 6));
+        this.setFunctionModule(8, 8, getBit(bits, 7));
+        this.setFunctionModule(7, 8, getBit(bits, 8));
+        for (let i = 9; i < 15; i++) this.setFunctionModule(14 - i, 8, getBit(bits, i));
+        for (let i = 0; i < 8; i++) this.setFunctionModule(this.size - 1 - i, 8, getBit(bits, i));
+        for (let i = 8; i < 15; i++) this.setFunctionModule(8, this.size - 15 + i, getBit(bits, i));
+        this.setFunctionModule(8, this.size - 8, true);
+      }
+
+      drawVersion() {
+        if (this.version < 7) return;
+        let rem = this.version;
+        for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1f25);
+        const bits = (this.version << 12) | rem;
+        for (let i = 0; i < 18; i++) {
+          const bit = getBit(bits, i);
+          const a = this.size - 11 + (i % 3);
+          const b = Math.floor(i / 3);
+          this.setFunctionModule(a, b, bit);
+          this.setFunctionModule(b, a, bit);
+        }
+      }
+
+      drawCodewords(data) {
+        let bitIndex = 0;
+        for (let right = this.size - 1; right >= 1; right -= 2) {
+          if (right === 6) right = 5;
+          for (let vert = 0; vert < this.size; vert++) {
+            for (let j = 0; j < 2; j++) {
+              const x = right - j;
+              const upward = ((right + 1) & 2) === 0;
+              const y = upward ? this.size - 1 - vert : vert;
+              if (!this.isFunction[y][x] && bitIndex < data.length * 8) {
+                this.modules[y][x] = getBit(data[bitIndex >>> 3], 7 - (bitIndex & 7));
+                bitIndex++;
+              }
+            }
+          }
+        }
+      }
+
+      applyMask(mask) {
+        for (let y = 0; y < this.size; y++) {
+          for (let x = 0; x < this.size; x++) {
+            let invert;
+            switch (mask) {
+              case 0: invert = (x + y) % 2 === 0; break;
+              case 1: invert = y % 2 === 0; break;
+              case 2: invert = x % 3 === 0; break;
+              case 3: invert = (x + y) % 3 === 0; break;
+              case 4: invert = (Math.floor(y / 2) + Math.floor(x / 3)) % 2 === 0; break;
+              case 5: invert = ((x * y) % 2 + (x * y) % 3) === 0; break;
+              case 6: invert = (((x * y) % 2 + (x * y) % 3) % 2) === 0; break;
+              case 7: invert = (((x + y) % 2 + (x * y) % 3) % 2) === 0; break;
+            }
+            if (!this.isFunction[y][x] && invert) this.modules[y][x] = !this.modules[y][x];
+          }
+        }
+      }
+
+      getPenaltyScore() {
+        let result = 0;
+        for (let y = 0; y < this.size; y++) {
+          let runColor = false;
+          let runLength = 0;
+          for (let x = 0; x < this.size; x++) {
+            if (this.modules[y][x] === runColor) {
+              runLength++;
+              if (runLength === 5) result += 3;
+              else if (runLength > 5) result++;
+            } else {
+              runColor = this.modules[y][x];
+              runLength = 1;
+            }
+          }
+        }
+        for (let x = 0; x < this.size; x++) {
+          let runColor = false;
+          let runLength = 0;
+          for (let y = 0; y < this.size; y++) {
+            if (this.modules[y][x] === runColor) {
+              runLength++;
+              if (runLength === 5) result += 3;
+              else if (runLength > 5) result++;
+            } else {
+              runColor = this.modules[y][x];
+              runLength = 1;
+            }
+          }
+        }
+        for (let y = 0; y < this.size - 1; y++) {
+          for (let x = 0; x < this.size - 1; x++) {
+            const color = this.modules[y][x];
+            if (color === this.modules[y][x + 1] && color === this.modules[y + 1][x] && color === this.modules[y + 1][x + 1]) result += 3;
+          }
+        }
+        const pattern = [true, false, true, true, true, false, true];
+        for (let y = 0; y < this.size; y++) {
+          for (let x = 0; x <= this.size - 7; x++) {
+            if (pattern.every((bit, i) => this.modules[y][x + i] === bit)) {
+              const before = x >= 4 && [1,2,3,4].every((i) => !this.modules[y][x - i]);
+              const after = x + 11 <= this.size && [7,8,9,10].every((i) => !this.modules[y][x + i]);
+              if (before || after) result += 40;
+            }
+          }
+        }
+        for (let x = 0; x < this.size; x++) {
+          for (let y = 0; y <= this.size - 7; y++) {
+            if (pattern.every((bit, i) => this.modules[y + i][x] === bit)) {
+              const before = y >= 4 && [1,2,3,4].every((i) => !this.modules[y - i][x]);
+              const after = y + 11 <= this.size && [7,8,9,10].every((i) => !this.modules[y + i][x]);
+              if (before || after) result += 40;
+            }
+          }
+        }
+        let dark = 0;
+        for (const row of this.modules) for (const cell of row) if (cell) dark++;
+        const total = this.size * this.size;
+        result += Math.floor(Math.abs(dark * 20 - total * 10) / total) * 10;
+        return result;
+      }
+    }
+
+    function getBit(value, index) {
+      return ((value >>> index) & 1) !== 0;
+    }
+
+    el.singleTab.addEventListener("click", () => setMode("single"));
+    el.batchTab.addEventListener("click", () => setMode("batch"));
+    document.querySelectorAll(".segment").forEach((button) => button.addEventListener("click", () => setContentType(button.dataset.type)));
+    [el.urlInput, el.ssidInput, el.passwordInput, el.securityInput, el.hiddenInput, el.textInput, el.errorLevelInput].forEach((input) => {
+      input.addEventListener("input", updatePreview);
+      input.addEventListener("change", updatePreview);
+    });
+    el.sizeRange.addEventListener("input", () => {
+      el.sizeInput.value = el.sizeRange.value;
+      updatePreview();
+    });
+    el.sizeInput.addEventListener("input", () => {
+      const size = clampSize(el.sizeInput.value);
+      el.sizeRange.value = Math.min(2048, size);
+      updatePreview();
+    });
+    el.pngBtn.addEventListener("click", () => downloadCurrent("png"));
+    el.svgBtn.addEventListener("click", () => downloadCurrent("svg"));
+    el.zipBtn.addEventListener("click", () => {
+      downloadZip().catch((error) => {
+        el.previewStatus.textContent = error.message;
+        el.previewStatus.classList.add("error");
+      });
+    });
+    el.fileInput.addEventListener("change", () => handleFile(el.fileInput.files[0]));
+    el.dropzone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      el.dropzone.classList.add("dragover");
+    });
+    el.dropzone.addEventListener("dragleave", () => el.dropzone.classList.remove("dragover"));
+    el.dropzone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      el.dropzone.classList.remove("dragover");
+      handleFile(event.dataTransfer.files[0]);
+    });
+    el.clearBatchBtn.addEventListener("click", () => {
+      batchRows = [];
+      selectedBatchIndex = 0;
+      el.fileInput.value = "";
+      renderBatchTable();
+      setBatchStatus("");
+      el.zipBtn.classList.add("hidden");
+      updatePreview();
+    });
+    el.loadSampleBtn.addEventListener("click", () => {
+      batchRows = rowsToItems([
+        ["name", "type", "url", "ssid", "password", "security", "hidden", "content"],
+        ["OpenAI", "web", "https://openai.com", "", "", "", "", ""],
+        ["Guest Wi-Fi", "wifi", "", "Studio Guest", "launchpad42", "WPA", "false", ""],
+        ["Desk note", "text", "", "", "", "", "", "Bring curiosity. Leave with a QR code."]
+      ]);
+      selectedBatchIndex = 0;
+      renderBatchTable();
+      setBatchStatus(`${batchRows.length} rows loaded`);
+      setMode("batch");
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>
