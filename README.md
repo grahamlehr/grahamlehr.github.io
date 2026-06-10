@@ -27,3 +27,7 @@ A quick way to make PNGs for digital signage at events.
 ## Tent Card Studio
 Does what it says on the tin
 [Tent Card Studio](https://grahamlehr.github.io/TentCardGenerator.html)
+
+## QR Code Maker
+Makes single or batch QR codes
+[QRui](https://grahamlehr.github.io/QRui.html)
