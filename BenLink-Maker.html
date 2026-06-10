@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BenLink Maker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --ink: #17212b;
+      --muted: #627083;
+      --line: #d7dde5;
+      --panel: #ffffff;
+      --accent: #0f7b7e;
+      --accent-dark: #095b60;
+      --danger: #b42318;
+      --soft: #e8f4f4;
+      --shadow: 0 18px 50px rgba(21, 38, 52, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(15, 123, 126, 0.10), transparent 320px),
+        var(--bg);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 36px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-end;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .intro {
+      margin: 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .status-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid rgba(15, 123, 126, 0.24);
+      border-radius: 999px;
+      color: var(--accent-dark);
+      background: rgba(255, 255, 255, 0.72);
+      font-size: 0.92rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-panel {
+      padding: 22px;
+    }
+
+    .qr-panel {
+      position: sticky;
+      top: 18px;
+      padding: 22px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+      line-height: 1.2;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      color: #243241;
+      font-size: 0.91rem;
+      font-weight: 750;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fbfcfd;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    textarea {
+      min-height: 94px;
+      resize: vertical;
+      overflow-wrap: anywhere;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 123, 126, 0.15);
+      background: #ffffff;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    button,
+    .button-link {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 0 15px;
+      font: inherit;
+      font-weight: 760;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    }
+
+    button:active,
+    .button-link:active {
+      transform: translateY(1px);
+    }
+
+    .primary {
+      color: #ffffff;
+      background: var(--accent);
+    }
+
+    .primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .secondary,
+    .button-link {
+      color: var(--accent-dark);
+      background: #ffffff;
+      border-color: rgba(15, 123, 126, 0.28);
+    }
+
+    .secondary:hover,
+    .button-link:hover {
+      border-color: var(--accent);
+      background: var(--soft);
+    }
+
+    .qr-wrap {
+      display: grid;
+      place-items: center;
+      min-height: 330px;
+      border: 1px dashed #c5ced9;
+      border-radius: 8px;
+      background:
+        linear-gradient(45deg, rgba(15, 123, 126, 0.04) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(15, 123, 126, 0.04) 25%, transparent 25%),
+        #fbfcfd;
+      background-size: 18px 18px;
+      overflow: hidden;
+    }
+
+    #qrCode {
+      display: grid;
+      place-items: center;
+      width: min(100%, 304px);
+      min-height: 304px;
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 8px;
+    }
+
+    #qrCode canvas,
+    #qrCode img {
+      width: 280px;
+      height: 280px;
+      max-width: 100%;
+      image-rendering: pixelated;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      text-align: center;
+      padding: 22px;
+      line-height: 1.45;
+    }
+
+    .url-output {
+      margin-top: 16px;
+    }
+
+    .url-output textarea {
+      min-height: 116px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .notice {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 7px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .notice.error {
+      color: var(--danger);
+      background: #fff1f0;
+      border: 1px solid #ffccc7;
+    }
+
+    .notice.ok {
+      color: #075e54;
+      background: #e7f7f3;
+      border: 1px solid #b6e2d8;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 14px 0 0;
+    }
+
+    .metric {
+      min-height: 62px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fbfcfd;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 1rem;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 860px) {
+      header,
+      .layout {
+        display: block;
+      }
+
+      .status-pill {
+        margin-top: 14px;
+      }
+
+      .qr-panel {
+        position: static;
+        margin-top: 18px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        width: min(100% - 22px, 1180px);
+        padding-top: 18px;
+      }
+
+      .field-grid,
+      .meta {
+        grid-template-columns: 1fr;
+      }
+
+      .form-panel,
+      .qr-panel {
+        padding: 16px;
+      }
+
+      .actions > * {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>BenLink Maker</h1>
+        <p class="intro">Create one QR code that sends iPhone and iPad users to the Apple App Store, and Android users to Google Play.</p>
+      </div>
+      <div class="status-pill">Static GitHub Pages ready</div>
+    </header>
+
+    <div class="layout">
+      <section class="panel form-panel" aria-labelledby="setupTitle">
+        <h2 class="section-title" id="setupTitle">Link setup</h2>
+
+        <div class="field">
+          <label for="switcherUrl">BenLink Switcher URL</label>
+          <input id="switcherUrl" type="url" autocomplete="url" spellcheck="false">
+          <div class="hint">Use the published GitHub Pages URL for <strong>BenLink-Switcher.html</strong>.</div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field full">
+            <label for="iosUrl">iOS App Store URL</label>
+            <textarea id="iosUrl" spellcheck="false" placeholder="https://apps.apple.com/..."></textarea>
+          </div>
+
+          <div class="field full">
+            <label for="androidUrl">Google Play URL</label>
+            <textarea id="androidUrl" spellcheck="false" placeholder="https://play.google.com/store/apps/details?id=..."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="fallbackUrl">Fallback URL</label>
+            <input id="fallbackUrl" type="url" spellcheck="false" placeholder="Optional">
+            <div class="hint">Used for desktop or unrecognised devices. Leave blank to show store choices.</div>
+          </div>
+
+          <div class="field">
+            <label for="campaignName">Campaign name</label>
+            <input id="campaignName" type="text" spellcheck="false" placeholder="Optional">
+            <div class="hint">Stored in the QR URL for your own reference.</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="button" id="generateBtn">Generate QR code</button>
+          <button class="secondary" type="button" id="sampleBtn">Use example links</button>
+          <button class="secondary" type="button" id="clearBtn">Clear</button>
+        </div>
+
+        <div class="notice" id="formNotice" role="status" aria-live="polite"></div>
+      </section>
+
+      <aside class="panel qr-panel" aria-labelledby="qrTitle">
+        <h2 class="section-title" id="qrTitle">QR output</h2>
+        <div class="qr-wrap">
+          <div id="qrCode">
+            <div class="empty-state">Your QR code will appear here after the store links are entered.</div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="metric">
+            <span>Encoded URL</span>
+            <strong id="urlLength">0 chars</strong>
+          </div>
+          <div class="metric">
+            <span>iOS target</span>
+            <strong id="iosState">Missing</strong>
+          </div>
+          <div class="metric">
+            <span>Android target</span>
+            <strong id="androidState">Missing</strong>
+          </div>
+        </div>
+
+        <div class="url-output">
+          <label for="encodedUrl">QR destination</label>
+          <textarea id="encodedUrl" readonly spellcheck="false"></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="secondary" type="button" id="copyBtn">Copy URL</button>
+          <button class="secondary" type="button" id="downloadBtn">Download PNG</button>
+          <a class="button-link" id="testLink" href="#" target="_blank" rel="noopener">Test switcher</a>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const el = {
+      switcherUrl: document.getElementById("switcherUrl"),
+      iosUrl: document.getElementById("iosUrl"),
+      androidUrl: document.getElementById("androidUrl"),
+      fallbackUrl: document.getElementById("fallbackUrl"),
+      campaignName: document.getElementById("campaignName"),
+      generateBtn: document.getElementById("generateBtn"),
+      sampleBtn: document.getElementById("sampleBtn"),
+      clearBtn: document.getElementById("clearBtn"),
+      copyBtn: document.getElementById("copyBtn"),
+      downloadBtn: document.getElementById("downloadBtn"),
+      testLink: document.getElementById("testLink"),
+      qrCode: document.getElementById("qrCode"),
+      encodedUrl: document.getElementById("encodedUrl"),
+      notice: document.getElementById("formNotice"),
+      urlLength: document.getElementById("urlLength"),
+      iosState: document.getElementById("iosState"),
+      androidState: document.getElementById("androidState")
+    };
+
+    const sample = {
+      ios: "https://apps.apple.com/us/app/linkedin-network-job-finder/id288429040",
+      android: "https://play.google.com/store/apps/details?id=com.linkedin.android",
+      fallback: "https://www.linkedin.com/mobile",
+      campaign: "LinkedIn example"
+    };
+
+    let latestQrUrl = "";
+
+    function sameFolderSwitcherUrl() {
+      if (!window.location.href.startsWith("http")) {
+        return "https://your-github-username.github.io/your-repo/BenLink-Switcher.html";
+      }
+
+      return new URL("BenLink-Switcher.html", window.location.href).href;
+    }
+
+    function setNotice(message, type) {
+      el.notice.textContent = message;
+      el.notice.className = "notice show " + type;
+    }
+
+    function clearNotice() {
+      el.notice.textContent = "";
+      el.notice.className = "notice";
+    }
+
+    function validateHttpUrl(value, label, required) {
+      const trimmed = value.trim();
+
+      if (!trimmed) {
+        if (required) {
+          throw new Error(label + " is required.");
+        }
+
+        return "";
+      }
+
+      let parsed;
+      try {
+        parsed = new URL(trimmed);
+      } catch (error) {
+        throw new Error(label + " must be a valid URL.");
+      }
+
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        throw new Error(label + " must start with http:// or https://.");
+      }
+
+      return parsed.href;
+    }
+
+    function buildSwitcherUrl() {
+      const switcher = validateHttpUrl(el.switcherUrl.value, "BenLink Switcher URL", true);
+      const ios = validateHttpUrl(el.iosUrl.value, "iOS App Store URL", true);
+      const android = validateHttpUrl(el.androidUrl.value, "Google Play URL", true);
+      const fallback = validateHttpUrl(el.fallbackUrl.value, "Fallback URL", false);
+      const campaign = el.campaignName.value.trim();
+      const url = new URL(switcher);
+
+      url.searchParams.set("ios", ios);
+      url.searchParams.set("android", android);
+
+      if (fallback) {
+        url.searchParams.set("fallback", fallback);
+      } else {
+        url.searchParams.delete("fallback");
+      }
+
+      if (campaign) {
+        url.searchParams.set("name", campaign);
+      } else {
+        url.searchParams.delete("name");
+      }
+
+      return url.href;
+    }
+
+    function renderQr(url) {
+      el.qrCode.innerHTML = "";
+
+      if (window.QRCode) {
+        new QRCode(el.qrCode, {
+          text: url,
+          width: 280,
+          height: 280,
+          colorDark: "#111827",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        return;
+      }
+
+      const img = document.createElement("img");
+      img.alt = "Generated BenLink QR code";
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=560x560&format=png&data=" + encodeURIComponent(url);
+      el.qrCode.appendChild(img);
+    }
+
+    function updateMetrics(url) {
+      el.urlLength.textContent = url.length + " chars";
+      el.iosState.textContent = el.iosUrl.value.trim() ? "Ready" : "Missing";
+      el.androidState.textContent = el.androidUrl.value.trim() ? "Ready" : "Missing";
+    }
+
+    function generateQr() {
+      try {
+        latestQrUrl = buildSwitcherUrl();
+        renderQr(latestQrUrl);
+        el.encodedUrl.value = latestQrUrl;
+        el.testLink.href = latestQrUrl;
+        updateMetrics(latestQrUrl);
+        setNotice("QR code generated. Test it before printing or sharing.", "ok");
+      } catch (error) {
+        setNotice(error.message, "error");
+      }
+    }
+
+    async function copyUrl() {
+      if (!latestQrUrl) {
+        setNotice("Generate a QR code first.", "error");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(latestQrUrl);
+        setNotice("QR destination copied.", "ok");
+      } catch (error) {
+        el.encodedUrl.focus();
+        el.encodedUrl.select();
+        setNotice("Copy was blocked by the browser, so the URL is selected for you.", "error");
+      }
+    }
+
+    function downloadQr() {
+      if (!latestQrUrl) {
+        setNotice("Generate a QR code first.", "error");
+        return;
+      }
+
+      const canvas = el.qrCode.querySelector("canvas");
+      const img = el.qrCode.querySelector("img");
+      const link = document.createElement("a");
+      const cleanName = (el.campaignName.value.trim() || "benlink-qr")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "benlink-qr";
+
+      link.download = cleanName + ".png";
+
+      if (canvas) {
+        link.href = canvas.toDataURL("image/png");
+      } else if (img) {
+        link.href = img.src;
+        link.target = "_blank";
+      } else {
+        setNotice("Generate a QR code first.", "error");
+        return;
+      }
+
+      link.click();
+    }
+
+    function useSampleLinks() {
+      el.iosUrl.value = sample.ios;
+      el.androidUrl.value = sample.android;
+      el.fallbackUrl.value = sample.fallback;
+      el.campaignName.value = sample.campaign;
+      generateQr();
+    }
+
+    function clearForm() {
+      el.iosUrl.value = "";
+      el.androidUrl.value = "";
+      el.fallbackUrl.value = "";
+      el.campaignName.value = "";
+      latestQrUrl = "";
+      el.encodedUrl.value = "";
+      el.testLink.href = "#";
+      el.qrCode.innerHTML = '<div class="empty-state">Your QR code will appear here after the store links are entered.</div>';
+      updateMetrics("");
+      clearNotice();
+    }
+
+    el.switcherUrl.value = sameFolderSwitcherUrl();
+    updateMetrics("");
+
+    el.generateBtn.addEventListener("click", generateQr);
+    el.sampleBtn.addEventListener("click", useSampleLinks);
+    el.clearBtn.addEventListener("click", clearForm);
+    el.copyBtn.addEventListener("click", copyUrl);
+    el.downloadBtn.addEventListener("click", downloadQr);
+  </script>
+</body>
+</html>
