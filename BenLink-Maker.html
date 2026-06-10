@@ -362,10 +362,10 @@
   <main>
     <header>
       <div>
-        <h1>BenLink V1.1</h1>
+        <h1>BenLink Maker</h1>
         <p class="intro">Create one QR code that sends iPhone and iPad users to the Apple App Store, and Android users to Google Play.</p>
       </div>
-      <div class="status-pill">Ask and you shall receive</div>
+      <div class="status-pill">Static GitHub Pages ready</div>
     </header>
 
     <div class="layout">
@@ -375,7 +375,7 @@
         <div class="field">
           <label for="switcherUrl">BenLink Switcher URL</label>
           <input id="switcherUrl" type="url" autocomplete="url" spellcheck="false">
-          <div class="hint">Use the published GitHub Pages URL for <strong>BenLink-Switcher.html</strong>.</div>
+          <div class="hint">Use the published GitHub Pages URL for <strong>bls.html</strong>.</div>
         </div>
 
         <div class="field-grid">
@@ -487,10 +487,10 @@
 
     function sameFolderSwitcherUrl() {
       if (!window.location.href.startsWith("http")) {
-        return "https://your-github-username.github.io/your-repo/BenLink-Switcher.html";
+        return "https://your-github-username.github.io/your-repo/bls.html";
       }
 
-      return new URL("BenLink-Switcher.html", window.location.href).href;
+      return new URL("bls.html", window.location.href).href;
     }
 
     function setNotice(message, type) {

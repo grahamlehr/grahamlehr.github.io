@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>BenLink Switcher</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --ink: #17212b;
+      --muted: #627083;
+      --line: #d7dde5;
+      --panel: #ffffff;
+      --accent: #0f7b7e;
+      --accent-dark: #095b60;
+      --danger: #b42318;
+      --soft: #e8f4f4;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(15, 123, 126, 0.10), transparent 300px),
+        var(--bg);
+    }
+
+    main {
+      width: min(100%, 520px);
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 50px rgba(21, 38, 52, 0.12);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 1.6rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 18px;
+      border: 3px solid var(--soft);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .actions {
+      display: none;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .actions.show {
+      display: flex;
+    }
+
+    a {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 15px;
+      border-radius: 7px;
+      border: 1px solid rgba(15, 123, 126, 0.28);
+      color: var(--accent-dark);
+      background: #ffffff;
+      font-weight: 760;
+      text-decoration: none;
+    }
+
+    a.primary {
+      color: #ffffff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .error {
+      color: var(--danger);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 520px) {
+      main {
+        padding: 18px;
+      }
+
+      .actions a {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="spinner" id="spinner" aria-hidden="true"></div>
+    <h1 id="title">Opening the right app store</h1>
+    <p id="message">Checking this device and redirecting automatically.</p>
+    <div class="actions" id="actions">
+      <a class="primary" id="iosLink" href="#" rel="noopener">Apple App Store</a>
+      <a id="androidLink" href="#" rel="noopener">Google Play</a>
+      <a id="fallbackLink" href="#" rel="noopener">Open website</a>
+    </div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const urlTokens = {
+      A: "https://apps.apple.com/",
+      G: "https://play.google.com/store/apps/details?id=",
+      H: "https://",
+      S: "http://"
+    };
+
+    function expandCompactValue(value) {
+      if (!value) {
+        return "";
+      }
+
+      const prefix = urlTokens[value.charAt(0)];
+      return prefix ? prefix + value.slice(1) : value;
+    }
+
+    function readValue(shortName, longName) {
+      const compact = params.get(shortName);
+      if (compact !== null) {
+        return expandCompactValue(compact);
+      }
+
+      return params.get(longName) || "";
+    }
+
+    const iosUrl = readValue("i", "ios");
+    const androidUrl = readValue("a", "android");
+    const fallbackUrl = readValue("f", "fallback");
+    const campaignName = readValue("n", "name");
+
+    const el = {
+      spinner: document.getElementById("spinner"),
+      title: document.getElementById("title"),
+      message: document.getElementById("message"),
+      actions: document.getElementById("actions"),
+      iosLink: document.getElementById("iosLink"),
+      androidLink: document.getElementById("androidLink"),
+      fallbackLink: document.getElementById("fallbackLink")
+    };
+
+    function isHttpUrl(value) {
+      if (!value) {
+        return false;
+      }
+
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function detectDevice() {
+      const ua = navigator.userAgent || "";
+      const platform = navigator.platform || "";
+      const hasTouch = navigator.maxTouchPoints && navigator.maxTouchPoints > 1;
+
+      if (/android/i.test(ua)) {
+        return "android";
+      }
+
+      if (/iPad|iPhone|iPod/i.test(ua)) {
+        return "ios";
+      }
+
+      if (/MacIntel/i.test(platform) && hasTouch) {
+        return "ios";
+      }
+
+      return "unknown";
+    }
+
+    function setManualChoice(message, isError) {
+      el.spinner.style.display = "none";
+      el.title.textContent = isError ? "BenLink needs attention" : "Choose your app store";
+      el.message.textContent = message;
+      el.message.className = isError ? "error" : "";
+      el.actions.classList.add("show");
+
+      el.iosLink.href = isHttpUrl(iosUrl) ? iosUrl : "#";
+      el.androidLink.href = isHttpUrl(androidUrl) ? androidUrl : "#";
+      el.fallbackLink.href = isHttpUrl(fallbackUrl) ? fallbackUrl : "#";
+
+      el.iosLink.style.display = isHttpUrl(iosUrl) ? "inline-flex" : "none";
+      el.androidLink.style.display = isHttpUrl(androidUrl) ? "inline-flex" : "none";
+      el.fallbackLink.style.display = isHttpUrl(fallbackUrl) ? "inline-flex" : "none";
+    }
+
+    function redirectTo(url) {
+      const label = campaignName ? " for " + campaignName : "";
+      el.message.textContent = "Redirecting" + label + ".";
+      window.location.replace(url);
+    }
+
+    function run() {
+      const validIos = isHttpUrl(iosUrl);
+      const validAndroid = isHttpUrl(androidUrl);
+      const validFallback = isHttpUrl(fallbackUrl);
+
+      if (!validIos && !validAndroid && !validFallback) {
+        setManualChoice("This BenLink QR code does not include any valid destination URLs.", true);
+        return;
+      }
+
+      const device = detectDevice();
+
+      if (device === "ios" && validIos) {
+        redirectTo(iosUrl);
+        return;
+      }
+
+      if (device === "android" && validAndroid) {
+        redirectTo(androidUrl);
+        return;
+      }
+
+      if (validFallback) {
+        redirectTo(fallbackUrl);
+        return;
+      }
+
+      setManualChoice("This device was not recognised, so select the store you want to open.", false);
+    }
+
+    run();
+  </script>
+</body>
+</html>
