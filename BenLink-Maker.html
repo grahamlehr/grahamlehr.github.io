@@ -365,7 +365,7 @@
         <h1>BenLink Maker</h1>
         <p class="intro">Create one QR code that sends iPhone and iPad users to the Apple App Store, and Android users to Google Play.</p>
       </div>
-      <div class="status-pill">Ask and you shall receive</div>
+      <div class="status-pill">Static GitHub Pages ready</div>
     </header>
 
     <div class="layout">
@@ -476,6 +476,13 @@
       campaign: "LinkedIn example"
     };
 
+    const urlTokens = [
+      ["A", "https://apps.apple.com/"],
+      ["G", "https://play.google.com/store/apps/details?id="],
+      ["H", "https://"],
+      ["S", "http://"]
+    ];
+
     let latestQrUrl = "";
 
     function sameFolderSwitcherUrl() {
@@ -521,30 +528,75 @@
       return parsed.href;
     }
 
-    function buildSwitcherUrl() {
+    function compactValue(value) {
+      const token = urlTokens.find((entry) => value.startsWith(entry[1]));
+      const packed = token ? token[0] + value.slice(token[1].length) : value;
+
+      return encodeURIComponent(packed)
+        .replace(/%2F/gi, "/")
+        .replace(/%3A/gi, ":")
+        .replace(/%40/gi, "@")
+        .replace(/%2C/gi, ",");
+    }
+
+    function buildLegacySwitcherUrl(data) {
+      const url = new URL(data.switcher);
+
+      url.searchParams.set("ios", data.ios);
+      url.searchParams.set("android", data.android);
+
+      if (data.fallback) {
+        url.searchParams.set("fallback", data.fallback);
+      }
+
+      if (data.campaign) {
+        url.searchParams.set("name", data.campaign);
+      }
+
+      return url.href;
+    }
+
+    function buildCompactSwitcherUrl(data) {
+      const url = new URL(data.switcher);
+      const parts = [
+        "i=" + compactValue(data.ios),
+        "a=" + compactValue(data.android)
+      ];
+
+      url.search = "";
+      url.hash = "";
+
+      if (data.fallback) {
+        parts.push("f=" + compactValue(data.fallback));
+      }
+
+      if (data.campaign) {
+        parts.push("n=" + compactValue(data.campaign));
+      }
+
+      return url.href + "?" + parts.join("&");
+    }
+
+    function getLinkData() {
       const switcher = validateHttpUrl(el.switcherUrl.value, "BenLink Switcher URL", true);
       const ios = validateHttpUrl(el.iosUrl.value, "iOS App Store URL", true);
       const android = validateHttpUrl(el.androidUrl.value, "Google Play URL", true);
       const fallback = validateHttpUrl(el.fallbackUrl.value, "Fallback URL", false);
       const campaign = el.campaignName.value.trim();
-      const url = new URL(switcher);
 
-      url.searchParams.set("ios", ios);
-      url.searchParams.set("android", android);
+      return { switcher, ios, android, fallback, campaign };
+    }
 
-      if (fallback) {
-        url.searchParams.set("fallback", fallback);
-      } else {
-        url.searchParams.delete("fallback");
-      }
+    function buildSwitcherUrl() {
+      const data = getLinkData();
+      const compactUrl = buildCompactSwitcherUrl(data);
+      const legacyUrl = buildLegacySwitcherUrl(data);
 
-      if (campaign) {
-        url.searchParams.set("name", campaign);
-      } else {
-        url.searchParams.delete("name");
-      }
-
-      return url.href;
+      return {
+        href: compactUrl,
+        legacyLength: legacyUrl.length,
+        savedChars: Math.max(0, legacyUrl.length - compactUrl.length)
+      };
     }
 
     function renderQr(url) {
@@ -568,20 +620,28 @@
       el.qrCode.appendChild(img);
     }
 
-    function updateMetrics(url) {
+    function updateMetrics(url, savedChars) {
       el.urlLength.textContent = url.length + " chars";
       el.iosState.textContent = el.iosUrl.value.trim() ? "Ready" : "Missing";
       el.androidState.textContent = el.androidUrl.value.trim() ? "Ready" : "Missing";
+      el.urlLength.title = savedChars ? savedChars + " fewer characters than the full URL format." : "";
     }
 
     function generateQr() {
       try {
-        latestQrUrl = buildSwitcherUrl();
+        const result = buildSwitcherUrl();
+
+        latestQrUrl = result.href;
         renderQr(latestQrUrl);
         el.encodedUrl.value = latestQrUrl;
         el.testLink.href = latestQrUrl;
-        updateMetrics(latestQrUrl);
-        setNotice("QR code generated. Test it before printing or sharing.", "ok");
+        updateMetrics(latestQrUrl, result.savedChars);
+
+        if (result.savedChars) {
+          setNotice("Compact QR code generated. This saved " + result.savedChars + " characters versus the full URL format.", "ok");
+        } else {
+          setNotice("QR code generated. Test it before printing or sharing.", "ok");
+        }
       } catch (error) {
         setNotice(error.message, "error");
       }
@@ -649,12 +709,12 @@
       el.encodedUrl.value = "";
       el.testLink.href = "#";
       el.qrCode.innerHTML = '<div class="empty-state">Your QR code will appear here after the store links are entered.</div>';
-      updateMetrics("");
+      updateMetrics("", 0);
       clearNotice();
     }
 
     el.switcherUrl.value = sameFolderSwitcherUrl();
-    updateMetrics("");
+    updateMetrics("", 0);
 
     el.generateBtn.addEventListener("click", generateQr);
     el.sampleBtn.addEventListener("click", useSampleLinks);

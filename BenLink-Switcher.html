@@ -134,10 +134,35 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const iosUrl = params.get("ios") || "";
-    const androidUrl = params.get("android") || "";
-    const fallbackUrl = params.get("fallback") || "";
-    const campaignName = params.get("name") || "";
+    const urlTokens = {
+      A: "https://apps.apple.com/",
+      G: "https://play.google.com/store/apps/details?id=",
+      H: "https://",
+      S: "http://"
+    };
+
+    function expandCompactValue(value) {
+      if (!value) {
+        return "";
+      }
+
+      const prefix = urlTokens[value.charAt(0)];
+      return prefix ? prefix + value.slice(1) : value;
+    }
+
+    function readValue(shortName, longName) {
+      const compact = params.get(shortName);
+      if (compact !== null) {
+        return expandCompactValue(compact);
+      }
+
+      return params.get(longName) || "";
+    }
+
+    const iosUrl = readValue("i", "ios");
+    const androidUrl = readValue("a", "android");
+    const fallbackUrl = readValue("f", "fallback");
+    const campaignName = readValue("n", "name");
 
     const el = {
       spinner: document.getElementById("spinner"),
