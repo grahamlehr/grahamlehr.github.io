@@ -489,11 +489,11 @@
       const [tab, setTab] = useState("landing");
       const [title, setTitle] = useState("Norway Podcasts");
 
-      /* 
+      
       return ( 
         <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", background: "#0A0E1A", minHeight: "100vh" }}>
           <div style={{ display: "flex", background: "#0A0E1A", borderBottom: "1px solid rgba(255,255,255,0.07)", padding: "0 16px", position: "sticky", top: 0, zIndex: 20 }}>
-            {[["landing", "📱 Preview"], ["setup", "⚙ Setup"]].map(([id, label]) => (
+            {[["landing", ""].map(([id, label]) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
@@ -518,7 +518,7 @@
           )}
         </div>
       ); 
-      */
+      
     }
 
     const root = ReactDOM.createRoot(document.getElementById("root"));
