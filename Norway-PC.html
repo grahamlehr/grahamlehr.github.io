@@ -12,7 +12,53 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin="anonymous"
+  href="https://www.shell.com/etc.clientlibs/amidala/clientlibs/theme-base/resources/fonts/shell-typeface-la-heavy-221208.woff2"
+/>
 
+<style>
+  @font-face {
+    font-family: "Shell Typeface Heavy";
+    src: url("https://www.shell.com/etc.clientlibs/amidala/clientlibs/theme-base/resources/fonts/shell-typeface-la-heavy-221208.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #F5F5F5;
+  }
+
+  a {
+    font-family: inherit;
+  }
+
+  .wb {
+    animation: wave 1.5s ease-in-out infinite;
+    transform-origin: center bottom;
+  }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1.15); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wb {
+      animation: none !important;
+    }
+  }
+</style>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #F5F5F5; }
@@ -404,7 +450,7 @@
       const [title, setTitle] = useState("Norway Podcasts");
 
       return (
-        <div style={{ fontFamily: "'Arial', system-ui, sans-serif", background: "#F5F5F5", minHeight: "100vh" }}>
+        <div style={{ fontFamily: "'Shell Typeface Heavy', Arial, system-ui, sans-serif", background: "#F5F5F5", minHeight: "100vh" }}>
 
           <LandingPage title={title} />
         </div>
