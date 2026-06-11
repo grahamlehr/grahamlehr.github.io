@@ -303,7 +303,7 @@
 
           {open && (
             <div style={{ padding: "2px 16px 16px" }}>
-              <p style={{ color: "#9CA9BE", fontSize: 14, lineHeight: 1.65, margin: "0 0 12px" }}>
+              <p style={{ color: "#000000", fontSize: 14, lineHeight: 1.65, margin: "0 0 12px" }}>
                 {episode.description}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -319,7 +319,7 @@
                       background: "rgba(255,255,255,0.05)",
                       border: "1px solid rgba(255,255,255,0.1)",
                       borderRadius: 6,
-                      color: "#C9D1D9",
+                      color: "#000000",
                       fontSize: 12,
                       fontWeight: 500,
                       textDecoration: "none",
@@ -346,16 +346,16 @@
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
               <Waveform />
             </div>
-            <h1 style={{ color: "#E8EEF8", fontSize: 26, fontWeight: 700, margin: "0 0 8px", lineHeight: 1.2 }}>
+            <h1 style={{ color: "#000000", fontSize: 26, fontWeight: 700, margin: "0 0 8px", lineHeight: 1.2 }}>
               {title}
             </h1>
-            <p style={{ color: "#8A96B0", fontSize: 14, margin: 0 }}>
+            <p style={{ color: "#000000", fontSize: 14, margin: 0 }}>
               {EPISODES.length} handpicked episodes — tap any to open in your app
             </p>
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.09em", margin: "0 0 8px" }}>
+            <p style={{ fontSize: 11, color: "#000000", textTransform: "uppercase", letterSpacing: "0.09em", margin: "0 0 8px" }}>
               Choose your app
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
@@ -404,7 +404,7 @@
       const [title, setTitle] = useState("Norway Podcasts");
 
       return (
-        <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", background: "#0A0E1A", minHeight: "100vh" }}>
+        <div style={{ fontFamily: "'Arial', system-ui, sans-serif", background: "#F5F5F5", minHeight: "100vh" }}>
 
           <LandingPage title={title} />
         </div>
