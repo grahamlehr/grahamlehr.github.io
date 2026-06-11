@@ -396,125 +396,17 @@
 
     // ─── Setup panel ───────────────────────────────────────────────────────────
 
-    function SetupPanel({ title, setTitle }) {
-      const [qrUrl, setQrUrl] = useState("https://your-podcast-page.com");
-      const [copied, setCopied] = useState(false);
-
-      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&bgcolor=FFFFFF&color=000000&data=${encodeURIComponent(qrUrl)}`;
-
-      const copyUrl = () => {
-        navigator.clipboard.writeText(qrUrl).catch(() => {});
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      };
-
-      const downloadQR = async () => {
-        const hiRes = qrSrc.replace("size=240x240", "size=800x800");
-        try {
-          const res = await fetch(hiRes);
-          const blob = await res.blob();
-          Object.assign(document.createElement("a"), {
-            href: URL.createObjectURL(blob),
-            download: "podcast-qr-code.png",
-          }).click();
-        } catch {
-          window.open(hiRes, "_blank");
-        }
-      };
-
-      const STEPS = [
-        ["Host this file",     "Upload this HTML file to any static host — Netlify (drag and drop), GitHub Pages, or Cloudflare Pages. All free."],
-        ["Enter your URL",     "Paste your live URL into the field above. The QR code regenerates instantly."],
-        ["Share the QR code",  "Download and print it, embed in a slide deck, add to an email signature, or display on screen."],
-      ];
-
-      return (
-        <div style={{ maxWidth: 480, margin: "0 auto", padding: "28px 16px 48px" }}>
-          <h2 style={{ color: "#E8EEF8", fontSize: 20, fontWeight: 700, margin: "0 0 24px" }}>
-            Setup
-          </h2>
-
-          <Field label="Page title">
-            <input value={title} onChange={(e) => setTitle(e.target.value)} style={inp} />
-          </Field>
-
-          <Field label="Your deployed page URL">
-            <input
-              value={qrUrl}
-              onChange={(e) => setQrUrl(e.target.value)}
-              placeholder="https://your-site.com/listen"
-              style={inp}
-            />
-          </Field>
-
-          <div style={{ textAlign: "center", background: "#0A0E1A", borderRadius: 12, border: "1px solid rgba(240,180,41,0.2)", padding: "24px 24px 16px", marginBottom: 12 }}>
-            <img src={qrSrc} alt="QR Code" width={200} height={200} style={{ display: "block", margin: "0 auto" }} />
-            <p style={{ color: "#4A5568", fontSize: 12, margin: "12px 0 0" }}>
-              Points to your page URL above
-            </p>
-          </div>
-
-          <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-            <button onClick={copyUrl} style={{ ...btnDim, flex: 1, color: copied ? "#10B981" : "#C9D1D9" }}>
-              {copied ? "✓ Copied" : "Copy URL"}
-            </button>
-            <button onClick={downloadQR} style={{ ...btnGold, flex: 1 }}>
-              ↓ Download QR
-            </button>
-          </div>
-
-          <div>
-            <p style={{ fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.09em", margin: "0 0 14px" }}>
-              How to go live
-            </p>
-            {STEPS.map(([t, d], i) => (
-              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-                <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(240,180,41,0.12)", color: "#F0B429", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {i + 1}
-                </div>
-                <div>
-                  <p style={{ color: "#E8EEF8", fontSize: 14, fontWeight: 600, margin: "0 0 2px" }}>{t}</p>
-                  <p style={{ color: "#8A96B0", fontSize: 13, margin: 0, lineHeight: 1.55 }}>{d}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
+   
 
     // ─── Root ──────────────────────────────────────────────────────────────────
 
     function App() {
-      const [tab, setTab] = useState("landing");
       const [title, setTitle] = useState("Norway Podcasts");
 
       return (
         <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", background: "#0A0E1A", minHeight: "100vh" }}>
-          <div style={{ display: "flex", background: "#0A0E1A", borderBottom: "1px solid rgba(255,255,255,0.07)", padding: "0 16px", position: "sticky", top: 0, zIndex: 20 }}>
-            {[["landing", "P"], ["setup", "S"]].map(([id, label]) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                style={{
-                  background: "none", border: "none",
-                  borderBottom: tab === id ? "2px solid #F0B429" : "2px solid transparent",
-                  color: tab === id ? "#F0B429" : "#6B7280",
-                  fontSize: 14, fontWeight: tab === id ? 700 : 500,
-                  padding: "14px 16px", cursor: "pointer",
-                  fontFamily: "inherit", transition: "color 0.15s",
-                }}
-              >
-                {label}
-              </button>
-           ))}
-          </div>
 
-          {tab === "landing" ? (
-            <LandingPage title={title} />
-          ) : (
-            <SetupPanel title={title} setTitle={setTitle} />
-          )}
+          <LandingPage title={title} />
         </div>
       );
     }
