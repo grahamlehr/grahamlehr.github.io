@@ -17,9 +17,9 @@ A full featured browser based Markdown editor and converter that does everthing 
 This one is Niche, but it takes the notes from PowerPoint slides and spits out a word document formatted for different cue card sizes. 
 
 ## QR Code Maker 'QRUI'
-Makes single or batches of QR codes
-🇵🇹 flavoured, custard tarts not included. IYKYK
-
+Makes single or batches of QR codes 
+Made for Porto's favourite producer. 
+🇵🇹 flavoured, custard tarts not included. 
 [QRui](https://grahamlehr.github.io/QRui.html)
 
 ## Digital Signage Maker
