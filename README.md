@@ -18,7 +18,7 @@ This one is Niche, but it takes the notes from PowerPoint slides and spits out a
 
 ## QR Code Maker 'QRUI'
 Makes single or batches of QR codes
-Porto flavoured, custard tarts not included. IYKYK
+🇵🇹 flavoured, custard tarts not included. IYKYK
 
 [QRui](https://grahamlehr.github.io/QRui.html)
 
