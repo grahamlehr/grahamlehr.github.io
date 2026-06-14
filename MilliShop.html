@@ -2133,6 +2133,7 @@
       const vHeight = viewport.clientHeight;
       guideCtx.translate(vWidth / 2 + state.panX, vHeight / 2 + state.panY);
       guideCtx.scale(state.zoom, state.zoom);
+      guideCtx.translate(-state.canvasWidth / 2, -state.canvasHeight / 2);
 
       // Render brush ring if active and mouse is inside
       if ((state.activeTool === 'brush' || state.activeTool === 'eraser') && state.activeLayerId && state.lastMouseCoords) {
@@ -3662,14 +3663,14 @@
     // Handle coefficients map for transform math
     function getHandleCoefficients(handle) {
       switch (handle) {
-        case 'tl': return { kx: 0.5, ky: 0.5 };
-        case 'tm': return { kx: 0.0, ky: 0.5 };
-        case 'tr': return { kx: -0.5, ky: 0.5 };
-        case 'mr': return { kx: -0.5, ky: 0.0 };
-        case 'br': return { kx: -0.5, ky: -0.5 };
-        case 'bm': return { kx: 0.0, ky: -0.5 };
-        case 'bl': return { kx: 0.5, ky: -0.5 };
-        case 'ml': return { kx: 0.5, ky: 0.0 };
+        case 'tl': return { kx: -0.5, ky: -0.5 };
+        case 'tm': return { kx: 0.0, ky: -0.5 };
+        case 'tr': return { kx: 0.5, ky: -0.5 };
+        case 'mr': return { kx: 0.5, ky: 0.0 };
+        case 'br': return { kx: 0.5, ky: 0.5 };
+        case 'bm': return { kx: 0.0, ky: 0.5 };
+        case 'bl': return { kx: -0.5, ky: 0.5 };
+        case 'ml': return { kx: -0.5, ky: 0.0 };
         default: return { kx: 0, ky: 0 };
       }
     }
