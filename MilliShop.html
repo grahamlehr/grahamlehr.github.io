@@ -463,17 +463,16 @@
     .workspace-viewport {
       flex-grow: 1;
       background-color: var(--bg-darker);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: auto;
+      overflow: hidden;
       position: relative;
       outline: none;
     }
 
     /* Workspace checkered background container */
     .canvas-container {
-      position: relative;
+      position: absolute;
+      left: 50%;
+      top: 50%;
       transform-origin: center center;
       transition: none; /* Instant updating for pans */
     }
@@ -610,6 +609,11 @@
     .layer-row.selected {
       background: rgba(99, 102, 241, 0.15);
       border-color: var(--accent-indigo);
+    }
+
+    .layer-row.clipping-mask-row {
+      padding-left: 24px;
+      background: rgba(168, 85, 247, 0.03);
     }
 
     .layer-visibility {
@@ -961,6 +965,10 @@
         <div class="dropdown-menu">
           <button class="dropdown-item" id="btn-canvas-size">Canvas Dimensions...</button>
           <button class="dropdown-item" id="btn-crop-fit">Fit Canvas to Layers</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="btn-toggle-snapping">Toggle Smart Snapping <span class="dropdown-shortcut" id="snapping-status">On</span></button>
+          <button class="dropdown-item" id="btn-toggle-guides">Toggle Guidelines <span class="dropdown-shortcut" id="guides-status">On</span></button>
+          <button class="dropdown-item" id="btn-clear-guides">Clear Guidelines</button>
         </div>
       </div>
 
@@ -1005,6 +1013,16 @@
 
     <!-- Dynamic Settings (Brush controls, Font controls, Shape controls etc.) -->
     <div id="settings-brush" class="tool-setting-panel" style="display: none; align-items: center; gap: 20px;">
+      <div class="setting-group">
+        <label>Type</label>
+        <select id="brush-type" class="setting-input">
+          <option value="solid">Solid</option>
+          <option value="airbrush">Airbrush</option>
+          <option value="calligraphy">Calligraphy</option>
+          <option value="chalk">Chalk</option>
+          <option value="spray">Spray Paint</option>
+        </select>
+      </div>
       <div class="setting-group">
         <label>Brush Size</label>
         <input type="range" id="brush-size" min="1" max="200" value="20" style="width: 100px;">
@@ -1081,6 +1099,45 @@
         <button class="layers-tool-btn" id="btn-text-bold" style="padding: 4px 8px;"><b>B</b></button>
         <button class="layers-tool-btn" id="btn-text-italic" style="padding: 4px 8px; font-style: italic;">I</button>
       </div>
+      <div class="setting-group">
+        <label>Align</label>
+        <select id="text-align" class="setting-input">
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label>Spacing</label>
+        <input type="number" id="text-letter-spacing" min="-10" max="50" value="0" class="setting-input" style="width: 50px;" title="Letter Spacing (px)">
+      </div>
+      <div class="setting-group">
+        <label>Line H</label>
+        <input type="number" id="text-line-height" min="0.5" max="3" step="0.1" value="1.2" class="setting-input" style="width: 50px;" title="Line Height multiplier">
+      </div>
+    </div>
+
+    <div id="settings-gradient" class="tool-setting-panel" style="display: none; align-items: center; gap: 20px;">
+      <div class="setting-group">
+        <label>Type</label>
+        <select id="gradient-type" class="setting-input">
+          <option value="linear">Linear</option>
+          <option value="radial">Radial</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label>Color 1</label>
+        <input type="color" id="gradient-color-1" class="setting-color" value="#6366f1">
+      </div>
+      <div class="setting-group">
+        <label>Color 2</label>
+        <input type="color" id="gradient-color-2" class="setting-color" value="#ffffff">
+      </div>
+      <div class="setting-group">
+        <label>Opacity</label>
+        <input type="range" id="gradient-opacity" min="1" max="100" value="100" style="width: 80px;">
+        <span id="lbl-gradient-opacity">100%</span>
+      </div>
     </div>
   </div>
 
@@ -1100,6 +1157,20 @@
       </button>
       <button class="tool-btn" data-tool="shape" data-tooltip="Vector Shapes (U)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+      </button>
+      <button class="tool-btn" data-tool="gradient" data-tooltip="Interactive Gradient (G)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="url(#icon-grad-fill)"/>
+          <line x1="6" y1="18" x2="18" y2="6" stroke="#ffffff" stroke-width="2"/>
+          <circle cx="6" cy="18" r="2" fill="#ffffff"/>
+          <circle cx="18" cy="6" r="2" fill="#ffffff"/>
+          <defs>
+            <linearGradient id="icon-grad-fill" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#a855f7" stop-opacity="0.9"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </button>
       <button class="tool-btn" data-tool="text" data-tooltip="Text Layer (T)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
@@ -1191,10 +1262,10 @@
     <div class="workspace-viewport" id="workspace-viewport" tabindex="0">
       <div class="canvas-container canvas-checkers" id="canvas-container">
         <canvas id="master-canvas"></canvas>
-        <canvas id="guide-canvas"></canvas>
         <!-- Floating Text editor area -->
         <textarea id="text-editor-overlay" spellcheck="false"></textarea>
       </div>
+      <canvas id="guide-canvas"></canvas>
     </div>
 
     <!-- RIGHT SIDEBAR -->
@@ -1278,6 +1349,9 @@
             </button>
             <button class="layers-tool-btn" id="btn-merge-layer" title="Merge with layer below">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg> Merge
+            </button>
+            <button class="layers-tool-btn" id="btn-clip-layer" title="Toggle Clipping Mask">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 6v8h6"/><path d="M13 11l3 3-3 3"/></svg> Clip
             </button>
             <button class="layers-tool-btn" id="btn-delete-layer" style="color: var(--danger);" title="Delete selected layer">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -1605,6 +1679,18 @@
       isPanning: false,
       panStartX: 0,
       panStartY: 0,
+      isNudging: false,
+      snappingEnabled: true,
+      guidelines: {
+        visible: true,
+        horizontal: [], // Y canvas coordinates
+        vertical: []    // X canvas coordinates
+      },
+      rulerDrag: {
+        active: false,
+        type: null, // 'h' or 'v'
+        value: 0
+      },
       
       // History stack
       undoStack: [],
@@ -1613,6 +1699,7 @@
 
       // Tool configurations
       brush: {
+        type: 'solid', // 'solid', 'airbrush', 'calligraphy', 'chalk', 'spray'
         size: 20,
         hardness: 0.5,
         opacity: 1.0,
@@ -1631,7 +1718,23 @@
         size: 48,
         color: '#ffffff',
         bold: false,
-        italic: false
+        italic: false,
+        align: 'left',
+        letterSpacing: 0,
+        lineHeight: 1.2
+      },
+      gradient: {
+        type: 'linear', // 'linear', 'radial'
+        color1: '#6366f1',
+        color2: '#ffffff',
+        opacity: 1.0
+      },
+      gradientDrag: {
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0
       },
 
       // Interaction variables (Select Tool transform / painting / shape dragging)
@@ -1695,6 +1798,7 @@
         this.opacity = 1.0;
         this.visible = true;
         this.blendMode = 'source-over';
+        this.isClippingMask = false;
         
         // Specific layer data
         this.shapeData = null; // { type, fill, stroke, hasFill, hasStroke, strokeWidth }
@@ -1714,6 +1818,7 @@
         copy.opacity = this.opacity;
         copy.visible = this.visible;
         copy.blendMode = this.blendMode;
+        copy.isClippingMask = this.isClippingMask;
         if (this.shapeData) copy.shapeData = { ...this.shapeData };
         if (this.textData) copy.textData = { ...this.textData };
         
@@ -1735,6 +1840,7 @@
     const brushSettingsBar = document.getElementById('settings-brush');
     const shapeSettingsBar = document.getElementById('settings-shape');
     const textSettingsBar = document.getElementById('settings-text');
+    const gradientSettingsBar = document.getElementById('settings-gradient');
     const activeToolTitle = document.getElementById('active-tool-title');
     const layerPropView = document.getElementById('layer-properties-view');
     const layerPropEmpty = document.getElementById('layer-properties-empty');
@@ -1751,11 +1857,21 @@
     const shapeStrokePicker = document.getElementById('shape-stroke');
     const shapeHasStrokeCheck = document.getElementById('shape-has-stroke');
     const shapeStrokeWidthInput = document.getElementById('shape-stroke-width');
+    
     const textFontSelect = document.getElementById('text-font');
     const textSizeInput = document.getElementById('text-size');
     const textColorPicker = document.getElementById('text-color');
     const btnTextBold = document.getElementById('btn-text-bold');
     const btnTextItalic = document.getElementById('btn-text-italic');
+    const textAlignSelect = document.getElementById('text-align');
+    const textLetterSpacingInput = document.getElementById('text-letter-spacing');
+    const textLineHeightInput = document.getElementById('text-line-height');
+
+    const gradientTypeSelect = document.getElementById('gradient-type');
+    const gradientColor1Picker = document.getElementById('gradient-color-1');
+    const gradientColor2Picker = document.getElementById('gradient-color-2');
+    const gradientOpacitySlider = document.getElementById('gradient-opacity');
+    const lblGradientOpacity = document.getElementById('lbl-gradient-opacity');
 
     // Layer Properties Fields
     const propLayerName = document.getElementById('prop-layer-name');
@@ -1900,37 +2016,108 @@
        WORKSPACE RENDER ENGINE
        ========================================================================== */
     
+    // Reusable offscreen canvases for clipping mask composition
+    let maskCanvas = null;
+    let maskCtx = null;
+    let layerTempCanvas = null;
+    let layerTempCtx = null;
+
     // Composites all layers onto master canvas
     function drawWorkspace() {
       // Clear main view
       masterCtx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
       
-      for (const layer of state.layers) {
+      // Initialize helper canvases
+      if (!maskCanvas) {
+        maskCanvas = document.createElement('canvas');
+        maskCtx = maskCanvas.getContext('2d');
+        layerTempCanvas = document.createElement('canvas');
+        layerTempCtx = layerTempCanvas.getContext('2d');
+      }
+      if (maskCanvas.width !== state.canvasWidth || maskCanvas.height !== state.canvasHeight) {
+        maskCanvas.width = state.canvasWidth;
+        maskCanvas.height = state.canvasHeight;
+        layerTempCanvas.width = state.canvasWidth;
+        layerTempCanvas.height = state.canvasHeight;
+      }
+
+      for (let i = 0; i < state.layers.length; i++) {
+        const layer = state.layers[i];
         if (!layer.visible) continue;
         
-        masterCtx.save();
-        
-        // Composite blending and opacity
-        masterCtx.globalAlpha = layer.opacity;
-        masterCtx.globalCompositeOperation = layer.blendMode;
-        
-        // Position layer center at local rotation origin
-        const cx = layer.x + (layer.width * layer.scaleX) / 2;
-        const cy = layer.y + (layer.height * layer.scaleY) / 2;
-        
-        masterCtx.translate(cx, cy);
-        masterCtx.rotate(layer.rotation);
-        
-        // Render the layer's local canvas at local size scaled
-        masterCtx.drawImage(
-          layer.canvas, 
-          -(layer.width * layer.scaleX) / 2, 
-          -(layer.height * layer.scaleY) / 2, 
-          layer.width * layer.scaleX, 
-          layer.height * layer.scaleY
-        );
-        
-        masterCtx.restore();
+        // Determine if this layer acts as a base layer for clipping masks directly above it
+        const hasClippingAbove = (i + 1 < state.layers.length) && state.layers[i + 1].visible && state.layers[i + 1].isClippingMask;
+
+        if (hasClippingAbove && !layer.isClippingMask) {
+          // Re-create the mask representing this base layer in world space
+          maskCtx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+          maskCtx.save();
+          maskCtx.globalAlpha = layer.opacity; // Mask opacity is determined by base layer opacity
+          const cx = layer.x + (layer.width * layer.scaleX) / 2;
+          const cy = layer.y + (layer.height * layer.scaleY) / 2;
+          maskCtx.translate(cx, cy);
+          maskCtx.rotate(layer.rotation);
+          maskCtx.drawImage(
+            layer.canvas, 
+            -(layer.width * layer.scaleX) / 2, 
+            -(layer.height * layer.scaleY) / 2, 
+            layer.width * layer.scaleX, 
+            layer.height * layer.scaleY
+          );
+          maskCtx.restore();
+        }
+
+        if (layer.isClippingMask) {
+          // Draw this clipping mask layer onto a temp canvas, mask it with the base mask, then composite onto masterCtx
+          layerTempCtx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+          layerTempCtx.save();
+          layerTempCtx.globalAlpha = layer.opacity;
+          const cx = layer.x + (layer.width * layer.scaleX) / 2;
+          const cy = layer.y + (layer.height * layer.scaleY) / 2;
+          layerTempCtx.translate(cx, cy);
+          layerTempCtx.rotate(layer.rotation);
+          layerTempCtx.drawImage(
+            layer.canvas, 
+            -(layer.width * layer.scaleX) / 2, 
+            -(layer.height * layer.scaleY) / 2, 
+            layer.width * layer.scaleX, 
+            layer.height * layer.scaleY
+          );
+          layerTempCtx.restore();
+
+          // Apply mask composition (destination-in)
+          layerTempCtx.save();
+          layerTempCtx.globalCompositeOperation = 'destination-in';
+          layerTempCtx.drawImage(maskCanvas, 0, 0);
+          layerTempCtx.restore();
+
+          // Composite the result onto the master canvas
+          masterCtx.save();
+          masterCtx.globalCompositeOperation = layer.blendMode;
+          masterCtx.drawImage(layerTempCanvas, 0, 0);
+          masterCtx.restore();
+        } else {
+          // Draw regular layer
+          masterCtx.save();
+          masterCtx.globalAlpha = layer.opacity;
+          masterCtx.globalCompositeOperation = layer.blendMode;
+          
+          const cx = layer.x + (layer.width * layer.scaleX) / 2;
+          const cy = layer.y + (layer.height * layer.scaleY) / 2;
+          
+          masterCtx.translate(cx, cy);
+          masterCtx.rotate(layer.rotation);
+          
+          masterCtx.drawImage(
+            layer.canvas, 
+            -(layer.width * layer.scaleX) / 2, 
+            -(layer.height * layer.scaleY) / 2, 
+            layer.width * layer.scaleX, 
+            layer.height * layer.scaleY
+          );
+          
+          masterCtx.restore();
+        }
       }
       
       drawGuides();
@@ -1938,11 +2125,22 @@
 
     // Draws selection box, transform handles and temp shapes on top layer
     function drawGuides() {
-      guideCtx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+      guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
       
-      // If brush/eraser active, render cursor ring showing size
-      if ((state.activeTool === 'brush' || state.activeTool === 'eraser') && state.activeLayerId) {
-        // Handled dynamically on mousemove, skip static drawing here
+      guideCtx.save();
+      // Apply workspace viewport transform so we can draw in canvas coordinates
+      const vWidth = viewport.clientWidth;
+      const vHeight = viewport.clientHeight;
+      guideCtx.translate(vWidth / 2 + state.panX, vHeight / 2 + state.panY);
+      guideCtx.scale(state.zoom, state.zoom);
+
+      // Render brush ring if active and mouse is inside
+      if ((state.activeTool === 'brush' || state.activeTool === 'eraser') && state.activeLayerId && state.lastMouseCoords) {
+        guideCtx.strokeStyle = 'rgba(255,255,255,0.8)';
+        guideCtx.lineWidth = 1 / state.zoom;
+        guideCtx.beginPath();
+        guideCtx.arc(state.lastMouseCoords.x, state.lastMouseCoords.y, state.brush.size / 2, 0, Math.PI * 2);
+        guideCtx.stroke();
       }
 
       // If active shape is currently drawing/dragging
@@ -1950,8 +2148,39 @@
         drawTempShapeGuide();
       }
 
+      // If active gradient is currently dragging
+      if (state.activeTool === 'gradient' && state.gradientDrag && state.gradientDrag.isDragging) {
+        drawTempGradientGuide();
+      }
+
+      // Draw Smart Snapping Lines
+      if (state.activeSnapLines && state.activeTool === 'select' && state.transform.mode === 'move') {
+        guideCtx.strokeStyle = '#d946ef'; // Fuchsia / purple for smart snap lines
+        guideCtx.lineWidth = 1.5 / state.zoom;
+        
+        if (state.activeSnapLines.x) {
+          for (const sx of state.activeSnapLines.x) {
+            guideCtx.beginPath();
+            guideCtx.moveTo(sx, -10000);
+            guideCtx.lineTo(sx, 10000);
+            guideCtx.stroke();
+          }
+        }
+        if (state.activeSnapLines.y) {
+          for (const sy of state.activeSnapLines.y) {
+            guideCtx.beginPath();
+            guideCtx.moveTo(-10000, sy);
+            guideCtx.lineTo(10000, sy);
+            guideCtx.stroke();
+          }
+        }
+      }
+
       const activeLayer = getActiveLayer();
-      if (!activeLayer || state.activeTool !== 'select') return;
+      if (!activeLayer || state.activeTool !== 'select') {
+        guideCtx.restore();
+        return;
+      }
 
       // Draw bounding box
       const halfW = activeLayer.width / 2;
@@ -2004,6 +2233,191 @@
           guideCtx.stroke();
         }
       }
+
+      // Draw guidelines
+      if (state.guidelines.visible) {
+        guideCtx.strokeStyle = '#22d3ee';
+        guideCtx.lineWidth = 1 / state.zoom;
+        guideCtx.setLineDash([4 / state.zoom, 4 / state.zoom]);
+        
+        // Horizontal guides
+        for (const gy of state.guidelines.horizontal) {
+          guideCtx.beginPath();
+          guideCtx.moveTo(-10000, gy);
+          guideCtx.lineTo(10000, gy);
+          guideCtx.stroke();
+        }
+        
+        // Vertical guides
+        for (const gx of state.guidelines.vertical) {
+          guideCtx.beginPath();
+          guideCtx.moveTo(gx, -10000);
+          guideCtx.lineTo(gx, 10000);
+          guideCtx.stroke();
+        }
+        
+        guideCtx.setLineDash([]);
+      }
+      
+      guideCtx.restore();
+      
+      drawRulers();
+    }
+
+    function drawRulers() {
+      const w = guideCanvas.width;
+      const h = guideCanvas.height;
+      const rulerSize = 20;
+      
+      guideCtx.save();
+      guideCtx.setTransform(1, 0, 0, 1, 0, 0);
+      
+      // Draw background bar
+      guideCtx.fillStyle = '#0f172a';
+      guideCtx.fillRect(0, 0, w, rulerSize);
+      guideCtx.fillRect(0, 0, rulerSize, h);
+      
+      // Draw borders
+      guideCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+      guideCtx.lineWidth = 1;
+      guideCtx.beginPath();
+      guideCtx.moveTo(0, rulerSize);
+      guideCtx.lineTo(w, rulerSize);
+      guideCtx.moveTo(rulerSize, 0);
+      guideCtx.lineTo(rulerSize, h);
+      guideCtx.stroke();
+      
+      // Determine dynamic tick spacing based on zoom
+      const tickSpacings = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+      let canvasSpacing = 1000;
+      for (const s of tickSpacings) {
+        if (s * state.zoom >= 50) {
+          canvasSpacing = s;
+          break;
+        }
+      }
+      
+      guideCtx.fillStyle = '#94a3b8';
+      guideCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+      guideCtx.font = '9px "Inter", sans-serif';
+      
+      // Center of canvas in screen coordinates
+      const cxScreen = w / 2 + state.panX;
+      const cyScreen = h / 2 + state.panY;
+      
+      // 1. Top Ruler (X-axis)
+      const startCanvasX = Math.floor((rulerSize - cxScreen) / (canvasSpacing * state.zoom)) * canvasSpacing;
+      const endCanvasX = Math.ceil((w - cxScreen) / (canvasSpacing * state.zoom)) * canvasSpacing;
+      
+      for (let cx = startCanvasX; cx <= endCanvasX; cx += canvasSpacing) {
+        const sx = cxScreen + cx * state.zoom;
+        if (sx < rulerSize) continue;
+        
+        guideCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+        guideCtx.beginPath();
+        guideCtx.moveTo(sx, rulerSize);
+        guideCtx.lineTo(sx, rulerSize - 8);
+        guideCtx.stroke();
+        
+        guideCtx.fillText(cx, sx + 3, rulerSize - 4);
+        
+        guideCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+        const subSpacing = canvasSpacing / 5;
+        for (let j = 1; j < 5; j++) {
+          const ssx = sx + subSpacing * j * state.zoom;
+          if (ssx >= rulerSize && ssx < w) {
+            guideCtx.beginPath();
+            guideCtx.moveTo(ssx, rulerSize);
+            guideCtx.lineTo(ssx, rulerSize - 4);
+            guideCtx.stroke();
+          }
+        }
+      }
+      
+      // 2. Left Ruler (Y-axis)
+      const startCanvasY = Math.floor((rulerSize - cyScreen) / (canvasSpacing * state.zoom)) * canvasSpacing;
+      const endCanvasY = Math.ceil((h - cyScreen) / (canvasSpacing * state.zoom)) * canvasSpacing;
+      
+      for (let cy = startCanvasY; cy <= endCanvasY; cy += canvasSpacing) {
+        const sy = cyScreen + cy * state.zoom;
+        if (sy < rulerSize) continue;
+        
+        guideCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+        guideCtx.beginPath();
+        guideCtx.moveTo(rulerSize, sy);
+        guideCtx.lineTo(rulerSize - 8, sy);
+        guideCtx.stroke();
+        
+        guideCtx.save();
+        guideCtx.translate(rulerSize - 12, sy + 3);
+        guideCtx.rotate(-Math.PI / 2);
+        guideCtx.fillText(cy, 0, 0);
+        guideCtx.restore();
+        
+        guideCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+        const subSpacing = canvasSpacing / 5;
+        for (let j = 1; j < 5; j++) {
+          const ssy = sy + subSpacing * j * state.zoom;
+          if (ssy >= rulerSize && ssy < h) {
+            guideCtx.beginPath();
+            guideCtx.moveTo(rulerSize, ssy);
+            guideCtx.lineTo(rulerSize - 4, ssy);
+            guideCtx.stroke();
+          }
+        }
+      }
+      
+      // Draw mouse tracking lines on rulers
+      if (state.lastMouseCoords) {
+        const mxScreen = cxScreen + state.lastMouseCoords.x * state.zoom;
+        const myScreen = cyScreen + state.lastMouseCoords.y * state.zoom;
+        
+        guideCtx.strokeStyle = '#6366f1';
+        guideCtx.lineWidth = 1;
+        
+        if (mxScreen >= rulerSize && mxScreen < w) {
+          guideCtx.beginPath();
+          guideCtx.moveTo(mxScreen, 0);
+          guideCtx.lineTo(mxScreen, rulerSize);
+          guideCtx.stroke();
+        }
+        
+        if (myScreen >= rulerSize && myScreen < h) {
+          guideCtx.beginPath();
+          guideCtx.moveTo(0, myScreen);
+          guideCtx.lineTo(rulerSize, myScreen);
+          guideCtx.stroke();
+        }
+      }
+      
+      // Draw Corner square
+      guideCtx.fillStyle = '#090d16';
+      guideCtx.fillRect(0, 0, rulerSize, rulerSize);
+      guideCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+      guideCtx.beginPath();
+      guideCtx.moveTo(rulerSize, 0);
+      guideCtx.lineTo(rulerSize, rulerSize);
+      guideCtx.lineTo(0, rulerSize);
+      guideCtx.stroke();
+      
+      // Draw active ruler guide line if dragging ruler
+      if (state.rulerDrag.active) {
+        guideCtx.strokeStyle = '#a855f7';
+        guideCtx.lineWidth = 1;
+        guideCtx.setLineDash([4, 4]);
+        guideCtx.beginPath();
+        if (state.rulerDrag.type === 'h') {
+          guideCtx.moveTo(0, state.rulerDrag.value);
+          guideCtx.lineTo(w, state.rulerDrag.value);
+        } else {
+          guideCtx.moveTo(state.rulerDrag.value, 0);
+          guideCtx.lineTo(state.rulerDrag.value, h);
+        }
+        guideCtx.stroke();
+        guideCtx.setLineDash([]);
+      }
+      
+      guideCtx.restore();
     }
 
     // Get 9 handle positions in world space
@@ -2021,6 +2435,38 @@
         ml: localToWorld(layer, -halfW, 0),
         rot: localToWorld(layer, 0, -halfH - (30 / state.zoom))
       };
+    }
+
+    // Renders temp gradient drag vector line
+    function drawTempGradientGuide() {
+      const start = { x: state.gradientDrag.startX, y: state.gradientDrag.startY };
+      const curr = { x: state.gradientDrag.currentX, y: state.gradientDrag.currentY };
+      
+      guideCtx.strokeStyle = '#d946ef';
+      guideCtx.lineWidth = 2 / state.zoom;
+      guideCtx.setLineDash([4 / state.zoom, 4 / state.zoom]);
+
+      guideCtx.beginPath();
+      guideCtx.moveTo(start.x, start.y);
+      guideCtx.lineTo(curr.x, curr.y);
+      guideCtx.stroke();
+
+      guideCtx.setLineDash([]);
+
+      // Draw start and end handles
+      guideCtx.fillStyle = '#ffffff';
+      guideCtx.strokeStyle = '#d946ef';
+      guideCtx.lineWidth = 1.5 / state.zoom;
+
+      guideCtx.beginPath();
+      guideCtx.arc(start.x, start.y, 4 / state.zoom, 0, Math.PI * 2);
+      guideCtx.fill();
+      guideCtx.stroke();
+
+      guideCtx.beginPath();
+      guideCtx.arc(curr.x, curr.y, 4 / state.zoom, 0, Math.PI * 2);
+      guideCtx.fill();
+      guideCtx.stroke();
     }
 
     // Renders temp shape path during drag
@@ -2175,11 +2621,49 @@
       // Draw top layer relative center
       if (activeLayer.visible) {
         tempCtx.save();
-        tempCtx.globalAlpha = activeLayer.opacity;
-        tempCtx.globalCompositeOperation = activeLayer.blendMode;
-        tempCtx.translate(activeLayer.x + (activeLayer.width * activeLayer.scaleX)/2, activeLayer.y + (activeLayer.height * activeLayer.scaleY)/2);
-        tempCtx.rotate(activeLayer.rotation);
-        tempCtx.drawImage(activeLayer.canvas, -(activeLayer.width * activeLayer.scaleX)/2, -(activeLayer.height * activeLayer.scaleY)/2, activeLayer.width * activeLayer.scaleX, activeLayer.height * activeLayer.scaleY);
+        if (activeLayer.isClippingMask) {
+          // Render top layer inside the bottom layer's alpha mask
+          const topTemp = document.createElement('canvas');
+          topTemp.width = state.canvasWidth;
+          topTemp.height = state.canvasHeight;
+          const topTempCtx = topTemp.getContext('2d');
+          
+          topTempCtx.save();
+          topTempCtx.globalAlpha = activeLayer.opacity;
+          topTempCtx.translate(activeLayer.x + (activeLayer.width * activeLayer.scaleX)/2, activeLayer.y + (activeLayer.height * activeLayer.scaleY)/2);
+          topTempCtx.rotate(activeLayer.rotation);
+          topTempCtx.drawImage(activeLayer.canvas, -(activeLayer.width * activeLayer.scaleX)/2, -(activeLayer.height * activeLayer.scaleY)/2, activeLayer.width * activeLayer.scaleX, activeLayer.height * activeLayer.scaleY);
+          topTempCtx.restore();
+          
+          // Draw bottom layer mask onto maskTemp
+          const maskTemp = document.createElement('canvas');
+          maskTemp.width = state.canvasWidth;
+          maskTemp.height = state.canvasHeight;
+          const maskTempCtx = maskTemp.getContext('2d');
+          
+          maskTempCtx.save();
+          maskTempCtx.globalAlpha = bottomLayer.opacity;
+          maskTempCtx.translate(bottomLayer.x + (bottomLayer.width * bottomLayer.scaleX)/2, bottomLayer.y + (bottomLayer.height * bottomLayer.scaleY)/2);
+          maskTempCtx.rotate(bottomLayer.rotation);
+          maskTempCtx.drawImage(bottomLayer.canvas, -(bottomLayer.width * bottomLayer.scaleX)/2, -(bottomLayer.height * bottomLayer.scaleY)/2, bottomLayer.width * bottomLayer.scaleX, bottomLayer.height * bottomLayer.scaleY);
+          maskTempCtx.restore();
+          
+          topTempCtx.save();
+          topTempCtx.globalCompositeOperation = 'destination-in';
+          topTempCtx.drawImage(maskTemp, 0, 0);
+          topTempCtx.restore();
+          
+          tempCtx.save();
+          tempCtx.globalCompositeOperation = activeLayer.blendMode;
+          tempCtx.drawImage(topTemp, 0, 0);
+          tempCtx.restore();
+        } else {
+          tempCtx.globalAlpha = activeLayer.opacity;
+          tempCtx.globalCompositeOperation = activeLayer.blendMode;
+          tempCtx.translate(activeLayer.x + (activeLayer.width * activeLayer.scaleX)/2, activeLayer.y + (activeLayer.height * activeLayer.scaleY)/2);
+          tempCtx.rotate(activeLayer.rotation);
+          tempCtx.drawImage(activeLayer.canvas, -(activeLayer.width * activeLayer.scaleX)/2, -(activeLayer.height * activeLayer.scaleY)/2, activeLayer.width * activeLayer.scaleX, activeLayer.height * activeLayer.scaleY);
+        }
         tempCtx.restore();
       }
       
@@ -2215,7 +2699,7 @@
       for (let i = state.layers.length - 1; i >= 0; i--) {
         const layer = state.layers[i];
         const row = document.createElement('div');
-        row.className = `layer-row ${layer.id === state.activeLayerId ? 'selected' : ''}`;
+        row.className = `layer-row ${layer.id === state.activeLayerId ? 'selected' : ''} ${layer.isClippingMask ? 'clipping-mask-row' : ''}`;
         row.dataset.id = layer.id;
         
         // Draggable configuration
@@ -2230,12 +2714,20 @@
               `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
             }
           </button>
+          ${layer.isClippingMask ? `
+            <span class="clipping-mask-arrow" style="margin-right: 4px; display: flex; align-items: center;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 6v8h6"/>
+                <path d="M13 11l3 3-3 3"/>
+              </svg>
+            </span>
+          ` : ''}
           <div class="layer-thumb">
             <canvas id="thumb-${layer.id}" width="32" height="32"></canvas>
           </div>
           <div class="layer-info">
             <span class="layer-name" data-id="${layer.id}">${layer.name}</span>
-            <span class="layer-meta">${layer.type.toUpperCase()} | Opacity: ${Math.round(layer.opacity * 100)}%</span>
+            <span class="layer-meta">${layer.isClippingMask ? 'CLIPPED | ' : ''}${layer.type.toUpperCase()} | Opacity: ${Math.round(layer.opacity * 100)}%</span>
           </div>
         `;
         
@@ -2390,6 +2882,9 @@
         textColorPicker.value = data.color;
         btnTextBold.classList.toggle('active', data.bold);
         btnTextItalic.classList.toggle('active', data.italic);
+        textAlignSelect.value = data.align || 'left';
+        textLetterSpacingInput.value = data.letterSpacing !== undefined ? data.letterSpacing : 0;
+        textLineHeightInput.value = data.lineHeight !== undefined ? data.lineHeight : 1.2;
       }
     }
 
@@ -2471,6 +2966,10 @@
       fontStr += `${data.size}px "${data.font}"`;
       ctx.font = fontStr;
       
+      // Set letter spacing before measuring
+      const spacing = data.letterSpacing !== undefined ? data.letterSpacing : 0;
+      ctx.letterSpacing = spacing + 'px';
+      
       // Calculate real dimensions of multi-line text
       const lines = data.text.split('\n');
       ctx.textBaseline = 'top';
@@ -2480,7 +2979,8 @@
         maxW = Math.max(maxW, ctx.measureText(line).width);
       }
       
-      const lineHeight = data.size * 1.2;
+      const heightMult = data.lineHeight !== undefined ? data.lineHeight : 1.2;
+      const lineHeight = data.size * heightMult;
       const totalH = lines.length * lineHeight;
       
       // Resize offscreen canvas to match text bounding box
@@ -2492,13 +2992,23 @@
       
       // Re-configure context styles after canvas resize (clears bindings)
       ctx.font = fontStr;
+      ctx.letterSpacing = spacing + 'px';
       ctx.textBaseline = 'top';
       ctx.fillStyle = data.color;
       ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
       
       // Draw lines
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], pad, pad + i * lineHeight);
+        const line = lines[i];
+        let lx = pad;
+        if (data.align === 'center') {
+          const lineWidth = ctx.measureText(line).width;
+          lx = pad + (maxW - lineWidth) / 2;
+        } else if (data.align === 'right') {
+          const lineWidth = ctx.measureText(line).width;
+          lx = pad + (maxW - lineWidth);
+        }
+        ctx.fillText(line, lx, pad + i * lineHeight);
       }
       
       ctx.restore();
@@ -2517,7 +3027,7 @@
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
-    function drawStroke(x1, y1, x2, y2, ctx, size, color, hardness, isEraser) {
+    function drawStroke(x1, y1, x2, y2, ctx, size, color, hardness, isEraser, type = 'solid') {
       const dist = Math.hypot(x2 - x1, y2 - y1);
       const steps = Math.ceil(dist / Math.max(1, size / 8));
       ctx.save();
@@ -2534,27 +3044,89 @@
         const cx = x1 + (x2 - x1) * t;
         const cy = y1 + (y2 - y1) * t;
         
-        if (hardness >= 0.95 && !isEraser) {
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          // Soft radial gradient stroke
-          const radius = size / 2;
-          const radGrad = ctx.createRadialGradient(cx, cy, radius * hardness, cx, cy, radius);
-          
-          if (isEraser) {
+        if (isEraser) {
+          // Eraser behaves like soft or hard solid stroke
+          if (hardness >= 0.95) {
+            ctx.fillStyle = 'rgba(0,0,0,1)';
+            ctx.beginPath();
+            ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            const radius = size / 2;
+            const radGrad = ctx.createRadialGradient(cx, cy, radius * hardness, cx, cy, radius);
             radGrad.addColorStop(0, 'rgba(0,0,0,1)');
             radGrad.addColorStop(1, 'rgba(0,0,0,0)');
-          } else {
-            radGrad.addColorStop(0, color);
-            radGrad.addColorStop(1, hexToRgba(color, 0));
+            ctx.fillStyle = radGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.fill();
           }
+          continue;
+        }
+
+        // Apply Brush Presets
+        if (type === 'airbrush') {
+          // Airbrush is extra soft and low flow
+          const radius = size / 2;
+          const radGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+          radGrad.addColorStop(0, hexToRgba(color, 0.1));
+          radGrad.addColorStop(1, hexToRgba(color, 0));
           ctx.fillStyle = radGrad;
           ctx.beginPath();
           ctx.arc(cx, cy, radius, 0, Math.PI * 2);
           ctx.fill();
+        } else if (type === 'calligraphy') {
+          // Calligraphy is a flat angled pen stroke
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, size / 2, size / 8, Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (type === 'chalk') {
+          // Chalk texture stroke
+          const radius = size / 2;
+          ctx.fillStyle = color;
+          const dotCount = Math.ceil(radius * 1.5);
+          for (let j = 0; j < dotCount; j++) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.pow(Math.random(), 1.5) * radius; // cluster towards center
+            const px = cx + Math.cos(angle) * r;
+            const py = cy + Math.sin(angle) * r;
+            const dotSize = Math.random() * 2 + 0.5;
+            ctx.globalAlpha = Math.random() * 0.4;
+            ctx.fillRect(px - dotSize / 2, py - dotSize / 2, dotSize, dotSize);
+          }
+        } else if (type === 'spray') {
+          // Spray paint splatter stroke
+          const radius = size / 2;
+          ctx.fillStyle = color;
+          const dotCount = Math.ceil(size / 3);
+          for (let j = 0; j < dotCount; j++) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.sqrt(Math.random()) * radius; // spread out evenly
+            const px = cx + Math.cos(angle) * r;
+            const py = cy + Math.sin(angle) * r;
+            const dotSize = Math.random() * 1.5 + 0.5;
+            ctx.beginPath();
+            ctx.arc(px, py, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else {
+          // Default Solid Brush (with hardness settings)
+          if (hardness >= 0.95) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            const radius = size / 2;
+            const radGrad = ctx.createRadialGradient(cx, cy, radius * hardness, cx, cy, radius);
+            radGrad.addColorStop(0, color);
+            radGrad.addColorStop(1, hexToRgba(color, 0));
+            ctx.fillStyle = radGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
       ctx.restore();
@@ -2565,21 +3137,28 @@
        ZOOM & PAN NAVIGATION
        ========================================================================== */
     function updateWorkspaceTransform() {
-      canvasContainer.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+      canvasContainer.style.transform = `translate(-50%, -50%) translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
       lblZoomFactor.textContent = `${Math.round(state.zoom * 100)}%`;
       drawWorkspace();
     }
 
-    function zoomTo(newZoom, centerX, centerY) {
+    function zoomTo(newZoom, mouseX, mouseY) {
       // Clamps zoom between 10% and 1000%
       const oldZoom = state.zoom;
       state.zoom = Math.max(0.1, Math.min(10.0, newZoom));
       
-      if (centerX !== undefined && centerY !== undefined) {
-        // Zoom relative to cursor point
-        state.panX = centerX - (centerX - state.panX) * (state.zoom / oldZoom);
-        state.panY = centerY - (centerY - state.panY) * (state.zoom / oldZoom);
-      }
+      const vRect = viewport.getBoundingClientRect();
+      const vWidth = vRect.width;
+      const vHeight = vRect.height;
+      
+      const targetX = (mouseX !== undefined) ? mouseX : vWidth / 2;
+      const targetY = (mouseY !== undefined) ? mouseY : vHeight / 2;
+      
+      const cx = targetX - vWidth / 2;
+      const cy = targetY - vHeight / 2;
+      
+      state.panX = cx - (cx - state.panX) * (state.zoom / oldZoom);
+      state.panY = cy - (cy - state.panY) * (state.zoom / oldZoom);
       
       updateWorkspaceTransform();
     }
@@ -2597,12 +3176,50 @@
       updateWorkspaceTransform();
     }
 
+    function resizeGuideCanvas() {
+      guideCanvas.width = viewport.clientWidth;
+      guideCanvas.height = viewport.clientHeight;
+      drawWorkspace();
+    }
+
 
     /* ==========================================================================
        CANVAS EVENT HANDLERS & TOOL ENGINE
        ========================================================================== */
     
     viewport.addEventListener('mousedown', (e) => {
+      // Check click on rulers
+      const rect = viewport.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const rulerSize = 20;
+
+      if (my < rulerSize && mx >= rulerSize) {
+        // Drag horizontal guide
+        state.rulerDrag.active = true;
+        state.rulerDrag.type = 'h';
+        state.rulerDrag.value = my;
+        e.preventDefault();
+        return;
+      }
+      if (mx < rulerSize && my >= rulerSize) {
+        // Drag vertical guide
+        state.rulerDrag.active = true;
+        state.rulerDrag.type = 'v';
+        state.rulerDrag.value = mx;
+        e.preventDefault();
+        return;
+      }
+      if (mx < rulerSize && my < rulerSize) {
+        // Toggle guidelines visibility
+        state.guidelines.visible = !state.guidelines.visible;
+        const guidesStatus = document.getElementById('guides-status');
+        if (guidesStatus) guidesStatus.textContent = state.guidelines.visible ? 'On' : 'Off';
+        drawWorkspace();
+        e.preventDefault();
+        return;
+      }
+
       // Space or middle mouse click forces panning
       if (state.activeTool === 'hand' || e.code === 'Space' || e.button === 1) {
         state.isPanning = true;
@@ -2727,7 +3344,7 @@
         const brushOpacity = state.brush.opacity;
         const isEraser = state.activeTool === 'eraser';
         
-        drawStroke(lx, ly, lx, ly, getActiveLayer().ctx, state.brush.size, brushCol, brushHard, isEraser);
+        drawStroke(lx, ly, lx, ly, getActiveLayer().ctx, state.brush.size, brushCol, brushHard, isEraser, state.brush.type);
         drawWorkspace();
         return;
       }
@@ -2741,10 +3358,35 @@
         state.shapeDrag.currentY = coords.y;
         drawWorkspace();
       }
+
+      // GRADIENT DRAWING START
+      if (state.activeTool === 'gradient') {
+        state.gradientDrag.isDragging = true;
+        state.gradientDrag.startX = coords.x;
+        state.gradientDrag.startY = coords.y;
+        state.gradientDrag.currentX = coords.x;
+        state.gradientDrag.currentY = coords.y;
+        drawWorkspace();
+      }
     });
 
     viewport.addEventListener('mousemove', (e) => {
+      // Check ruler drag
+      if (state.rulerDrag.active) {
+        const rect = viewport.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        if (state.rulerDrag.type === 'h') {
+          state.rulerDrag.value = my;
+        } else {
+          state.rulerDrag.value = mx;
+        }
+        drawWorkspace();
+        return;
+      }
+
       const coords = getCanvasCoordinates(e);
+      state.lastMouseCoords = coords;
       
       // Update coordinates status bar
       statusCoords.textContent = `X: ${coords.x}px | Y: ${coords.y}px`;
@@ -2759,14 +3401,9 @@
 
       const activeLayer = getActiveLayer();
 
-      // Custom brush cursor ring preview drawing on guide canvas
+      // Custom brush cursor ring preview drawing
       if ((state.activeTool === 'brush' || state.activeTool === 'eraser') && activeLayer) {
-        drawGuides();
-        guideCtx.strokeStyle = 'rgba(255,255,255,0.8)';
-        guideCtx.lineWidth = 1;
-        guideCtx.beginPath();
-        guideCtx.arc(coords.x, coords.y, state.brush.size / 2, 0, Math.PI * 2);
-        guideCtx.stroke();
+        drawWorkspace();
       }
 
       // SELECT INTERACTIVE DRAGS
@@ -2774,8 +3411,101 @@
         if (state.transform.mode === 'move') {
           const dx = coords.x - state.transform.startX;
           const dy = coords.y - state.transform.startY;
-          activeLayer.x = state.transform.startLayerX + dx;
-          activeLayer.y = state.transform.startLayerY + dy;
+          
+          if (state.snappingEnabled) {
+            const threshold = 8 / state.zoom;
+            const layerW = activeLayer.width * activeLayer.scaleX;
+            const layerH = activeLayer.height * activeLayer.scaleY;
+            
+            const currentX = state.transform.startLayerX + dx;
+            const currentY = state.transform.startLayerY + dy;
+            
+            const srcX = [
+              { val: currentX, offset: 0 },
+              { val: currentX + layerW / 2, offset: -layerW / 2 },
+              { val: currentX + layerW, offset: -layerW }
+            ];
+            
+            const srcY = [
+              { val: currentY, offset: 0 },
+              { val: currentY + layerH / 2, offset: -layerH / 2 },
+              { val: currentY + layerH, offset: -layerH }
+            ];
+            
+            const targetsX = [
+              { val: 0 },
+              { val: state.canvasWidth / 2 },
+              { val: state.canvasWidth }
+            ];
+            
+            const targetsY = [
+              { val: 0 },
+              { val: state.canvasHeight / 2 },
+              { val: state.canvasHeight }
+            ];
+            
+            for (const l of state.layers) {
+              if (l.id === activeLayer.id || !l.visible) continue;
+              const lW = l.width * l.scaleX;
+              const lH = l.height * l.scaleY;
+              
+              targetsX.push({ val: l.x });
+              targetsX.push({ val: l.x + lW / 2 });
+              targetsX.push({ val: l.x + lW });
+              
+              targetsY.push({ val: l.y });
+              targetsY.push({ val: l.y + lH / 2 });
+              targetsY.push({ val: l.y + lH });
+            }
+            
+            if (state.guidelines.visible) {
+              for (const gx of state.guidelines.vertical) {
+                targetsX.push({ val: gx });
+              }
+              for (const gy of state.guidelines.horizontal) {
+                targetsY.push({ val: gy });
+              }
+            }
+            
+            let bestDiffX = threshold;
+            let snapOffsetX = 0;
+            let snapTargetX = null;
+            for (const s of srcX) {
+              for (const t of targetsX) {
+                const diff = Math.abs(s.val - t.val);
+                if (diff < bestDiffX) {
+                  bestDiffX = diff;
+                  snapOffsetX = t.val - s.val;
+                  snapTargetX = t.val;
+                }
+              }
+            }
+            
+            let bestDiffY = threshold;
+            let snapOffsetY = 0;
+            let snapTargetY = null;
+            for (const s of srcY) {
+              for (const t of targetsY) {
+                const diff = Math.abs(s.val - t.val);
+                if (diff < bestDiffY) {
+                  bestDiffY = diff;
+                  snapOffsetY = t.val - s.val;
+                  snapTargetY = t.val;
+                }
+              }
+            }
+            
+            activeLayer.x = currentX + snapOffsetX;
+            activeLayer.y = currentY + snapOffsetY;
+            
+            state.activeSnapLines = { x: [], y: [] };
+            if (snapTargetX !== null) state.activeSnapLines.x.push(snapTargetX);
+            if (snapTargetY !== null) state.activeSnapLines.y.push(snapTargetY);
+          } else {
+            activeLayer.x = state.transform.startLayerX + dx;
+            activeLayer.y = state.transform.startLayerY + dy;
+            state.activeSnapLines = null;
+          }
         } else if (state.transform.mode === 'scale') {
           // Bounding Box Scale Math Solver
           const coefs = getHandleCoefficients(state.transform.handle);
@@ -2847,7 +3577,7 @@
         const ly = local.y + activeLayer.height / 2;
         
         const isEraser = state.activeTool === 'eraser';
-        drawStroke(state.drawing.lastX, state.drawing.lastY, lx, ly, activeLayer.ctx, state.brush.size, state.brush.color, state.brush.hardness/100, isEraser);
+        drawStroke(state.drawing.lastX, state.drawing.lastY, lx, ly, activeLayer.ctx, state.brush.size, state.brush.color, state.brush.hardness/100, isEraser, state.brush.type);
         
         state.drawing.lastX = lx;
         state.drawing.lastY = ly;
@@ -2858,6 +3588,13 @@
       if (state.activeTool === 'shape' && state.shapeDrag.isDragging) {
         state.shapeDrag.currentX = coords.x;
         state.shapeDrag.currentY = coords.y;
+        drawWorkspace();
+      }
+
+      // GRADIENT DRAWING DRAGS
+      if (state.activeTool === 'gradient' && state.gradientDrag && state.gradientDrag.isDragging) {
+        state.gradientDrag.currentX = coords.x;
+        state.gradientDrag.currentY = coords.y;
         drawWorkspace();
       }
     });
@@ -2876,11 +3613,50 @@
         createShapeFromDrag();
       }
 
+      // Commit gradient drag release
+      if (state.activeTool === 'gradient' && state.gradientDrag && state.gradientDrag.isDragging) {
+        state.gradientDrag.isDragging = false;
+        applyGradientToActiveLayer();
+      }
+
+      // Commit ruler drag release
+      if (state.rulerDrag.active) {
+        state.rulerDrag.active = false;
+        const rect = viewport.getBoundingClientRect();
+        const clientVal = state.rulerDrag.value;
+        const dummyEvent = {
+          clientX: state.rulerDrag.type === 'v' ? (clientVal + rect.left) : (rect.left + 50),
+          clientY: state.rulerDrag.type === 'h' ? (clientVal + rect.top) : (rect.top + 50)
+        };
+        const coords = getCanvasCoordinates(dummyEvent);
+        const canvasVal = state.rulerDrag.type === 'h' ? coords.y : coords.x;
+        
+        const rulerSize = 20;
+        const releasedOnRuler = (state.rulerDrag.type === 'h' && clientVal < rulerSize) ||
+                                (state.rulerDrag.type === 'v' && clientVal < rulerSize);
+                                
+        if (!releasedOnRuler) {
+          if (state.rulerDrag.type === 'h') {
+            state.guidelines.horizontal.push(canvasVal);
+          } else {
+            state.guidelines.vertical.push(canvasVal);
+          }
+        }
+        drawWorkspace();
+      }
+
       if (state.activeTool === 'select' && state.transform.mode) {
         state.transform.mode = null;
+        state.activeSnapLines = null;
         updateLayersUI(); // update layer row thumbs
         updatePropertiesPanel();
+        drawWorkspace();
       }
+    });
+
+    viewport.addEventListener('mouseleave', () => {
+      state.lastMouseCoords = null;
+      drawWorkspace();
     });
 
     // Handle coefficients map for transform math
@@ -3007,7 +3783,10 @@
         size: state.text.size,
         color: state.text.color,
         bold: state.text.bold,
-        italic: state.text.italic
+        italic: state.text.italic,
+        align: state.text.align || 'left',
+        letterSpacing: state.text.letterSpacing !== undefined ? state.text.letterSpacing : 0,
+        lineHeight: state.text.lineHeight !== undefined ? state.text.lineHeight : 1.2
       };
 
       redrawTextLayer(textLayer);
@@ -3017,6 +3796,73 @@
       selectTool('select');
       updateLayersUI();
       updatePropertiesPanel();
+      drawWorkspace();
+    }
+
+    // Apply linear/radial gradient fill to active layer
+    function applyGradientToActiveLayer() {
+      const activeLayer = getActiveLayer();
+      if (!activeLayer) {
+        alert("Please select or create a layer first.");
+        return;
+      }
+      if (activeLayer.type !== 'bitmap') {
+        alert("Gradients can only be applied to Bitmap layers. Add a new layer or select a bitmap layer.");
+        return;
+      }
+
+      const startX = state.gradientDrag.startX;
+      const startY = state.gradientDrag.startY;
+      const endX = state.gradientDrag.currentX;
+      const endY = state.gradientDrag.currentY;
+
+      const dist = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+      const ctx = activeLayer.ctx;
+
+      saveHistory();
+
+      let grad;
+      if (dist < 2) {
+        // Default gradient fill diagonally across the layer if user clicked instead of dragging
+        const lx1 = 0;
+        const ly1 = 0;
+        const lx2 = activeLayer.width;
+        const ly2 = activeLayer.height;
+        if (state.gradient.type === 'linear') {
+          grad = ctx.createLinearGradient(lx1, ly1, lx2, ly2);
+        } else {
+          const radius = Math.min(activeLayer.width, activeLayer.height) / 2;
+          grad = ctx.createRadialGradient(activeLayer.width / 2, activeLayer.height / 2, 0, activeLayer.width / 2, activeLayer.height / 2, radius);
+        }
+      } else {
+        // Transform world coordinates into local layer space coordinates
+        const localStart = worldToLocal(activeLayer, startX, startY);
+        const localEnd = worldToLocal(activeLayer, endX, endY);
+        
+        const lx1 = localStart.x + activeLayer.width / 2;
+        const ly1 = localStart.y + activeLayer.height / 2;
+        const lx2 = localEnd.x + activeLayer.width / 2;
+        const ly2 = localEnd.y + activeLayer.height / 2;
+
+        if (state.gradient.type === 'linear') {
+          grad = ctx.createLinearGradient(lx1, ly1, lx2, ly2);
+        } else {
+          const radius = Math.sqrt(Math.pow(lx2 - lx1, 2) + Math.pow(ly2 - ly1, 2));
+          grad = ctx.createRadialGradient(lx1, ly1, 0, lx1, ly1, Math.max(1, radius));
+        }
+      }
+
+      grad.addColorStop(0, state.gradient.color1);
+      grad.addColorStop(1, state.gradient.color2);
+
+      ctx.clearRect(0, 0, activeLayer.width, activeLayer.height);
+      ctx.save();
+      ctx.globalAlpha = state.gradient.opacity;
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, activeLayer.width, activeLayer.height);
+      ctx.restore();
+
+      updateLayersUI();
       drawWorkspace();
     }
 
@@ -3064,7 +3910,9 @@
       textEditorOverlay.style.fontFamily = `"${layer.textData.font}", sans-serif`;
       textEditorOverlay.style.fontSize = (layer.textData.size * layer.scaleY * scale) + 'px';
       textEditorOverlay.style.color = layer.textData.color;
-      textEditorOverlay.style.textAlign = 'left';
+      textEditorOverlay.style.textAlign = layer.textData.align || 'left';
+      textEditorOverlay.style.letterSpacing = (layer.textData.letterSpacing || 0) * scale + 'px';
+      textEditorOverlay.style.lineHeight = (layer.textData.lineHeight || 1.2);
       textEditorOverlay.style.fontWeight = layer.textData.bold ? 'bold' : 'normal';
       textEditorOverlay.style.fontStyle = layer.textData.italic ? 'italic' : 'normal';
 
@@ -3488,8 +4336,7 @@
       // Update sizes of visible rendering contexts
       masterCanvas.width = newWidth;
       masterCanvas.height = newHeight;
-      guideCanvas.width = newWidth;
-      guideCanvas.height = newHeight;
+      resizeGuideCanvas();
       
       canvasContainer.style.width = newWidth + 'px';
       canvasContainer.style.height = newHeight + 'px';
@@ -3656,6 +4503,7 @@
       else if (toolName === 'eraser') title = 'Eraser Tool';
       else if (toolName === 'shape') title = 'Shape Tool';
       else if (toolName === 'text') title = 'Text Layer';
+      else if (toolName === 'gradient') title = 'Gradient Tool';
       else if (toolName === 'eyedropper') title = 'Eyedropper';
       else if (toolName === 'hand') title = 'Hand Pan Tool';
       activeToolTitle.textContent = title;
@@ -3664,6 +4512,7 @@
       brushSettingsBar.style.display = 'none';
       shapeSettingsBar.style.display = 'none';
       textSettingsBar.style.display = 'none';
+      gradientSettingsBar.style.display = 'none';
 
       // Show relative tool panel
       if (toolName === 'brush' || toolName === 'eraser') {
@@ -3675,6 +4524,9 @@
       } else if (toolName === 'text') {
         textSettingsBar.style.display = 'flex';
         viewport.style.cursor = 'text';
+      } else if (toolName === 'gradient') {
+        gradientSettingsBar.style.display = 'flex';
+        viewport.style.cursor = 'crosshair';
       } else if (toolName === 'eyedropper') {
         viewport.style.cursor = 'copy';
       } else if (toolName === 'hand') {
@@ -3718,6 +4570,10 @@
       // 4. Draw Layout workspace
       resetZoomFit();
       selectTool('select');
+
+      // 5. Initialize guide canvas sizing & resize listener
+      resizeGuideCanvas();
+      window.addEventListener('resize', resizeGuideCanvas);
     }
 
     function bindInputListeners() {
@@ -3833,6 +4689,9 @@
       });
 
       // Brush properties sliders labels sync
+      document.getElementById('brush-type').addEventListener('change', (e) => {
+        state.brush.type = e.target.value;
+      });
       brushSizeSlider.addEventListener('input', (e) => {
         state.brush.size = parseInt(e.target.value);
         document.getElementById('lbl-brush-size').textContent = e.target.value + 'px';
@@ -3963,10 +4822,90 @@
         }
       });
 
+      textAlignSelect.addEventListener('change', (e) => {
+        state.text.align = e.target.value;
+        const activeLayer = getActiveLayer();
+        if (activeLayer && activeLayer.type === 'text') {
+          saveHistory();
+          activeLayer.textData.align = e.target.value;
+          redrawTextLayer(activeLayer);
+          drawWorkspace();
+        }
+      });
+      textLetterSpacingInput.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value) || 0;
+        state.text.letterSpacing = val;
+        const activeLayer = getActiveLayer();
+        if (activeLayer && activeLayer.type === 'text') {
+          saveHistory();
+          activeLayer.textData.letterSpacing = val;
+          redrawTextLayer(activeLayer);
+          drawWorkspace();
+        }
+      });
+      textLineHeightInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 1.2;
+        state.text.lineHeight = val;
+        const activeLayer = getActiveLayer();
+        if (activeLayer && activeLayer.type === 'text') {
+          saveHistory();
+          activeLayer.textData.lineHeight = val;
+          redrawTextLayer(activeLayer);
+          drawWorkspace();
+        }
+      });
+
+      // Gradient Tool controls bindings
+      gradientTypeSelect.addEventListener('change', (e) => {
+        state.gradient.type = e.target.value;
+      });
+      gradientColor1Picker.addEventListener('input', (e) => {
+        state.gradient.color1 = e.target.value;
+      });
+      gradientColor2Picker.addEventListener('input', (e) => {
+        state.gradient.color2 = e.target.value;
+      });
+      gradientOpacitySlider.addEventListener('input', (e) => {
+        state.gradient.opacity = parseFloat(e.target.value) / 100;
+        lblGradientOpacity.textContent = e.target.value + '%';
+      });
+
       // Layer actions toolbar binds
       document.getElementById('btn-add-layer').addEventListener('click', () => addLayer());
       document.getElementById('btn-duplicate-layer').addEventListener('click', duplicateLayer);
       document.getElementById('btn-merge-layer').addEventListener('click', mergeLayerDown);
+      
+      document.getElementById('btn-clip-layer').addEventListener('click', () => {
+        const activeLayer = getActiveLayer();
+        if (!activeLayer) return;
+        
+        const index = state.layers.findIndex(l => l.id === activeLayer.id);
+        if (index === 0) {
+          alert("The bottom-most layer cannot be used as a clipping mask.");
+          return;
+        }
+        
+        saveHistory();
+        activeLayer.isClippingMask = !activeLayer.isClippingMask;
+        updateLayersUI();
+        drawWorkspace();
+      });
+
+      // Snapping / Guidelines toggles
+      document.getElementById('btn-toggle-snapping').addEventListener('click', () => {
+        state.snappingEnabled = !state.snappingEnabled;
+        document.getElementById('snapping-status').textContent = state.snappingEnabled ? 'On' : 'Off';
+      });
+      document.getElementById('btn-toggle-guides').addEventListener('click', () => {
+        state.guidelines.visible = !state.guidelines.visible;
+        document.getElementById('guides-status').textContent = state.guidelines.visible ? 'On' : 'Off';
+        drawWorkspace();
+      });
+      document.getElementById('btn-clear-guides').addEventListener('click', () => {
+        state.guidelines.horizontal = [];
+        state.guidelines.vertical = [];
+        drawWorkspace();
+      });
       document.getElementById('btn-delete-layer').addEventListener('click', deleteLayer);
 
       // Layer Properties Panel Fields Input binding
@@ -4028,12 +4967,33 @@
 
       const isCtrl = e.ctrlKey || e.metaKey;
 
+      // Layer nudging via arrow keys
+      if (!isCtrl && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        const activeLayer = getActiveLayer();
+        if (activeLayer) {
+          e.preventDefault();
+          if (!state.isNudging) {
+            saveHistory();
+            state.isNudging = true;
+          }
+          const nudgeAmount = e.shiftKey ? 10 : 1;
+          if (e.key === 'ArrowUp') activeLayer.y -= nudgeAmount;
+          else if (e.key === 'ArrowDown') activeLayer.y += nudgeAmount;
+          else if (e.key === 'ArrowLeft') activeLayer.x -= nudgeAmount;
+          else if (e.key === 'ArrowRight') activeLayer.x += nudgeAmount;
+          
+          updatePropertiesPanel();
+          drawWorkspace();
+        }
+      }
+
       // Tool shortcuts
       if (!isCtrl) {
         if (e.key.toLowerCase() === 'v') selectTool('select');
         else if (e.key.toLowerCase() === 'b') selectTool('brush');
         else if (e.key.toLowerCase() === 'e') selectTool('eraser');
         else if (e.key.toLowerCase() === 'u') selectTool('shape');
+        else if (e.key.toLowerCase() === 'g') selectTool('gradient');
         else if (e.key.toLowerCase() === 't') createTextLayer();
         else if (e.key.toLowerCase() === 'i') selectTool('eyedropper');
         else if (e.key.toLowerCase() === 'h') selectTool('hand');
@@ -4062,8 +5022,11 @@
       }
     });
 
-    // Spacebar panning hook
+    // Spacebar panning and Nudging hook
     window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        state.isNudging = false;
+      }
       if (e.code === 'Space') {
         if (state.activeTool === 'hand') {
           viewport.style.cursor = 'grab';
