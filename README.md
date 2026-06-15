@@ -22,6 +22,10 @@ Made for Porto's favourite producer.
 🇵🇹 flavoured, custard tarts not included. 
 [QRui](https://grahamlehr.github.io/QRui.html)
 
+## S^4^ - Simple Site-visit Slide Sorter
+You're jetlagged, you've seen so many hotels they all blur into one, and now you need to do something with hundreds of photos in your camera roll.
+Enter [S4 - The Simple Site-visit Slide Sorter](https://grahamlehr.github.io/s4-app.html). Sort by date, day, location [(if you share photos with location)](https://support.apple.com/en-gb/guide/personal-safety/ips0d7a5df82/web) and export to PPTX or PDF.
+
 ## Digital Signage Maker
 A quick way to make PNGs for digital signage at events.
 [Digital Signage Maker](https://grahamlehr.github.io/Digital-Signage-Maker.html)
