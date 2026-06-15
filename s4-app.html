@@ -1,0 +1,2312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S⁴</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18202a;
+      --muted: #627084;
+      --line: #d7dde5;
+      --panel: #f6f7f9;
+      --paper: #ffffff;
+      --accent: #0e6f68;
+      --accent-2: #29415f;
+      --danger: #b73535;
+      --warn: #a66205;
+      --shadow: 0 12px 30px rgba(30, 42, 58, .12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef1f4;
+      color: var(--ink);
+      font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button, .button {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    button:hover, .button:hover { border-color: #aeb8c5; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: white; }
+    button.danger { color: var(--danger); }
+    button.icon { width: 34px; padding: 0; }
+    button.mini {
+      min-height: 28px;
+      padding: 0 8px;
+      font-size: 12px;
+      justify-self: start;
+    }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+
+    input, select, textarea {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
+      border-radius: 6px;
+      min-height: 34px;
+      padding: 6px 8px;
+      width: 100%;
+    }
+
+    textarea { min-height: 80px; resize: vertical; }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 230px;
+      font-weight: 750;
+      color: var(--accent-2);
+      font-size: 16px;
+    }
+
+    .brand sup {
+      font-size: 10px;
+      line-height: 0;
+      vertical-align: super;
+    }
+
+    .mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #0e6f68, #29415f);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .mark:before, .mark:after {
+      content: "";
+      position: absolute;
+      background: white;
+      opacity: .92;
+    }
+
+    .mark:before {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      top: 6px;
+      left: 6px;
+    }
+
+    .mark:after {
+      width: 15px;
+      height: 9px;
+      border-radius: 2px;
+      right: 5px;
+      bottom: 6px;
+      transform: skewX(-12deg);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .status {
+      margin-left: auto;
+      color: var(--muted);
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 270px 1fr 320px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    aside, main {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .side, .details {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .details {
+      border-right: 0;
+      border-left: 1px solid var(--line);
+      grid-template-rows: auto 1fr;
+    }
+
+    .panel-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 8px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 700;
+      color: var(--accent-2);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 650;
+    }
+
+    .link:hover { text-decoration: underline; }
+
+    .groups {
+      overflow: auto;
+      padding: 8px;
+    }
+
+    .group-row {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      justify-content: space-between;
+      padding: 8px;
+      margin-bottom: 4px;
+      min-height: 38px;
+    }
+
+    .group-row.active, .group-row.drag-over {
+      border-color: #79aaa5;
+      background: white;
+      box-shadow: 0 1px 0 rgba(0,0,0,.04);
+    }
+
+    .group-row .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .count {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .filters {
+      border-top: 1px solid var(--line);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .side-group-editor {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      gap: 8px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-width: 0;
+      background: #fbfcfd;
+    }
+
+    .viewbar {
+      border-bottom: 1px solid var(--line);
+      background: white;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 3px;
+      background: #f9fafb;
+    }
+
+    .tab {
+      border: 0;
+      min-height: 28px;
+      background: transparent;
+      padding: 0 10px;
+    }
+
+    .tab.active {
+      background: white;
+      box-shadow: 0 1px 3px rgba(20, 30, 40, .12);
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: minmax(160px, 300px) minmax(120px, 160px) minmax(120px, 160px);
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .bulk {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .drop {
+      margin: 18px;
+      min-height: 260px;
+      border: 2px dashed #aeb8c5;
+      border-radius: 8px;
+      background: white;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+    }
+
+    .drop.drag {
+      border-color: var(--accent);
+      background: #f1fbfa;
+    }
+
+    .drop strong {
+      display: block;
+      color: var(--ink);
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .view {
+      min-height: 0;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    .photo {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      min-width: 0;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(20, 30, 40, .06);
+    }
+
+    .photo.selected { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .photo.rejected { opacity: .52; }
+
+    .thumb {
+      aspect-ratio: 4 / 3;
+      background: #e7ebf0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .badges {
+      position: absolute;
+      inset: 6px 6px auto 6px;
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      color: var(--accent-2);
+      border: 1px solid rgba(30, 50, 70, .14);
+      font-size: 11px;
+      line-height: 18px;
+      padding: 0 6px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge.warn { color: var(--warn); }
+    .badge.danger { color: var(--danger); }
+
+    .photo-meta {
+      padding: 8px;
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .filename {
+      font-weight: 650;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .group-section {
+      margin-bottom: 18px;
+    }
+
+    .group-title {
+      position: sticky;
+      top: -14px;
+      z-index: 2;
+      background: #fbfcfd;
+      border-bottom: 1px solid var(--line);
+      padding: 8px 0;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .map-view, .timeline-view {
+      display: grid;
+      gap: 14px;
+    }
+
+    .map-plot {
+      min-height: 520px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(#edf1f5 1px, transparent 1px),
+        linear-gradient(90deg, #edf1f5 1px, transparent 1px),
+        white;
+      background-size: 32px 32px;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pin {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      margin: -8px 0 0 -8px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      background: var(--accent);
+      border: 2px solid white;
+      box-shadow: 0 2px 7px rgba(0,0,0,.25);
+    }
+
+    .pin span {
+      position: absolute;
+      transform: rotate(45deg);
+      left: 12px;
+      top: -6px;
+      background: white;
+      border: 1px solid var(--line);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+      color: var(--ink);
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      align-items: start;
+      border-left: 3px solid #c5d3dc;
+      padding: 0 0 14px 12px;
+    }
+
+    .timeline-time {
+      color: var(--accent-2);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .details-body {
+      overflow: auto;
+      padding: 12px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .preview {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .preview img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      display: block;
+      background: #eef1f4;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .checks {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .checks label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .checks input { width: auto; min-height: auto; }
+
+    dialog {
+      border: 0;
+      border-radius: 8px;
+      width: min(760px, calc(100vw - 32px));
+      padding: 0;
+      box-shadow: var(--shadow);
+    }
+
+    dialog::backdrop { background: rgba(17, 24, 34, .42); }
+
+    .modal {
+      background: white;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      max-height: min(760px, calc(100vh - 32px));
+    }
+
+    .modal-head, .modal-foot {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-foot {
+      border-bottom: 0;
+      border-top: 1px solid var(--line);
+      justify-content: flex-end;
+    }
+
+    .modal-body {
+      overflow: auto;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .progress {
+      height: 8px;
+      background: #e1e6ec;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress div {
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      transition: width .2s ease;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: #172331;
+      color: white;
+      border-radius: 8px;
+      padding: 10px 14px;
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 10;
+      max-width: min(560px, calc(100vw - 32px));
+    }
+
+    .toast.show { display: block; }
+
+    @media (max-width: 1100px) {
+      .workspace { grid-template-columns: 230px 1fr; }
+      .details { display: none; }
+      .side-group-editor { display: grid; }
+      .search-row { grid-template-columns: 1fr 130px; }
+      .search-row select:last-child { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      .app { height: auto; min-height: 100vh; overflow: visible; }
+      .topbar { flex-wrap: wrap; }
+      .brand { min-width: 100%; }
+      .workspace { grid-template-columns: 1fr; overflow: visible; }
+      .side { grid-template-rows: auto auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .groups { max-height: 190px; }
+      .content { min-height: 70vh; }
+      .viewbar { grid-template-columns: 1fr; }
+      .search-row { grid-template-columns: 1fr; }
+      .bulk { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="mark"></span><span>S<sup>4</sup></span></div>
+      <div class="toolbar">
+        <label class="button primary" title="Import photos">
+          Import
+          <input id="fileInput" type="file" accept="image/*,.heic,.heif" multiple hidden>
+        </label>
+        <button id="projectLoadBtn" title="Load a saved project">Load</button>
+        <button id="projectSaveBtn" title="Save a project file">Save</button>
+        <button id="groupTimeBtn" title="Group by gaps in capture time">Time</button>
+        <button id="groupGpsBtn" title="Group by GPS proximity">GPS</button>
+        <button id="groupDayBtn" title="Group by capture day">Day</button>
+        <button id="guessLocationsBtn" title="Guess group place names from GPS">Guess Locations</button>
+        <button id="newGroupBtn" title="Create a manual group">New Group</button>
+        <button id="exportBtn" class="primary" title="Export PDF or PPTX">Export</button>
+      </div>
+      <div class="status" id="status">0 photos</div>
+    </header>
+
+    <div class="workspace">
+      <aside class="side">
+        <div class="panel-head">
+          <div class="section-title">Groups <span class="small" id="groupTotal">0</span></div>
+          <div class="row">
+            <div class="field">
+              <label for="timeGap">Time gap</label>
+              <select id="timeGap">
+                <option value="10">10 min</option>
+                <option value="20" selected>20 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">60 min</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="gpsRadius">GPS radius</label>
+              <select id="gpsRadius">
+                <option value="10">10 m</option>
+                <option value="25" selected>25 m</option>
+                <option value="50">50 m</option>
+                <option value="100">100 m</option>
+                <option value="200">200 m</option>
+                <option value="500">500 m</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="groups" id="groupList"></div>
+        <div class="filters">
+          <div class="field">
+            <label for="filterStatus">Filter</label>
+            <select id="filterStatus">
+              <option value="all">All photos</option>
+              <option value="ungrouped">Ungrouped</option>
+              <option value="gps">Has GPS</option>
+              <option value="nogps">Missing GPS</option>
+              <option value="starred">Starred</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="checks">
+            <label><input id="hideRejected" type="checkbox" checked> Hide rejected</label>
+          </div>
+          <div class="side-group-editor" id="sideGroupEditor"></div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="viewbar">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-view="grid">Grid</button>
+            <button class="tab" data-view="groups">Groups</button>
+            <button class="tab" data-view="map">Location</button>
+            <button class="tab" data-view="timeline">Timeline</button>
+          </div>
+          <div class="search-row">
+            <input id="search" placeholder="Search filename, group, notes">
+            <select id="sortBy">
+              <option value="takenAt">Time taken</option>
+              <option value="name">Filename</option>
+              <option value="group">Group</option>
+              <option value="import">Import order</option>
+            </select>
+            <select id="moveToGroup">
+              <option value="">Move selected...</option>
+            </select>
+          </div>
+          <div class="bulk">
+            <span class="small" id="selectedCount">0 selected</span>
+            <button id="selectAllBtn">Select All</button>
+            <button id="clearSelectionBtn">Clear</button>
+          </div>
+        </div>
+        <div class="view" id="view"></div>
+      </main>
+
+      <aside class="details">
+        <div class="panel-head">
+          <div class="section-title">Details</div>
+          <div class="small" id="detailHint">Select a photo or group</div>
+        </div>
+        <div class="details-body" id="detailsBody"></div>
+      </aside>
+    </div>
+  </div>
+
+  <dialog id="exportDialog">
+    <div class="modal">
+      <div class="modal-head">
+        <strong>Export</strong>
+        <button class="icon" id="closeExport" title="Close">x</button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="field">
+            <label for="exportFormat">Format</label>
+            <select id="exportFormat">
+              <option value="pdf">PDF</option>
+              <option value="pptx">PPTX</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="perPage">Photos per page/slide</label>
+            <select id="perPage">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="6" selected>6</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="visitTitle">Visit title</label>
+            <input id="visitTitle" value="Site Visit Photo Review">
+          </div>
+          <div class="field">
+            <label for="captionMode">Photo info</label>
+            <select id="captionMode">
+              <option value="time">Info box</option>
+              <option value="file">Filename only</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+        </div>
+        <div class="checks">
+          <label><input id="exportRejected" type="checkbox"> Include rejected</label>
+          <label><input id="groupNotes" type="checkbox" checked> Include group notes</label>
+          <label><input id="coverPage" type="checkbox" checked> Include cover</label>
+        </div>
+        <div class="progress"><div id="exportProgress"></div></div>
+        <div class="small" id="exportStatus">Ready</div>
+        <div class="small">Location guesses use OpenStreetMap Nominatim only when requested and send group GPS coordinates to that provider.</div>
+      </div>
+      <div class="modal-foot">
+        <button id="cancelExport">Cancel</button>
+        <button id="runExport" class="primary">Download</button>
+      </div>
+    </div>
+  </dialog>
+
+  <input id="projectInput" type="file" accept=".json,application/json" hidden>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const state = {
+      photos: [],
+      groups: [],
+      selected: new Set(),
+      activeGroup: 'all',
+      activeView: 'grid',
+      selectedPhotoId: null,
+      importSeq: 0,
+      dragPhotoId: null
+    };
+
+    const els = {
+      fileInput: $('fileInput'),
+      projectInput: $('projectInput'),
+      status: $('status'),
+      groupTotal: $('groupTotal'),
+      groupList: $('groupList'),
+      view: $('view'),
+      detailsBody: $('detailsBody'),
+      detailHint: $('detailHint'),
+      search: $('search'),
+      sortBy: $('sortBy'),
+      filterStatus: $('filterStatus'),
+      hideRejected: $('hideRejected'),
+      moveToGroup: $('moveToGroup'),
+      selectedCount: $('selectedCount'),
+      sideGroupEditor: $('sideGroupEditor'),
+      toast: $('toast')
+    };
+
+    function uid(prefix) {
+      return prefix + '-' + Math.random().toString(36).slice(2, 9) + '-' + Date.now().toString(36);
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove('show'), 3000);
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
+      return (bytes / Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + units[i];
+    }
+
+    function formatDate(value) {
+      if (!value) return 'No capture time';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'No capture time';
+      return date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    function formatExportDayDate(value) {
+      if (!value) return 'No capture date';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'No capture date';
+      return date.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function formatExportTime(value) {
+      if (!value) return 'No capture time';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'No capture time';
+      return date.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function dateKey(value) {
+      if (!value) return 'Unknown date';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return 'Unknown date';
+      return d.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function timeKey(value) {
+      if (!value) return 'No time';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return 'No time';
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function getGroup(id) {
+      return state.groups.find((g) => g.id === id) || null;
+    }
+
+    function getGroupName(id) {
+      return getGroup(id)?.name || 'Ungrouped';
+    }
+
+    function getGroupPhotos(groupId) {
+      return state.photos.filter((p) => (p.groupId || null) === (groupId || null));
+    }
+
+    function groupCenter(groupId) {
+      const located = getGroupPhotos(groupId).filter((p) => p.gps);
+      if (!located.length) return null;
+      return {
+        lat: located.reduce((sum, p) => sum + p.gps.lat, 0) / located.length,
+        lng: located.reduce((sum, p) => sum + p.gps.lng, 0) / located.length
+      };
+    }
+
+    function googleMapsUrl(point) {
+      return point ? `https://www.google.com/maps/search/?api=1&query=${point.lat.toFixed(6)},${point.lng.toFixed(6)}` : '';
+    }
+
+    function visiblePhotos() {
+      const q = els.search.value.trim().toLowerCase();
+      return state.photos
+        .filter((photo) => {
+          if (els.hideRejected.checked && photo.rejected) return false;
+          if (state.activeGroup !== 'all') {
+            if (state.activeGroup === 'ungrouped' && photo.groupId) return false;
+            if (state.activeGroup !== 'ungrouped' && photo.groupId !== state.activeGroup) return false;
+          }
+          const f = els.filterStatus.value;
+          if (f === 'ungrouped' && photo.groupId) return false;
+          if (f === 'gps' && !photo.gps) return false;
+          if (f === 'nogps' && photo.gps) return false;
+          if (f === 'starred' && !photo.starred) return false;
+          if (f === 'rejected' && !photo.rejected) return false;
+          if (!q) return true;
+          return [photo.name, photo.notes, getGroupName(photo.groupId), formatDate(photo.takenAt)]
+            .join(' ')
+            .toLowerCase()
+            .includes(q);
+        })
+        .sort((a, b) => {
+          const sort = els.sortBy.value;
+          if (sort === 'name') return a.name.localeCompare(b.name);
+          if (sort === 'group') return getGroupName(a.groupId).localeCompare(getGroupName(b.groupId)) || a.importOrder - b.importOrder;
+          if (sort === 'import') return a.importOrder - b.importOrder;
+          const ta = a.takenAt ? new Date(a.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+          const tb = b.takenAt ? new Date(b.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+          return ta - tb || a.importOrder - b.importOrder;
+        });
+    }
+
+    function render() {
+      renderStatus();
+      renderGroups();
+      renderMoveOptions();
+      renderSideGroupEditor();
+      renderView();
+      renderDetails();
+    }
+
+    function renderStatus() {
+      const gps = state.photos.filter((p) => p.gps).length;
+      const grouped = state.photos.filter((p) => p.groupId).length;
+      els.status.textContent = `${state.photos.length} photos | ${grouped} grouped | ${gps} GPS`;
+      els.selectedCount.textContent = `${state.selected.size} selected`;
+      els.groupTotal.textContent = String(state.groups.length);
+    }
+
+    function groupCounts() {
+      const counts = new Map();
+      for (const p of state.photos) counts.set(p.groupId || 'ungrouped', (counts.get(p.groupId || 'ungrouped') || 0) + 1);
+      return counts;
+    }
+
+    function renderGroups() {
+      const counts = groupCounts();
+      const rows = [
+        { id: 'all', name: 'All Photos', count: state.photos.length },
+        { id: 'ungrouped', name: 'Ungrouped', count: counts.get('ungrouped') || 0 },
+        ...state.groups.map((g) => ({ id: g.id, name: g.name, count: counts.get(g.id) || 0 }))
+      ];
+      els.groupList.innerHTML = rows.map((g) => {
+        const group = getGroup(g.id);
+        const location = group?.locationGuess ? `<span class="caption">${escapeHtml(group.locationGuess)}</span>` : '';
+        return `
+        <button class="group-row ${state.activeGroup === g.id ? 'active' : ''}" data-group="${escapeHtml(g.id)}">
+          <span class="name">${escapeHtml(g.name)}${location}</span>
+          <span class="count">${g.count}</span>
+        </button>
+      `;
+      }).join('');
+      els.groupList.querySelectorAll('.group-row').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.activeGroup = btn.dataset.group;
+          if (state.activeGroup !== state.selectedPhotoId) state.selectedPhotoId = null;
+          render();
+        });
+        btn.addEventListener('dragover', (event) => {
+          event.preventDefault();
+          btn.classList.add('drag-over');
+        });
+        btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
+        btn.addEventListener('drop', (event) => {
+          event.preventDefault();
+          btn.classList.remove('drag-over');
+          movePhotosToGroup([state.dragPhotoId], btn.dataset.group === 'ungrouped' || btn.dataset.group === 'all' ? null : btn.dataset.group);
+        });
+      });
+    }
+
+    function renderMoveOptions() {
+      const options = ['<option value="">Move selected...</option>', '<option value="ungrouped">Ungrouped</option>'];
+      for (const g of state.groups) options.push(`<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`);
+      els.moveToGroup.innerHTML = options.join('');
+    }
+
+    function renderView() {
+      if (!state.photos.length) {
+        els.view.innerHTML = `
+          <div class="drop" id="dropZone">
+            <div>
+              <strong>Drop site visit photos here</strong>
+              <div>Import up to 200 images. Everything stays in this browser session.</div>
+            </div>
+          </div>`;
+        bindDropZone($('dropZone'));
+        return;
+      }
+      const photos = visiblePhotos();
+      if (state.activeView === 'groups') return renderGroupedView(photos);
+      if (state.activeView === 'map') return renderMapView(photos);
+      if (state.activeView === 'timeline') return renderTimelineView(photos);
+      els.view.innerHTML = `<div class="grid">${photos.map(photoCard).join('')}</div>`;
+      bindPhotoCards();
+    }
+
+    function photoCard(photo) {
+      const badges = [
+        photo.starred ? '<span class="badge">Star</span>' : '',
+        photo.rejected ? '<span class="badge danger">Rejected</span>' : '',
+        photo.gps ? '<span class="badge">GPS</span>' : '<span class="badge warn">No GPS</span>'
+      ].join('');
+      return `
+        <article class="photo ${state.selectedPhotoId === photo.id ? 'selected' : ''} ${photo.rejected ? 'rejected' : ''}" draggable="true" data-photo="${escapeHtml(photo.id)}">
+          <div class="thumb">
+            ${photo.thumbUrl ? `<img src="${photo.thumbUrl}" alt="">` : ''}
+            <div class="badges">${badges}</div>
+          </div>
+          <div class="photo-meta">
+            <div class="checks"><label><input type="checkbox" class="select-photo" data-photo="${escapeHtml(photo.id)}" ${state.selected.has(photo.id) ? 'checked' : ''}> Select</label></div>
+            <div class="filename" title="${escapeHtml(photo.name)}">${escapeHtml(photo.name)}</div>
+            <div class="caption">${escapeHtml(getGroupName(photo.groupId))}</div>
+            <div class="caption">${escapeHtml(formatDate(photo.takenAt))}</div>
+          </div>
+        </article>`;
+    }
+
+    function bindPhotoCards() {
+      els.view.querySelectorAll('.photo').forEach((card) => {
+        card.addEventListener('click', (event) => {
+          if (event.target.classList.contains('select-photo')) return;
+          state.selectedPhotoId = card.dataset.photo;
+          render();
+        });
+        card.addEventListener('dragstart', () => {
+          state.dragPhotoId = card.dataset.photo;
+        });
+      });
+      els.view.querySelectorAll('.select-photo').forEach((checkbox) => {
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) state.selected.add(checkbox.dataset.photo);
+          else state.selected.delete(checkbox.dataset.photo);
+          renderStatus();
+        });
+      });
+    }
+
+    function renderGroupedView(photos) {
+      const byGroup = new Map();
+      for (const photo of photos) {
+        const key = photo.groupId || 'ungrouped';
+        if (!byGroup.has(key)) byGroup.set(key, []);
+        byGroup.get(key).push(photo);
+      }
+      const ordered = [
+        ['ungrouped', byGroup.get('ungrouped') || []],
+        ...state.groups.map((g) => [g.id, byGroup.get(g.id) || []])
+      ].filter(([, list]) => list.length);
+      els.view.innerHTML = ordered.map(([id, list]) => `
+        <section class="group-section">
+          <div class="group-title">
+            <strong>${escapeHtml(id === 'ungrouped' ? 'Ungrouped' : getGroupName(id))}</strong>
+            <span class="small">${list.length} photos</span>
+          </div>
+          <div class="grid">${list.map(photoCard).join('')}</div>
+        </section>
+      `).join('') || '<div class="drop"><div>No photos match the current filters.</div></div>';
+      bindPhotoCards();
+    }
+
+    function renderMapView(photos) {
+      const located = photos.filter((p) => p.gps);
+      if (!located.length) {
+        els.view.innerHTML = '<div class="drop"><div>No GPS metadata is available in the current photo set.</div></div>';
+        return;
+      }
+      const lats = located.map((p) => p.gps.lat);
+      const lngs = located.map((p) => p.gps.lng);
+      const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+      const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+      const spanLat = Math.max(maxLat - minLat, 0.00005);
+      const spanLng = Math.max(maxLng - minLng, 0.00005);
+      const pins = located.map((p) => {
+        const x = 6 + ((p.gps.lng - minLng) / spanLng) * 88;
+        const y = 94 - ((p.gps.lat - minLat) / spanLat) * 88;
+        return `<button class="pin" title="${escapeHtml(p.name)}" style="left:${x}%;top:${y}%" data-photo="${escapeHtml(p.id)}"><span>${escapeHtml(getGroupName(p.groupId))}</span></button>`;
+      }).join('');
+      els.view.innerHTML = `
+        <div class="map-view">
+          <div class="small">${located.length} located photos. Plot is relative to the imported coordinates.</div>
+          <div class="map-plot">${pins}</div>
+        </div>`;
+      els.view.querySelectorAll('.pin').forEach((pin) => {
+        pin.addEventListener('click', () => {
+          state.selectedPhotoId = pin.dataset.photo;
+          render();
+        });
+      });
+    }
+
+    function renderTimelineView(photos) {
+      const sorted = [...photos].sort((a, b) => {
+        const ta = a.takenAt ? new Date(a.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+        const tb = b.takenAt ? new Date(b.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+        return ta - tb || a.importOrder - b.importOrder;
+      });
+      els.view.innerHTML = `<div class="timeline-view">${
+        sorted.map((p) => `
+          <div class="timeline-item">
+            <div class="timeline-time">${escapeHtml(timeKey(p.takenAt))}</div>
+            <div>${photoCard(p)}</div>
+          </div>
+        `).join('')
+      }</div>`;
+      bindPhotoCards();
+    }
+
+    function renderDetails() {
+      const photo = state.photos.find((p) => p.id === state.selectedPhotoId);
+      if (!photo && state.activeGroup !== 'all' && state.activeGroup !== 'ungrouped') return renderGroupDetails(state.activeGroup);
+      if (!photo) {
+        els.detailHint.textContent = 'Select a photo or group';
+        els.detailsBody.innerHTML = '<div class="small">Use the grid, grouped view, timeline, or location plot to select an item.</div>';
+        return;
+      }
+      els.detailHint.textContent = photo.name;
+      els.detailsBody.innerHTML = `
+        <div class="preview"><img src="${photo.objectUrl}" alt=""></div>
+        <div class="field">
+          <label>Group</label>
+          <select id="photoGroup">
+            <option value="">Ungrouped</option>
+            ${state.groups.map((g) => `<option value="${escapeHtml(g.id)}" ${photo.groupId === g.id ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="checks">
+          <label><input id="photoStarred" type="checkbox" ${photo.starred ? 'checked' : ''}> Starred</label>
+          <label><input id="photoRejected" type="checkbox" ${photo.rejected ? 'checked' : ''}> Rejected</label>
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <textarea id="photoNotes">${escapeHtml(photo.notes || '')}</textarea>
+        </div>
+        <div class="field">
+          <label>Metadata</label>
+          <div class="small">
+            ${escapeHtml(formatDate(photo.takenAt))}<br>
+            ${photo.gps ? `${photo.gps.lat.toFixed(6)}, ${photo.gps.lng.toFixed(6)}` : 'No GPS'}<br>
+            ${escapeHtml(photo.type || 'Unknown type')} | ${escapeHtml(formatBytes(photo.size))}<br>
+            ${photo.width || '?'} x ${photo.height || '?'} px
+          </div>
+        </div>
+      `;
+      $('photoGroup').addEventListener('change', (event) => { photo.groupId = event.target.value || null; render(); });
+      $('photoStarred').addEventListener('change', (event) => { photo.starred = event.target.checked; render(); });
+      $('photoRejected').addEventListener('change', (event) => { photo.rejected = event.target.checked; render(); });
+      $('photoNotes').addEventListener('input', (event) => { photo.notes = event.target.value; });
+    }
+
+    function renderGroupDetails(groupId) {
+      const group = getGroup(groupId);
+      if (!group) return renderDetails();
+      els.detailHint.textContent = group.name;
+      const center = group.locationCenter || groupCenter(group.id);
+      const mapUrl = group.mapUrl || googleMapsUrl(center);
+      els.detailsBody.innerHTML = `
+        <div class="field">
+          <label for="groupName">Group name</label>
+          <input id="groupName" value="${escapeHtml(group.name)}">
+        </div>
+        <div class="field">
+          <label for="groupLocation">Best guess location</label>
+          <input id="groupLocation" value="${escapeHtml(group.locationGuess || '')}" placeholder="Use Guess Location or type a venue/place name">
+          ${group.locationProvider ? `<div class="small">Provider: ${escapeHtml(group.locationProvider)}</div>` : ''}
+          ${mapUrl ? `<a class="link" href="${escapeHtml(mapUrl)}" target="_blank" rel="noreferrer">Open in Google Maps</a>` : '<div class="small">No GPS coordinates available for this group.</div>'}
+        </div>
+        <div class="field">
+          <label for="groupNotesText">Notes</label>
+          <textarea id="groupNotesText">${escapeHtml(group.notes || '')}</textarea>
+        </div>
+        <div class="row">
+          <button id="renameGroup">Apply</button>
+          <button id="guessGroupLocation">Guess Location</button>
+        </div>
+        ${group.locationGuess ? '<button id="copyLocationToGroupName" class="mini">Copy location to group name</button>' : ''}
+        <div class="row">
+          <button id="deleteGroup" class="danger">Delete</button>
+        </div>
+        <div class="small">${state.photos.filter((p) => p.groupId === group.id).length} photos in this group.</div>
+      `;
+      $('renameGroup').addEventListener('click', () => {
+        group.name = $('groupName').value.trim() || group.name;
+        group.locationGuess = $('groupLocation').value.trim();
+        group.notes = $('groupNotesText').value;
+        render();
+      });
+      $('guessGroupLocation').addEventListener('click', async () => {
+        await guessLocationForGroup(group);
+        render();
+      });
+      const copyLocationButton = $('copyLocationToGroupName');
+      if (copyLocationButton) {
+        copyLocationButton.addEventListener('click', () => {
+          copyLocationToGroupName(group, 'groupName', 'groupLocation');
+        });
+      }
+      $('deleteGroup').addEventListener('click', () => {
+        if (!confirm('Delete this group? Photos will become ungrouped.')) return;
+        for (const p of state.photos) if (p.groupId === group.id) p.groupId = null;
+        state.groups = state.groups.filter((g) => g.id !== group.id);
+        state.activeGroup = 'all';
+        render();
+      });
+    }
+
+    function renderSideGroupEditor() {
+      if (!els.sideGroupEditor) return;
+      const group = getGroup(state.activeGroup);
+      if (!group) {
+        els.sideGroupEditor.innerHTML = '';
+        return;
+      }
+      const center = group.locationCenter || groupCenter(group.id);
+      const mapUrl = group.mapUrl || googleMapsUrl(center);
+      els.sideGroupEditor.innerHTML = `
+        <div class="section-title">Edit Group</div>
+        <div class="field">
+          <label for="sideGroupName">Group name</label>
+          <input id="sideGroupName" value="${escapeHtml(group.name)}">
+        </div>
+        <div class="field">
+          <label for="sideGroupLocation">Best guess location</label>
+          <input id="sideGroupLocation" value="${escapeHtml(group.locationGuess || '')}" placeholder="Guess or type a place name">
+          ${mapUrl ? `<a class="link" href="${escapeHtml(mapUrl)}" target="_blank" rel="noreferrer">Open in Google Maps</a>` : '<div class="small">No GPS coordinates available.</div>'}
+        </div>
+        <div class="field">
+          <label for="sideGroupNotes">Notes</label>
+          <textarea id="sideGroupNotes">${escapeHtml(group.notes || '')}</textarea>
+        </div>
+        <div class="row">
+          <button id="sideApplyGroup">Apply</button>
+          <button id="sideGuessGroupLocation">Guess</button>
+        </div>
+        ${group.locationGuess ? '<button id="sideCopyLocationToGroupName" class="mini">Copy location to group name</button>' : ''}
+      `;
+      $('sideApplyGroup').addEventListener('click', () => {
+        group.name = $('sideGroupName').value.trim() || group.name;
+        group.locationGuess = $('sideGroupLocation').value.trim();
+        group.notes = $('sideGroupNotes').value;
+        render();
+      });
+      $('sideGuessGroupLocation').addEventListener('click', async () => {
+        await guessLocationForGroup(group);
+        render();
+      });
+      const sideCopyLocationButton = $('sideCopyLocationToGroupName');
+      if (sideCopyLocationButton) {
+        sideCopyLocationButton.addEventListener('click', () => {
+          copyLocationToGroupName(group, 'sideGroupName', 'sideGroupLocation');
+        });
+      }
+    }
+
+    function copyLocationToGroupName(group, nameInputId, locationInputId) {
+      const locationValue = $(locationInputId)?.value.trim() || group.locationGuess || '';
+      if (!locationValue) return showToast('No location to copy yet.');
+      group.locationGuess = locationValue;
+      group.name = locationValue;
+      const nameInput = $(nameInputId);
+      if (nameInput) nameInput.value = locationValue;
+      render();
+    }
+
+    async function importFiles(fileList) {
+      const importedKeys = new Set(state.photos.map(fileKey));
+      const seenThisBatch = new Set();
+      const files = [...fileList].filter((file) => {
+        if (!(file.type.startsWith('image/') || /\.(heic|heif)$/i.test(file.name))) return false;
+        const key = fileKey(file);
+        if (importedKeys.has(key) || seenThisBatch.has(key)) return false;
+        seenThisBatch.add(key);
+        return true;
+      });
+      if (!files.length) return;
+      const remaining = Math.max(0, 200 - state.photos.length);
+      const selected = files.slice(0, remaining);
+      if (files.length > remaining) showToast('Only 200 photos are supported in this version.');
+      for (let i = 0; i < selected.length; i++) {
+        els.status.textContent = `Importing ${i + 1} of ${selected.length}`;
+        const file = selected[i];
+        const objectUrl = URL.createObjectURL(file);
+        const meta = await readMetadata(file).catch(() => ({}));
+        const imageInfo = await makeThumbnail(objectUrl).catch(() => ({ thumbUrl: '', width: 0, height: 0 }));
+        state.photos.push({
+          id: uid('photo'),
+          file,
+          name: file.name,
+          size: file.size,
+          type: file.type || file.name.split('.').pop().toUpperCase(),
+          objectUrl,
+          thumbUrl: imageInfo.thumbUrl,
+          width: imageInfo.width,
+          height: imageInfo.height,
+          takenAt: meta.takenAt || (file.lastModified ? new Date(file.lastModified).toISOString() : null),
+          gps: meta.gps || null,
+          orientation: meta.orientation || null,
+          groupId: null,
+          starred: false,
+          rejected: false,
+          notes: '',
+          importOrder: state.importSeq++
+        });
+        if (i % 5 === 0) render();
+      }
+      render();
+      showToast(`Imported ${selected.length} photos.`);
+    }
+
+    function fileKey(file) {
+      return `${file.name}|${file.size}|${file.lastModified || 0}`;
+    }
+
+    async function readMetadata(file) {
+      if (!/jpe?g$/i.test(file.name) && !/jpe?g/i.test(file.type)) return {};
+      const buffer = await file.arrayBuffer();
+      return parseExif(buffer);
+    }
+
+    function makeThumbnail(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+          const max = 420;
+          const scale = Math.min(1, max / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve({ thumbUrl: canvas.toDataURL('image/jpeg', .78), width: image.naturalWidth, height: image.naturalHeight });
+        };
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    function parseExif(buffer) {
+      const view = new DataView(buffer);
+      if (view.getUint16(0) !== 0xffd8) return {};
+      let offset = 2;
+      while (offset < view.byteLength) {
+        const marker = view.getUint16(offset);
+        offset += 2;
+        const length = view.getUint16(offset);
+        if (marker === 0xffe1) {
+          const header = getAscii(view, offset + 2, 6);
+          if (header === 'Exif\0\0') return parseTiff(view, offset + 8);
+        }
+        offset += length;
+      }
+      return {};
+    }
+
+    function parseTiff(view, start) {
+      const little = view.getUint16(start) === 0x4949;
+      const get16 = (o) => view.getUint16(o, little);
+      const get32 = (o) => view.getUint32(o, little);
+      const firstIfd = start + get32(start + 4);
+      const root = readIfd(view, start, firstIfd, little);
+      const exif = root[0x8769] ? readIfd(view, start, start + root[0x8769], little) : {};
+      const gpsIfd = root[0x8825] ? readIfd(view, start, start + root[0x8825], little) : {};
+      const rawDate = exif[0x9003] || exif[0x9004] || root[0x0132] || null;
+      const takenAt = parseExifDate(rawDate);
+      const gps = parseGps(gpsIfd);
+      return { takenAt, gps, orientation: root[0x0112] || null };
+    }
+
+    function readIfd(view, tiffStart, ifdOffset, little) {
+      const get16 = (o) => view.getUint16(o, little);
+      const get32 = (o) => view.getUint32(o, little);
+      const count = get16(ifdOffset);
+      const tags = {};
+      for (let i = 0; i < count; i++) {
+        const entry = ifdOffset + 2 + i * 12;
+        const tag = get16(entry);
+        const type = get16(entry + 2);
+        const num = get32(entry + 4);
+        const size = [0,1,1,2,4,8,1,1,2,4,8,4,8][type] || 1;
+        const valueOffset = num * size <= 4 ? entry + 8 : tiffStart + get32(entry + 8);
+        tags[tag] = readExifValue(view, valueOffset, type, num, little);
+      }
+      return tags;
+    }
+
+    function readExifValue(view, offset, type, count, little) {
+      const get16 = (o) => view.getUint16(o, little);
+      const get32 = (o) => view.getUint32(o, little);
+      const one = (i) => {
+        const o = offset + i * ([0,1,1,2,4,8,1,1,2,4,8,4,8][type] || 1);
+        if (type === 2) return getAscii(view, offset, count).replace(/\0+$/, '');
+        if (type === 3) return get16(o);
+        if (type === 4) return get32(o);
+        if (type === 5) return get32(o) / Math.max(1, get32(o + 4));
+        if (type === 1 || type === 7) return view.getUint8(o);
+        return null;
+      };
+      if (type === 2) return one(0);
+      if (count === 1) return one(0);
+      return Array.from({ length: count }, (_, i) => one(i));
+    }
+
+    function getAscii(view, offset, length) {
+      let value = '';
+      for (let i = 0; i < length; i++) value += String.fromCharCode(view.getUint8(offset + i));
+      return value;
+    }
+
+    function parseExifDate(raw) {
+      if (!raw) return null;
+      const match = String(raw).match(/^(\d{4}):(\d{2}):(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+      if (!match) return null;
+      const [, y, m, d, hh, mm, ss] = match;
+      return new Date(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), Number(ss)).toISOString();
+    }
+
+    function parseGps(tags) {
+      if (!tags[1] || !tags[2] || !tags[3] || !tags[4]) return null;
+      const lat = dmsToDecimal(tags[2], tags[1]);
+      const lng = dmsToDecimal(tags[4], tags[3]);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    }
+
+    function dmsToDecimal(parts, ref) {
+      if (!Array.isArray(parts) || parts.length < 3) return NaN;
+      const sign = /S|W/i.test(ref) ? -1 : 1;
+      return sign * (parts[0] + parts[1] / 60 + parts[2] / 3600);
+    }
+
+    function makeGroup(name, method = 'manual') {
+      const group = { id: uid('group'), name, method, notes: '', sortOrder: state.groups.length, locationGuess: '', locationProvider: '', locationCenter: null, mapUrl: '' };
+      state.groups.push(group);
+      return group;
+    }
+
+    function clearGeneratedGroups() {
+      const generated = new Set(state.groups.filter((g) => g.method !== 'manual').map((g) => g.id));
+      state.groups = state.groups.filter((g) => !generated.has(g.id));
+      for (const p of state.photos) p.groupId = null;
+    }
+
+    function groupByDay() {
+      clearGeneratedGroups();
+      const map = new Map();
+      for (const photo of state.photos) {
+        const key = dateKey(photo.takenAt);
+        if (!map.has(key)) map.set(key, makeGroup(key, 'day'));
+        photo.groupId = map.get(key).id;
+      }
+      state.activeGroup = 'all';
+      render();
+    }
+
+    function groupByTime() {
+      clearGeneratedGroups();
+      const gapMs = Number($('timeGap').value) * 60 * 1000;
+      const sorted = [...state.photos].sort((a, b) => {
+        const ta = a.takenAt ? new Date(a.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+        const tb = b.takenAt ? new Date(b.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+        return ta - tb || a.importOrder - b.importOrder;
+      });
+      let current = null;
+      let previousTime = null;
+      for (const photo of sorted) {
+        const t = photo.takenAt ? new Date(photo.takenAt).getTime() : null;
+        if (!t) {
+          if (!current || current.name !== 'No capture time') current = makeGroup('No capture time', 'time');
+        } else if (!current || !previousTime || t - previousTime > gapMs) {
+          current = makeGroup(`${dateKey(photo.takenAt)} ${timeKey(photo.takenAt)}`, 'time');
+        }
+        photo.groupId = current.id;
+        if (t) previousTime = t;
+      }
+      state.activeGroup = 'all';
+      render();
+    }
+
+    function groupByGps() {
+      clearGeneratedGroups();
+      const radius = Number($('gpsRadius').value);
+      const clusters = [];
+      const noGps = makeGroup('No GPS metadata', 'gps');
+      for (const photo of state.photos) {
+        if (!photo.gps) {
+          photo.groupId = noGps.id;
+          continue;
+        }
+        let best = null;
+        let bestDist = Infinity;
+        for (const cluster of clusters) {
+          const d = distanceMeters(photo.gps, cluster.center);
+          if (d < bestDist) {
+            best = cluster;
+            bestDist = d;
+          }
+        }
+        if (!best || bestDist > radius) {
+          const group = makeGroup(`GPS cluster ${clusters.length + 1}`, 'gps');
+          best = { group, center: { ...photo.gps }, count: 0, number: clusters.length + 1 };
+          clusters.push(best);
+        }
+        best.count++;
+        best.center.lat += (photo.gps.lat - best.center.lat) / best.count;
+        best.center.lng += (photo.gps.lng - best.center.lng) / best.count;
+        best.group.locationCenter = { ...best.center };
+        best.group.mapUrl = googleMapsUrl(best.group.locationCenter);
+        photo.groupId = best.group.id;
+      }
+      for (const cluster of clusters) cluster.group.name = `Location ${cluster.number} (${cluster.count})`;
+      if (!state.photos.some((p) => p.groupId === noGps.id)) state.groups = state.groups.filter((g) => g.id !== noGps.id);
+      state.activeGroup = 'all';
+      render();
+    }
+
+    const geocodeCache = new Map();
+    let lastGeocodeAt = 0;
+
+    async function guessLocationsForGroups() {
+      const targets = state.groups.filter((group) => groupCenter(group.id));
+      if (!targets.length) return showToast('No grouped GPS coordinates to look up.');
+      for (let i = 0; i < targets.length; i++) {
+        els.status.textContent = `Guessing location ${i + 1} of ${targets.length}`;
+        await guessLocationForGroup(targets[i], true);
+        render();
+      }
+      showToast('Location guesses updated.');
+    }
+
+    async function guessLocationForGroup(group, quiet = false) {
+      const center = group.locationCenter || groupCenter(group.id);
+      if (!center) {
+        if (!quiet) showToast('This group has no GPS coordinates.');
+        return;
+      }
+      group.locationCenter = center;
+      group.mapUrl = googleMapsUrl(center);
+      const key = `${center.lat.toFixed(5)},${center.lng.toFixed(5)}`;
+      if (geocodeCache.has(key)) {
+        Object.assign(group, geocodeCache.get(key));
+        return;
+      }
+      const elapsed = Date.now() - lastGeocodeAt;
+      if (elapsed < 1100) await new Promise((resolve) => setTimeout(resolve, 1100 - elapsed));
+      lastGeocodeAt = Date.now();
+      try {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(center.lat)}&lon=${encodeURIComponent(center.lng)}&zoom=18&addressdetails=1&accept-language=en`;
+        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`Lookup returned ${response.status}`);
+        const data = await response.json();
+        const guess = formatPlaceGuess(data);
+        const result = {
+          locationGuess: guess || data.display_name || `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`,
+          locationProvider: 'OpenStreetMap Nominatim',
+          mapUrl: googleMapsUrl(center),
+          locationCenter: center
+        };
+        geocodeCache.set(key, result);
+        Object.assign(group, result);
+      } catch (error) {
+        group.locationGuess = group.locationGuess || `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
+        group.locationProvider = 'Lookup unavailable';
+        if (!quiet) showToast('Location lookup failed. Coordinates were kept.');
+      }
+    }
+
+    function formatPlaceGuess(data) {
+      const a = data.address || {};
+      const venue = data.name || a.hotel || a.building || a.attraction || a.amenity || a.road;
+      const locality = a.suburb || a.neighbourhood || a.city || a.town || a.village || a.hamlet;
+      const region = a.state || a.county;
+      const country = a.country;
+      return [venue, locality, region, country].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).slice(0, 4).join(', ');
+    }
+
+    function distanceMeters(a, b) {
+      const R = 6371000;
+      const dLat = (b.lat - a.lat) * Math.PI / 180;
+      const dLng = (b.lng - a.lng) * Math.PI / 180;
+      const lat1 = a.lat * Math.PI / 180;
+      const lat2 = b.lat * Math.PI / 180;
+      const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+    }
+
+    function movePhotosToGroup(ids, groupId) {
+      const targets = new Set(ids.filter(Boolean));
+      if (!targets.size && state.selected.size) for (const id of state.selected) targets.add(id);
+      for (const p of state.photos) if (targets.has(p.id)) p.groupId = groupId;
+      state.selected.clear();
+      render();
+    }
+
+    function bindDropZone(zone) {
+      if (!zone) return;
+      zone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        zone.classList.add('drag');
+      });
+      zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+      zone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        zone.classList.remove('drag');
+        importFiles(event.dataTransfer.files);
+      });
+    }
+
+    async function buildReportPages(options) {
+      const groups = exportGroups(options.includeRejected);
+      const pages = [];
+      if (options.cover) pages.push({ type: 'cover', title: options.title, groups });
+      for (const group of groups) {
+        const chunks = chunk(group.photos, options.perPage);
+        for (let i = 0; i < chunks.length; i++) {
+          pages.push({ type: 'photos', group, photos: chunks[i], pageIndex: i + 1, pageTotal: chunks.length });
+        }
+      }
+      const canvases = [];
+      for (let i = 0; i < pages.length; i++) {
+        $('exportProgress').style.width = `${Math.round((i / Math.max(1, pages.length)) * 70)}%`;
+        $('exportStatus').textContent = `Rendering page ${i + 1} of ${pages.length}`;
+        await tick();
+        canvases.push(await renderReportCanvas(pages[i], options));
+      }
+      return canvases;
+    }
+
+    function exportGroups(includeRejected) {
+      const eligible = state.photos.filter((p) => includeRejected || !p.rejected);
+      const orderedGroups = [
+        ...state.groups,
+        { id: null, name: 'Ungrouped', notes: '', method: 'manual', sortOrder: 9999 }
+      ];
+      return orderedGroups
+        .map((group) => ({
+          group,
+          name: group.name,
+          notes: group.notes || '',
+          photos: eligible.filter((p) => (p.groupId || null) === group.id)
+            .sort((a, b) => {
+              const ta = a.takenAt ? new Date(a.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+              const tb = b.takenAt ? new Date(b.takenAt).getTime() : Number.MAX_SAFE_INTEGER;
+              return ta - tb || a.importOrder - b.importOrder;
+            })
+        }))
+        .filter((g) => g.photos.length);
+    }
+
+    function chunk(list, size) {
+      const out = [];
+      for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+      return out;
+    }
+
+    function tick() {
+      return new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    async function renderReportCanvas(page, options) {
+      const isPdf = options.format === 'pdf';
+      const canvas = document.createElement('canvas');
+      canvas.width = isPdf ? 1600 : 1600;
+      canvas.height = isPdf ? 1131 : 900;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#18202a';
+      ctx.textBaseline = 'top';
+      if (page.type === 'cover') {
+        ctx.fillStyle = '#0e6f68';
+        ctx.fillRect(0, 0, canvas.width, 18);
+        ctx.fillStyle = '#18202a';
+        drawText(ctx, options.title, 80, 90, canvas.width - 160, 54, 700);
+        const totalPhotos = page.groups.reduce((sum, g) => sum + g.photos.length, 0);
+        drawText(ctx, `${totalPhotos} photos in ${page.groups.length} groups`, 82, 170, canvas.width - 160, 26, 500, '#627084');
+        let y = 250;
+        for (const g of page.groups.slice(0, 18)) {
+          drawText(ctx, `${g.name} - ${g.photos.length} photos`, 90, y, canvas.width - 180, 24, 650);
+          const context = [g.group.locationGuess, options.groupNotes ? g.notes : ''].filter(Boolean).join(' | ');
+          if (context) drawText(ctx, context, 110, y + 30, canvas.width - 220, 18, 400, '#627084');
+          y += context ? 76 : 44;
+        }
+        drawText(ctx, new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }), 82, canvas.height - 80, canvas.width - 160, 18, 500, '#627084');
+        return canvas;
+      }
+      drawText(ctx, page.group.name, 44, 32, canvas.width - 88, 34, 700);
+      const subtitle = `${page.photos.length} of ${page.group.photos.length} photos | page ${page.pageIndex} of ${page.pageTotal}`;
+      drawText(ctx, subtitle, 46, 74, canvas.width - 92, 18, 500, '#627084');
+      let top = 116;
+      const groupContext = [page.group.locationGuess, options.groupNotes ? page.group.notes : ''].filter(Boolean).join(' | ');
+      if (groupContext) {
+        drawText(ctx, groupContext, 46, 100, canvas.width - 92, 19, 400, '#627084');
+        top = 146;
+      }
+      const cells = layoutCells(options.perPage, canvas.width, canvas.height, top);
+      for (let i = 0; i < page.photos.length; i++) {
+        await drawPhotoCell(ctx, page.photos[i], cells[i], options);
+      }
+      return canvas;
+    }
+
+    function layoutCells(count, w, h, top) {
+      const cols = count === 1 ? 1 : 2;
+      const rows = count <= 2 ? count : count === 4 ? 2 : 3;
+      const gap = 26;
+      const marginX = 44;
+      const bottom = 34;
+      const cellW = (w - marginX * 2 - gap * (cols - 1)) / cols;
+      const cellH = (h - top - bottom - gap * (rows - 1)) / rows;
+      const cells = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) cells.push({ x: marginX + c * (cellW + gap), y: top + r * (cellH + gap), w: cellW, h: cellH });
+      }
+      return cells;
+    }
+
+    async function drawPhotoCell(ctx, photo, cell, options) {
+      ctx.strokeStyle = '#d7dde5';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cell.x, cell.y, cell.w, cell.h);
+      const hasInfo = options.captionMode !== 'none';
+      const pad = 8;
+      const gap = hasInfo ? 10 : 0;
+      const infoW = hasInfo ? Math.max(150, Math.min(260, cell.w * 0.36)) : 0;
+      const imageBox = {
+        x: cell.x + pad,
+        y: cell.y + pad,
+        w: cell.w - pad * 2 - infoW - gap,
+        h: cell.h - pad * 2
+      };
+      const image = await loadImage(photo.objectUrl);
+      const fit = fitRect(image.naturalWidth, image.naturalHeight, imageBox.w, imageBox.h);
+      ctx.drawImage(image, imageBox.x + (imageBox.w - fit.w) / 2, imageBox.y + (imageBox.h - fit.h) / 2, fit.w, fit.h);
+      if (hasInfo) {
+        const info = {
+          x: imageBox.x + imageBox.w + gap,
+          y: cell.y + pad,
+          w: infoW,
+          h: cell.h - pad * 2
+        };
+        ctx.fillStyle = '#f6f7f9';
+        ctx.fillRect(info.x, info.y, info.w, info.h);
+        ctx.strokeStyle = '#d7dde5';
+        ctx.strokeRect(info.x, info.y, info.w, info.h);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(info.x + 1, info.y + 1, info.w - 2, info.h - 2);
+        ctx.clip();
+        const textX = info.x + 10;
+        let y = info.y + 10;
+        y = drawText(ctx, photo.name, textX, y, info.w - 20, 13, 700, '#18202a') + 8;
+        if (options.captionMode !== 'file') {
+          y = drawText(ctx, formatExportDayDate(photo.takenAt), textX, y, info.w - 20, 12, 650, '#29415f') + 4;
+          y = drawText(ctx, formatExportTime(photo.takenAt), textX, y, info.w - 20, 12, 500, '#627084') + 12;
+          y = drawText(ctx, 'Notes', textX, y, info.w - 20, 11, 700, '#627084') + 4;
+          drawText(ctx, photo.notes || 'No notes', textX, y, info.w - 20, 12, 400, '#18202a');
+        }
+        ctx.restore();
+      }
+    }
+
+    function drawText(ctx, text, x, y, maxW, size, weight = 400, color = '#18202a') {
+      ctx.fillStyle = color;
+      ctx.font = `${weight} ${size}px system-ui, Segoe UI, sans-serif`;
+      const words = String(text || '').split(/\s+/);
+      let line = '';
+      let yy = y;
+      const lineH = size * 1.25;
+      for (const word of words) {
+        const test = line ? line + ' ' + word : word;
+        if (ctx.measureText(test).width > maxW && line) {
+          ctx.fillText(line, x, yy);
+          line = word;
+          yy += lineH;
+        } else {
+          line = test;
+        }
+      }
+      if (line) ctx.fillText(line, x, yy);
+      return yy + lineH;
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function fitRect(iw, ih, bw, bh) {
+      const scale = Math.min(bw / iw, bh / ih);
+      return { w: iw * scale, h: ih * scale };
+    }
+
+    async function runExport() {
+      if (!state.photos.length) return showToast('Import photos before exporting.');
+      const options = {
+        format: $('exportFormat').value,
+        perPage: Number($('perPage').value),
+        title: $('visitTitle').value.trim() || 'Site Visit Photo Review',
+        captionMode: $('captionMode').value,
+        includeRejected: $('exportRejected').checked,
+        groupNotes: $('groupNotes').checked,
+        cover: $('coverPage').checked
+      };
+      $('runExport').disabled = true;
+      $('exportStatus').textContent = 'Preparing export';
+      $('exportProgress').style.width = '1%';
+      try {
+        const canvases = await buildReportPages(options);
+        let blob, name;
+        if (options.format === 'pdf') {
+          $('exportStatus').textContent = 'Building PDF';
+          blob = await makePdf(canvases);
+          name = safeFilename(options.title) + '.pdf';
+        } else {
+          $('exportStatus').textContent = 'Building PPTX';
+          blob = await makePptx(canvases, options.title);
+          name = safeFilename(options.title) + '.pptx';
+        }
+        $('exportProgress').style.width = '100%';
+        downloadBlob(blob, name);
+        $('exportStatus').textContent = `Downloaded ${name}`;
+      } catch (error) {
+        console.error(error);
+        $('exportStatus').textContent = 'Export failed: ' + error.message;
+      } finally {
+        $('runExport').disabled = false;
+      }
+    }
+
+    function safeFilename(value) {
+      return value.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim() || 'site-visit-photo-review';
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function makePdf(canvases) {
+      const pageW = 842, pageH = 595;
+      const objects = [];
+      const kids = [];
+      objects.push('<< /Type /Catalog /Pages 2 0 R >>');
+      objects.push(null);
+      for (let i = 0; i < canvases.length; i++) {
+        const imgBytes = dataUrlBytes(canvases[i].toDataURL('image/jpeg', .86)).bytes;
+        const pageObj = objects.length + 1;
+        const contentObj = pageObj + 1;
+        const imageObj = pageObj + 2;
+        kids.push(`${pageObj} 0 R`);
+        const content = `q ${pageW} 0 0 ${pageH} 0 0 cm /Im${i} Do Q`;
+        objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im${i} ${imageObj} 0 R >> >> /Contents ${contentObj} 0 R >>`);
+        objects.push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+        objects.push({
+          prefix: `<< /Type /XObject /Subtype /Image /Width ${canvases[i].width} /Height ${canvases[i].height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgBytes.length} >>\nstream\n`,
+          bytes: imgBytes,
+          suffix: '\nendstream'
+        });
+      }
+      objects[1] = `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${kids.length} >>`;
+      return new Blob([buildPdfBytes(objects)], { type: 'application/pdf' });
+    }
+
+    function buildPdfBytes(objects) {
+      const enc = new TextEncoder();
+      const chunks = [enc.encode('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n')];
+      const offsets = [0];
+      let length = chunks[0].length;
+      for (let i = 0; i < objects.length; i++) {
+        offsets.push(length);
+        const head = enc.encode(`${i + 1} 0 obj\n`);
+        chunks.push(head); length += head.length;
+        const obj = objects[i];
+        if (typeof obj === 'string') {
+          const b = enc.encode(obj + '\n');
+          chunks.push(b); length += b.length;
+        } else {
+          const p = enc.encode(obj.prefix);
+          const s = enc.encode(obj.suffix + '\n');
+          chunks.push(p, obj.bytes, s);
+          length += p.length + obj.bytes.length + s.length;
+        }
+        const tail = enc.encode('endobj\n');
+        chunks.push(tail); length += tail.length;
+      }
+      const xrefAt = length;
+      let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+      for (let i = 1; i < offsets.length; i++) xref += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+      xref += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefAt}\n%%EOF`;
+      chunks.push(enc.encode(xref));
+      return new Blob(chunks);
+    }
+
+    async function makePptx(canvases, title) {
+      const entries = {};
+      const enc = new TextEncoder();
+      entries['[Content_Types].xml'] = xmlBytes(contentTypesXml(canvases.length));
+      entries['_rels/.rels'] = xmlBytes(rootRelsXml());
+      entries['docProps/core.xml'] = xmlBytes(coreXml(title));
+      entries['docProps/app.xml'] = xmlBytes(appXml(canvases.length));
+      entries['ppt/presentation.xml'] = xmlBytes(presentationXml(canvases.length));
+      entries['ppt/_rels/presentation.xml.rels'] = xmlBytes(presentationRelsXml(canvases.length));
+      entries['ppt/presProps.xml'] = xmlBytes(presPropsXml());
+      entries['ppt/viewProps.xml'] = xmlBytes(viewPropsXml());
+      entries['ppt/tableStyles.xml'] = xmlBytes(tableStylesXml());
+      entries['ppt/slideMasters/slideMaster1.xml'] = xmlBytes(slideMasterXml());
+      entries['ppt/slideMasters/_rels/slideMaster1.xml.rels'] = xmlBytes(slideMasterRelsXml());
+      entries['ppt/slideLayouts/slideLayout1.xml'] = xmlBytes(slideLayoutXml());
+      entries['ppt/slideLayouts/_rels/slideLayout1.xml.rels'] = xmlBytes(slideLayoutRelsXml());
+      entries['ppt/theme/theme1.xml'] = xmlBytes(themeXml());
+      for (let i = 0; i < canvases.length; i++) {
+        const n = i + 1;
+        const media = dataUrlBytes(canvases[i].toDataURL('image/jpeg', .88)).bytes;
+        entries[`ppt/media/slide-${n}.jpg`] = media;
+        entries[`ppt/slides/slide${n}.xml`] = xmlBytes(slideXml(n));
+        entries[`ppt/slides/_rels/slide${n}.xml.rels`] = xmlBytes(slideRelsXml(n));
+        $('exportProgress').style.width = `${70 + Math.round((n / canvases.length) * 25)}%`;
+        await tick();
+      }
+      return new Blob([makeZip(entries)], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+    }
+
+    function xmlBytes(xml) {
+      return new TextEncoder().encode(xml.trim());
+    }
+
+    function contentTypesXml(count) {
+      let overrides = '';
+      for (let i = 1; i <= count; i++) overrides += `<Override PartName="/ppt/slides/slide${i}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`;
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+        <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+        <Default Extension="xml" ContentType="application/xml"/>
+        <Default Extension="jpg" ContentType="image/jpeg"/>
+        <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+        <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+        <Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
+        <Override PartName="/ppt/presProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presProps+xml"/>
+        <Override PartName="/ppt/viewProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.viewProps+xml"/>
+        <Override PartName="/ppt/tableStyles.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.tableStyles+xml"/>
+        <Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>
+        <Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>
+        <Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
+        ${overrides}
+      </Types>`;
+    }
+
+    function rootRelsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+        <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>
+        <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+        <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+      </Relationships>`;
+    }
+
+    function coreXml(title) {
+      const now = new Date().toISOString();
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <dc:title>${escapeXml(title)}</dc:title><dc:creator>Site Visit Photo Grouper</dc:creator>
+        <cp:lastModifiedBy>Site Visit Photo Grouper</cp:lastModifiedBy>
+        <dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created>
+        <dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified>
+      </cp:coreProperties>`;
+    }
+
+    function appXml(count) {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+        <Application>Site Visit Photo Grouper</Application><PresentationFormat>On-screen Show (16:9)</PresentationFormat><Slides>${count}</Slides>
+      </Properties>`;
+    }
+
+    function presentationXml(count) {
+      let ids = '';
+      for (let i = 1; i <= count; i++) ids += `<p:sldId id="${255 + i}" r:id="rId${i + 1}"/>`;
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+        <p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>
+        <p:sldIdLst>${ids}</p:sldIdLst>
+        <p:sldSz cx="12192000" cy="6858000" type="wide"/><p:notesSz cx="6858000" cy="9144000"/>
+      </p:presentation>`;
+    }
+
+    function presentationRelsXml(count) {
+      let rels = '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>';
+      for (let i = 1; i <= count; i++) rels += `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${i}.xml"/>`;
+      rels += `<Relationship Id="rId${count + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/presProps" Target="presProps.xml"/>`;
+      rels += `<Relationship Id="rId${count + 3}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/viewProps" Target="viewProps.xml"/>`;
+      rels += `<Relationship Id="rId${count + 4}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>`;
+      rels += `<Relationship Id="rId${count + 5}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/tableStyles" Target="tableStyles.xml"/>`;
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels}</Relationships>`;
+    }
+
+    function presPropsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <p:presentationPr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+        <p:showPr showNarration="1"><p:sldAll/><p:penClr><a:srgbClr val="FF0000"/></p:penClr></p:showPr>
+        <p:clrMru><a:srgbClr val="0E6F68"/><a:srgbClr val="29415F"/><a:srgbClr val="627084"/></p:clrMru>
+      </p:presentationPr>`;
+    }
+
+    function viewPropsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <p:viewPr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+        <p:normalViewPr><p:restoredLeft sz="15620"/><p:restoredTop sz="94660"/></p:normalViewPr>
+        <p:slideViewPr><p:cSldViewPr><p:cViewPr varScale="1"><p:scale><a:sx n="100" d="100"/><a:sy n="100" d="100"/></p:scale><p:origin x="0" y="0"/></p:cViewPr><p:guideLst/></p:cSldViewPr></p:slideViewPr>
+        <p:notesTextViewPr><p:cViewPr><p:scale><a:sx n="100" d="100"/><a:sy n="100" d="100"/></p:scale><p:origin x="0" y="0"/></p:cViewPr></p:notesTextViewPr>
+        <p:gridSpacing cx="72008" cy="72008"/>
+      </p:viewPr>`;
+    }
+
+    function tableStylesXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <a:tblStyleLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" def="{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}"/>`;
+    }
+
+    function slideXml(n) {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+        <p:cSld><p:spTree>
+          <p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+          <p:pic><p:nvPicPr><p:cNvPr id="2" name="Slide ${n}"/><p:cNvPicPr/><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="12192000" cy="6858000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>
+        </p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>
+      </p:sld>`;
+    }
+
+    function slideRelsXml(n) {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/slide-${n}.jpg"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/></Relationships>`;
+    }
+
+    function slideMasterXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+        <p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld>
+        <p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>
+        <p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst>
+        <p:hf sldNum="0" hdr="0" ftr="0" dt="0"/>
+        ${masterTextStylesXml()}
+      </p:sldMaster>`;
+    }
+
+    function masterTextStylesXml() {
+      const level = (tag, size, margin) => `<a:${tag} marL="${margin}" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="${size}" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:${tag}>`;
+      return `<p:txStyles>
+        <p:titleStyle><a:lvl1pPr algn="ctr" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="4400" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mj-lt"/><a:ea typeface="+mj-ea"/><a:cs typeface="+mj-cs"/></a:defRPr></a:lvl1pPr></p:titleStyle>
+        <p:bodyStyle>${level('lvl1pPr', 3200, 342900)}${level('lvl2pPr', 2800, 742950)}${level('lvl3pPr', 2400, 1143000)}${level('lvl4pPr', 2000, 1600200)}${level('lvl5pPr', 2000, 2057400)}${level('lvl6pPr', 2000, 2514600)}${level('lvl7pPr', 2000, 2971800)}${level('lvl8pPr', 2000, 3429000)}${level('lvl9pPr', 2000, 3886200)}</p:bodyStyle>
+        <p:otherStyle><a:defPPr><a:defRPr lang="en-US"/></a:defPPr>${level('lvl1pPr', 1800, 0)}${level('lvl2pPr', 1800, 457200)}${level('lvl3pPr', 1800, 914400)}${level('lvl4pPr', 1800, 1371600)}${level('lvl5pPr', 1800, 1828800)}${level('lvl6pPr', 1800, 2286000)}${level('lvl7pPr', 1800, 2743200)}${level('lvl8pPr', 1800, 3200400)}${level('lvl9pPr', 1800, 3657600)}</p:otherStyle>
+      </p:txStyles>`;
+    }
+
+    function slideMasterRelsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/></Relationships>`;
+    }
+
+    function slideLayoutXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="blank" preserve="1"><p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`;
+    }
+
+    function slideLayoutRelsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/></Relationships>`;
+    }
+
+    function themeXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="S4 Theme">
+        <a:themeElements>
+          <a:clrScheme name="S4">
+            <a:dk1><a:srgbClr val="18202A"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1>
+            <a:dk2><a:srgbClr val="29415F"/></a:dk2><a:lt2><a:srgbClr val="EEF1F4"/></a:lt2>
+            <a:accent1><a:srgbClr val="0E6F68"/></a:accent1><a:accent2><a:srgbClr val="29415F"/></a:accent2>
+            <a:accent3><a:srgbClr val="A66205"/></a:accent3><a:accent4><a:srgbClr val="627084"/></a:accent4>
+            <a:accent5><a:srgbClr val="B73535"/></a:accent5><a:accent6><a:srgbClr val="D7DDE5"/></a:accent6>
+            <a:hlink><a:srgbClr val="0E6F68"/></a:hlink><a:folHlink><a:srgbClr val="29415F"/></a:folHlink>
+          </a:clrScheme>
+          <a:fontScheme name="S4"><a:majorFont><a:latin typeface="Arial"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont><a:minorFont><a:latin typeface="Arial"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont></a:fontScheme>
+          <a:fmtScheme name="S4">
+            <a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="67000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="85000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="94000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="78000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill></a:fillStyleLst>
+            <a:lnStyleLst><a:ln w="6350" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/><a:miter lim="800000"/></a:ln><a:ln w="12700" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/><a:miter lim="800000"/></a:ln><a:ln w="19050" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/><a:miter lim="800000"/></a:ln></a:lnStyleLst>
+            <a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad="57150" dist="19050" dir="5400000" algn="ctr" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="63000"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle></a:effectStyleLst>
+            <a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"><a:tint val="95000"/><a:satMod val="170000"/></a:schemeClr></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="93000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="63000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill></a:bgFillStyleLst>
+          </a:fmtScheme>
+        </a:themeElements>
+        <a:objectDefaults/><a:extraClrSchemeLst/>
+      </a:theme>`;
+    }
+
+    function escapeXml(value) {
+      return String(value ?? '').replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+    }
+
+    function dataUrlBytes(dataUrl) {
+      const [meta, data] = dataUrl.split(',');
+      const binary = atob(data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return { meta, bytes };
+    }
+
+    function makeZip(entries) {
+      const enc = new TextEncoder();
+      const parts = [];
+      const central = [];
+      let offset = 0;
+      const now = new Date();
+      const time = ((now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2)) & 0xffff;
+      const date = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xffff;
+      for (const [name, data] of Object.entries(entries)) {
+        const nameBytes = enc.encode(name);
+        const crc = crc32(data);
+        const local = new Uint8Array(30 + nameBytes.length);
+        const v = new DataView(local.buffer);
+        v.setUint32(0, 0x04034b50, true);
+        v.setUint16(4, 20, true);
+        v.setUint16(10, time, true);
+        v.setUint16(12, date, true);
+        v.setUint32(14, crc, true);
+        v.setUint32(18, data.length, true);
+        v.setUint32(22, data.length, true);
+        v.setUint16(26, nameBytes.length, true);
+        local.set(nameBytes, 30);
+        parts.push(local, data);
+        const cen = new Uint8Array(46 + nameBytes.length);
+        const cv = new DataView(cen.buffer);
+        cv.setUint32(0, 0x02014b50, true);
+        cv.setUint16(4, 20, true);
+        cv.setUint16(6, 20, true);
+        cv.setUint16(12, time, true);
+        cv.setUint16(14, date, true);
+        cv.setUint32(16, crc, true);
+        cv.setUint32(20, data.length, true);
+        cv.setUint32(24, data.length, true);
+        cv.setUint16(28, nameBytes.length, true);
+        cv.setUint32(42, offset, true);
+        cen.set(nameBytes, 46);
+        central.push(cen);
+        offset += local.length + data.length;
+      }
+      const centralSize = central.reduce((sum, p) => sum + p.length, 0);
+      const end = new Uint8Array(22);
+      const ev = new DataView(end.buffer);
+      ev.setUint32(0, 0x06054b50, true);
+      ev.setUint16(8, central.length, true);
+      ev.setUint16(10, central.length, true);
+      ev.setUint32(12, centralSize, true);
+      ev.setUint32(16, offset, true);
+      return new Blob([...parts, ...central, end]);
+    }
+
+    const crcTable = (() => {
+      const table = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        table[n] = c >>> 0;
+      }
+      return table;
+    })();
+
+    function crc32(bytes) {
+      let c = 0xffffffff;
+      for (let i = 0; i < bytes.length; i++) c = crcTable[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+      return (c ^ 0xffffffff) >>> 0;
+    }
+
+    function saveProject() {
+      const data = {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        groups: state.groups,
+        photos: state.photos.map((p) => ({
+          id: p.id, name: p.name, size: p.size, type: p.type, takenAt: p.takenAt, gps: p.gps,
+          groupId: p.groupId, starred: p.starred, rejected: p.rejected, notes: p.notes, importOrder: p.importOrder
+        }))
+      };
+      downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'site-visit-photo-project.json');
+    }
+
+    async function loadProject(file) {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      state.groups = data.groups || [];
+      const byName = new Map(state.photos.map((p) => [p.name + ':' + p.size, p]));
+      for (const saved of data.photos || []) {
+        const live = byName.get(saved.name + ':' + saved.size);
+        if (live) Object.assign(live, saved, { file: live.file, objectUrl: live.objectUrl, thumbUrl: live.thumbUrl, width: live.width, height: live.height });
+      }
+      render();
+      showToast('Project metadata loaded. Re-import matching photos first if needed.');
+    }
+
+    document.addEventListener('dragover', (event) => event.preventDefault());
+    document.addEventListener('drop', (event) => {
+      event.preventDefault();
+      if (event.dataTransfer?.files?.length) importFiles(event.dataTransfer.files);
+    });
+
+    els.fileInput.addEventListener('change', (event) => importFiles(event.target.files));
+    $('projectSaveBtn').addEventListener('click', saveProject);
+    $('projectLoadBtn').addEventListener('click', () => els.projectInput.click());
+    els.projectInput.addEventListener('change', (event) => event.target.files[0] && loadProject(event.target.files[0]));
+    $('groupTimeBtn').addEventListener('click', groupByTime);
+    $('groupGpsBtn').addEventListener('click', groupByGps);
+    $('groupDayBtn').addEventListener('click', groupByDay);
+    $('guessLocationsBtn').addEventListener('click', guessLocationsForGroups);
+    $('newGroupBtn').addEventListener('click', () => {
+      const group = makeGroup(`Group ${state.groups.length + 1}`, 'manual');
+      state.activeGroup = group.id;
+      render();
+    });
+    $('exportBtn').addEventListener('click', () => $('exportDialog').showModal());
+    $('closeExport').addEventListener('click', () => $('exportDialog').close());
+    $('cancelExport').addEventListener('click', () => $('exportDialog').close());
+    $('runExport').addEventListener('click', runExport);
+    $('selectAllBtn').addEventListener('click', () => {
+      visiblePhotos().forEach((p) => state.selected.add(p.id));
+      render();
+    });
+    $('clearSelectionBtn').addEventListener('click', () => {
+      state.selected.clear();
+      render();
+    });
+    els.moveToGroup.addEventListener('change', (event) => {
+      if (!event.target.value) return;
+      movePhotosToGroup([...state.selected], event.target.value === 'ungrouped' ? null : event.target.value);
+      event.target.value = '';
+    });
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        state.activeView = tab.dataset.view;
+        render();
+      });
+    });
+    [els.search, els.sortBy, els.filterStatus, els.hideRejected].forEach((el) => el.addEventListener('input', render));
+
+    render();
+  </script>
+</body>
+</html>
