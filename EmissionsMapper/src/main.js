@@ -109,7 +109,6 @@ const els = {
   selectedFlight: document.querySelector("#selectedFlight"),
   selectedJetlag: document.querySelector("#selectedJetlag"),
   topDrivers: document.querySelector("#topDrivers"),
-  heatToggle: document.querySelector("#heatToggle"),
   jetlagToggle: document.querySelector("#jetlagToggle"),
   routesToggle: document.querySelector("#routesToggle")
 };
@@ -673,7 +672,6 @@ function wireEvents() {
   });
 
   [
-    [els.heatToggle, "heat"],
     [els.jetlagToggle, "jetlag"],
     [els.routesToggle, "routes"]
   ].forEach(([button, key]) => {
