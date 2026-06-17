@@ -308,10 +308,8 @@ function initMap() {
   state.map.createPane("jetlagPane").style.zIndex = 520;
   state.map.createPane("routePane").style.zIndex = 650;
   state.map.createPane("airportPane").style.zIndex = 700;
-  state.map.getPane("tooltipPane").style.zIndex = 760;
   state.map.getPane("routePane").style.pointerEvents = "none";
   state.map.getPane("jetlagPane").style.pointerEvents = "none";
-  state.map.getPane("tooltipPane").style.pointerEvents = "none";
 
   state.mapLayers.heat = window.L.layerGroup().addTo(state.map);
   state.mapLayers.jetlag = window.L.layerGroup().addTo(state.map);
@@ -481,6 +479,7 @@ function renderAirports(min, max) {
     const fill = colorForScore(score, min, max);
     const marker = window.L.marker([score.destination.lat, score.destination.lon], {
       pane: "airportPane",
+      title: `${score.destination.city} (${score.destination.code})`,
       icon: window.L.divIcon({
         className: `airport-marker ${isSelected ? "selected" : ""}`,
         html: `<span class="airport-dot" style="--marker-color: ${fill}"></span><span class="airport-code">${score.destination.code}</span>`,
@@ -488,14 +487,6 @@ function renderAirports(min, max) {
         iconAnchor: [9, 14]
       })
     }).addTo(state.mapLayers.airports);
-
-    marker.bindTooltip(airportTooltipHtml(score), {
-      className: "airport-tooltip",
-      direction: "top",
-      offset: [20, -12],
-      opacity: 1,
-      sticky: true
-    });
 
     const selectDestination = () => {
       state.selectedCode = score.destination.code;
@@ -509,9 +500,6 @@ function renderAirports(min, max) {
       markerElement.dataset.code = score.destination.code;
       markerElement.setAttribute("role", "button");
       markerElement.setAttribute("tabindex", "0");
-      markerElement.setAttribute("aria-label", airportTooltipText(score));
-      markerElement.addEventListener("focus", () => marker.openTooltip());
-      markerElement.addEventListener("blur", () => marker.closeTooltip());
       markerElement.addEventListener("click", selectDestination);
       markerElement.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -521,20 +509,6 @@ function renderAirports(min, max) {
       });
     }
   }
-}
-
-function airportTooltipHtml(score) {
-  return `
-    <strong>${escapeHtml(score.destination.city)} (${escapeHtml(score.destination.code)})</strong>
-    <span>${formatTonnes(score.totalEmissionsKg)} total</span>
-    <span>${formatTonnes(score.averageEmissionsKg)} per person</span>
-    <span>${formatHours(score.averageHours)} avg flight</span>
-    <span>${score.jetlagScore.toFixed(1)} h avg jetlag</span>
-  `;
-}
-
-function airportTooltipText(score) {
-  return `${score.destination.city} (${score.destination.code}), ${formatTonnes(score.totalEmissionsKg)} total, ${formatTonnes(score.averageEmissionsKg)} per person, ${formatHours(score.averageHours)} average flight, ${score.jetlagScore.toFixed(1)} hours average jetlag`;
 }
 
 function renderSummary() {
