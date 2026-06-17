@@ -39,29 +39,6 @@ select {
   overflow: hidden;
 }
 
-.tooltip {
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px dotted black;
-  cursor: pointer;
-}
-
-.tooltip-bubble {
-  visibility: hidden;
-  width: 130px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  position: absolute;
-  z-index: 1;
-}
-
-.tooltip:hover .tooltip-bubble {
-  visibility: visible;
-}
-
 .control-panel {
   position: relative;
   z-index: 2;
@@ -226,6 +203,7 @@ input[type="range"] {
 }
 
 .toggle-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -257,10 +235,10 @@ input[type="range"] {
 
 .tooltip-bubble {
   position: absolute;
-  left: 50%;
+  left: 28px;
   bottom: calc(100% + 10px);
   z-index: 20;
-  width: min(270px, calc(100vw - 48px));
+  width: min(320px, calc(100vw - 64px));
   padding: 10px 12px;
   border: 1px solid rgba(27, 42, 52, 0.14);
   border-radius: 8px;
@@ -271,7 +249,7 @@ input[type="range"] {
   font-weight: 500;
   line-height: 1.4;
   text-align: left;
-  transform: translate(-50%, 4px);
+  transform: translateY(4px);
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
@@ -291,11 +269,12 @@ input[type="range"] {
   transform: translate(-50%, -5px) rotate(45deg);
 }
 
-.tooltip:hover .tooltip-bubble,
-.tooltip:focus .tooltip-bubble,
-.tooltip:focus-within .tooltip-bubble,
-.toggle-row:hover .tooltip-bubble {
-  transform: translate(-50%, 0);
+.tooltip:hover + .tooltip-bubble,
+.tooltip:focus + .tooltip-bubble,
+.tooltip:focus-within + .tooltip-bubble,
+.toggle-row:hover .tooltip-bubble,
+.toggle-row:focus-within .tooltip-bubble {
+  transform: translateY(0);
   visibility: visible;
   opacity: 1;
 }
