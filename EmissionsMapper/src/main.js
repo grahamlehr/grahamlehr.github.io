@@ -408,14 +408,14 @@ function renderRoutes() {
 
   selected.drivers.slice(0, 8).forEach((driver, index) => {
     const route = interpolateRoute(driver.origin, selected.destination);
-    const weight = Math.max(2.5, Math.min(6, 2 + Math.sqrt(driver.people)));
+    const weight = 1.1;
 
     window.L.polyline(route, {
       pane: "routePane",
       className: "route-line route-line-casing",
       color: "#ffffff",
-      opacity: 0.9,
-      weight: weight + 3
+      opacity: 0.72,
+      weight: 2.4
     }).addTo(state.mapLayers.routes);
 
     window.L.polyline(route, {
