@@ -209,6 +209,70 @@ input[type="range"] {
   margin-top: 14px;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: help;
+}
+
+.tooltip:focus-visible {
+  outline: 3px solid rgba(20, 125, 100, 0.28);
+  outline-offset: 2px;
+}
+
+.tooltip-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  z-index: 20;
+  width: min(270px, calc(100vw - 48px));
+  padding: 10px 12px;
+  border: 1px solid rgba(27, 42, 52, 0.14);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 34px rgba(27, 42, 52, 0.18);
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  transform: translate(-50%, 4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.tooltip-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 10px;
+  height: 10px;
+  border-right: 1px solid rgba(27, 42, 52, 0.14);
+  border-bottom: 1px solid rgba(27, 42, 52, 0.14);
+  background: rgba(255, 255, 255, 0.96);
+  transform: translate(-50%, -5px) rotate(45deg);
+}
+
+.tooltip:hover .tooltip-bubble,
+.tooltip:focus .tooltip-bubble,
+.tooltip:focus-within .tooltip-bubble {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -386,6 +450,13 @@ input[type="range"] {
   z-index: 650;
 }
 
+.leaflet-tooltip {
+  position: absolute;
+  padding: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .leaflet-popup-pane {
   z-index: 700;
 }
@@ -522,6 +593,34 @@ input[type="range"] {
   width: 20px;
   height: 20px;
   border-color: var(--ink);
+}
+
+.airport-tooltip {
+  display: grid;
+  gap: 3px;
+  min-width: 178px;
+  padding: 10px 12px;
+  border: 1px solid rgba(27, 42, 52, 0.12);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 34px rgba(27, 42, 52, 0.18);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.airport-tooltip strong,
+.airport-tooltip span {
+  display: block;
+}
+
+.airport-tooltip strong {
+  color: var(--ink);
+  font-size: 0.84rem;
+}
+
+.airport-tooltip span {
+  color: var(--muted);
 }
 
 .destination-card {
