@@ -214,17 +214,9 @@ input[type="range"] {
   position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  border-bottom: 1px solid var(--line);
-  color: var(--ink);
-  background: var(--paper);
-  font-size: 0.78rem;
-  font-weight: 900;
-  line-height: 1;
+  color: inherit;
+  border-bottom: 1px dotted currentColor;
+  line-height: 1.25;
   cursor: help;
 }
 
@@ -235,7 +227,7 @@ input[type="range"] {
 
 .tooltip-bubble {
   position: absolute;
-  left: 28px;
+  left: 0;
   bottom: calc(100% + 10px);
   z-index: 20;
   width: min(320px, calc(100vw - 64px));
@@ -259,7 +251,7 @@ input[type="range"] {
 .tooltip-bubble::after {
   content: "";
   position: absolute;
-  left: 50%;
+  left: 64px;
   top: 100%;
   width: 10px;
   height: 10px;
@@ -269,11 +261,9 @@ input[type="range"] {
   transform: translate(-50%, -5px) rotate(45deg);
 }
 
-.tooltip:hover + .tooltip-bubble,
-.tooltip:focus + .tooltip-bubble,
-.tooltip:focus-within + .tooltip-bubble,
-.toggle-row:hover .tooltip-bubble,
-.toggle-row:focus-within .tooltip-bubble {
+.tooltip:hover .tooltip-bubble,
+.tooltip:focus .tooltip-bubble,
+.tooltip:focus-within .tooltip-bubble {
   transform: translateY(0);
   visibility: visible;
   opacity: 1;
