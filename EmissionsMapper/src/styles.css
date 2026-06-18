@@ -212,11 +212,14 @@ input[type="range"] {
 
 .tooltip {
   position: relative;
-  display: inline-flex;
+  display: flex;
+  flex: 1;
   align-items: center;
+  min-width: 0;
   color: inherit;
   border-bottom: 1px dotted currentColor;
   line-height: 1.25;
+  white-space: nowrap;
   cursor: help;
 }
 
