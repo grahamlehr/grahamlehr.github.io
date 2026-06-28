@@ -1,0 +1,67 @@
+<svg width="100%" viewBox="0 0 680 660" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>SignOff layered architecture and trust boundaries</title>
+<desc>A top-to-bottom request flow: entry actors pass through the Next.js middleware auth gate into route groups, which call Zod-validated server actions, which use cross-cutting services and two kinds of Supabase client (RLS-enforced versus service-role) to reach Postgres, private storage, auth, and external email and AI services.</desc>
+<defs>
+<marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#5F5E5A" stroke-width="1.3"/></marker>
+<style>
+text{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+.lbl{font-size:12px;fill:#5F5E5A}
+.arr{stroke:#5F5E5A;stroke-width:1.5;fill:none}
+.th{font-weight:500;font-size:14px}
+.ts{font-size:12px}
+.gray rect{fill:#F1EFE8;stroke:#5F5E5A;stroke-width:1.1}.gray .th{fill:#2C2C2A}.gray .ts{fill:#444441}
+.amber rect{fill:#FAEEDA;stroke:#854F0B;stroke-width:1.1}.amber .th{fill:#633806}.amber .ts{fill:#854F0B}
+.blue rect{fill:#E6F1FB;stroke:#185FA5;stroke-width:1.1}.blue .th{fill:#0C447C}.blue .ts{fill:#185FA5}
+.green rect{fill:#EAF3DE;stroke:#3B6D11;stroke-width:1.1}.green .th{fill:#27500A}.green .ts{fill:#3B6D11}
+.coral rect{fill:#FAECE7;stroke:#993C1D;stroke-width:1.1}.coral .th{fill:#712B13}.coral .ts{fill:#993C1D}
+</style>
+</defs>
+
+<text class="lbl" x="40" y="40">entry points</text>
+<g class="gray"><rect x="40" y="48" width="140" height="46" rx="8"/><text class="th" x="110" y="70" text-anchor="middle">Internal user</text><text class="ts" x="110" y="85" text-anchor="middle">logged-in browser</text></g>
+<g class="gray"><rect x="193" y="48" width="140" height="46" rx="8"/><text class="th" x="263" y="70" text-anchor="middle">External client</text><text class="ts" x="263" y="85" text-anchor="middle">magic link only</text></g>
+<g class="gray"><rect x="346" y="48" width="140" height="46" rx="8"/><text class="th" x="416" y="70" text-anchor="middle">Delivery partner</text><text class="ts" x="416" y="85" text-anchor="middle">final-file links</text></g>
+<g class="gray"><rect x="499" y="48" width="140" height="46" rx="8"/><text class="th" x="569" y="70" text-anchor="middle">Webhook / cron</text><text class="ts" x="569" y="85" text-anchor="middle">email / cron jobs</text></g>
+
+<line class="arr" x1="340" y1="94" x2="340" y2="114" marker-end="url(#ah)"/>
+
+<g class="amber"><rect x="40" y="114" width="599" height="44" rx="8"/><text class="th" x="340" y="136" text-anchor="middle">middleware - updateSession()</text><text class="ts" x="340" y="151" text-anchor="middle">auth gate - session max-age - MFA - password setup; skips /review /deliver /api</text></g>
+
+<line class="arr" x1="340" y1="158" x2="340" y2="184" marker-end="url(#ah)"/>
+<text class="lbl" x="40" y="178">route groups - app router</text>
+<g class="gray"><rect x="40" y="186" width="140" height="50" rx="8"/><text class="th" x="110" y="208" text-anchor="middle">(internal)/*</text><text class="ts" x="110" y="224" text-anchor="middle">app, RLS-guarded</text></g>
+<g class="gray"><rect x="193" y="186" width="140" height="50" rx="8"/><text class="th" x="263" y="208" text-anchor="middle">/site/*</text><text class="ts" x="263" y="224" text-anchor="middle">platform admin</text></g>
+<g class="amber"><rect x="346" y="186" width="140" height="50" rx="8"/><text class="th" x="416" y="208" text-anchor="middle">/review - /deliver</text><text class="ts" x="416" y="224" text-anchor="middle">public - token</text></g>
+<g class="gray"><rect x="499" y="186" width="140" height="50" rx="8"/><text class="th" x="569" y="208" text-anchor="middle">/api/*</text><text class="ts" x="569" y="224" text-anchor="middle">upload - cron - inbound</text></g>
+
+<line class="arr" x1="340" y1="236" x2="340" y2="256" marker-end="url(#ah)"/>
+<g class="gray"><rect x="40" y="256" width="599" height="44" rx="8"/><text class="th" x="340" y="278" text-anchor="middle">server actions &amp; route handlers</text><text class="ts" x="340" y="293" text-anchor="middle">lib/actions/* - Zod-validated mutations - approval-gate domain logic</text></g>
+
+<line class="arr" x1="340" y1="300" x2="340" y2="322" marker-end="url(#ah)"/>
+<text class="lbl" x="40" y="316">cross-cutting services</text>
+<g class="gray"><rect x="40" y="322" width="140" height="50" rx="8"/><text class="th" x="110" y="344" text-anchor="middle">Notifications</text><text class="ts" x="110" y="360" text-anchor="middle">email via Resend</text></g>
+<g class="gray"><rect x="193" y="322" width="140" height="50" rx="8"/><text class="th" x="263" y="344" text-anchor="middle">AI assists</text><text class="ts" x="263" y="360" text-anchor="middle">Gemini - prompts</text></g>
+<g class="gray"><rect x="346" y="322" width="140" height="50" rx="8"/><text class="th" x="416" y="344" text-anchor="middle">Entitlements</text><text class="ts" x="416" y="360" text-anchor="middle">features - plans - seats</text></g>
+<g class="gray"><rect x="499" y="322" width="140" height="50" rx="8"/><text class="th" x="569" y="344" text-anchor="middle">Audit log</text><text class="ts" x="569" y="360" text-anchor="middle">events - retention</text></g>
+
+<line class="arr" x1="340" y1="372" x2="340" y2="394" marker-end="url(#ah)"/>
+<text class="lbl" x="40" y="388">supabase access - trust boundary</text>
+<g class="green"><rect x="140" y="396" width="180" height="46" rx="8"/><text class="th" x="230" y="418" text-anchor="middle">Server client</text><text class="ts" x="230" y="433" text-anchor="middle">runs as user - RLS enforced</text></g>
+<g class="coral"><rect x="360" y="396" width="180" height="46" rx="8"/><text class="th" x="450" y="418" text-anchor="middle">Service client</text><text class="ts" x="450" y="433" text-anchor="middle">service role - bypasses RLS</text></g>
+
+<line class="arr" x1="340" y1="442" x2="340" y2="466" marker-end="url(#ah)"/>
+<text class="lbl" x="40" y="460">data plane &amp; external services</text>
+<g class="green"><rect x="46" y="468" width="180" height="48" rx="8"/><text class="th" x="136" y="490" text-anchor="middle">Postgres + RLS</text><text class="ts" x="136" y="506" text-anchor="middle">51 migrations - tenant isolation</text></g>
+<g class="green"><rect x="250" y="468" width="180" height="48" rx="8"/><text class="th" x="340" y="490" text-anchor="middle">Private storage</text><text class="ts" x="340" y="506" text-anchor="middle">signed URLs only</text></g>
+<g class="green"><rect x="454" y="468" width="180" height="48" rx="8"/><text class="th" x="544" y="490" text-anchor="middle">Supabase Auth</text><text class="ts" x="544" y="506" text-anchor="middle">sessions - MFA</text></g>
+
+<line class="arr" x1="340" y1="516" x2="340" y2="542" marker-end="url(#ah)"/>
+<g class="blue"><rect x="140" y="544" width="180" height="44" rx="8"/><text class="th" x="230" y="566" text-anchor="middle">Resend</text><text class="ts" x="230" y="581" text-anchor="middle">transactional email</text></g>
+<g class="blue"><rect x="360" y="544" width="180" height="44" rx="8"/><text class="th" x="450" y="566" text-anchor="middle">Google Gemini</text><text class="ts" x="450" y="581" text-anchor="middle">AI features</text></g>
+
+<rect x="40" y="612" width="12" height="12" rx="3" fill="#FAEEDA" stroke="#854F0B"/><text class="lbl" x="58" y="622">security gate</text>
+<rect x="170" y="612" width="12" height="12" rx="3" fill="#EAF3DE" stroke="#3B6D11"/><text class="lbl" x="188" y="622">RLS-enforced</text>
+<rect x="300" y="612" width="12" height="12" rx="3" fill="#FAECE7" stroke="#993C1D"/><text class="lbl" x="318" y="622">bypasses RLS</text>
+<rect x="440" y="612" width="12" height="12" rx="3" fill="#E6F1FB" stroke="#185FA5"/><text class="lbl" x="458" y="622">external</text>
+<rect x="540" y="612" width="12" height="12" rx="3" fill="#F1EFE8" stroke="#5F5E5A"/><text class="lbl" x="558" y="622">neutral</text>
+</svg>

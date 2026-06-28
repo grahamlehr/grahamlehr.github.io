@@ -1,0 +1,46 @@
+<svg width="100%" viewBox="0 0 680 330" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>SignOff two-stage approval gate state machine</title>
+<desc>Assets move draft to internal_review to client_review to approved. Any change request bounces to amends_needed, from which resubmit resets all decisions and re-enters the gate. Opt-in shortcuts skip the internal stage or approve internal-only assets without a client stage.</desc>
+<defs>
+<marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#5F5E5A" stroke-width="1.3"/></marker>
+<style>
+text{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+.lbl{font-size:12px;fill:#5F5E5A}
+.edge{stroke:#5F5E5A;stroke-width:1.5;fill:none}
+.dash{stroke-dasharray:4 3}
+.th{font-weight:500;font-size:14px}
+.ts{font-size:12px}
+.gray rect{fill:#F1EFE8;stroke:#5F5E5A;stroke-width:1.1}.gray .th{fill:#2C2C2A}.gray .ts{fill:#444441}
+.amber rect{fill:#FAEEDA;stroke:#854F0B;stroke-width:1.1}.amber .th{fill:#633806}.amber .ts{fill:#854F0B}
+.blue rect{fill:#E6F1FB;stroke:#185FA5;stroke-width:1.1}.blue .th{fill:#0C447C}.blue .ts{fill:#185FA5}
+.green rect{fill:#EAF3DE;stroke:#3B6D11;stroke-width:1.1}.green .th{fill:#27500A}.green .ts{fill:#3B6D11}
+.red rect{fill:#FCEBEB;stroke:#A32D2D;stroke-width:1.1}.red .th{fill:#791F1F}.red .ts{fill:#A32D2D}
+</style>
+</defs>
+
+<path class="edge" d="M205 88 L205 110" marker-end="url(#ah)"/>
+<path class="edge" d="M205 158 L205 180" marker-end="url(#ah)"/>
+<path class="edge" d="M205 228 L205 250" marker-end="url(#ah)"/>
+
+<path class="edge" d="M280 135 L455 162" marker-end="url(#ah)"/>
+<path class="edge" d="M280 205 L455 182" marker-end="url(#ah)"/>
+<path class="edge" d="M538 147 C538 80, 410 64, 282 64" marker-end="url(#ah)"/>
+
+<path class="edge dash" d="M130 76 C58 112, 58 160, 128 194" marker-end="url(#ah)"/>
+<path class="edge dash" d="M130 124 C38 162, 38 230, 128 264" marker-end="url(#ah)"/>
+
+<g class="gray"><rect x="130" y="42" width="150" height="46" rx="8"/><text class="th" x="205" y="64" text-anchor="middle">draft</text><text class="ts" x="205" y="79" text-anchor="middle">not submitted</text></g>
+<g class="amber"><rect x="130" y="112" width="150" height="46" rx="8"/><text class="th" x="205" y="134" text-anchor="middle">internal_review</text><text class="ts" x="205" y="149" text-anchor="middle">team reviewing</text></g>
+<g class="blue"><rect x="130" y="182" width="150" height="46" rx="8"/><text class="th" x="205" y="204" text-anchor="middle">client_review</text><text class="ts" x="205" y="219" text-anchor="middle">client deciding</text></g>
+<g class="green"><rect x="130" y="252" width="150" height="46" rx="8"/><text class="th" x="205" y="274" text-anchor="middle">approved</text><text class="ts" x="205" y="289" text-anchor="middle">done</text></g>
+<g class="red"><rect x="460" y="147" width="160" height="46" rx="8"/><text class="th" x="540" y="169" text-anchor="middle">amends_needed</text><text class="ts" x="540" y="184" text-anchor="middle">changes requested</text></g>
+
+<text class="lbl" x="296" y="103">submit - has reviewers</text>
+<text class="lbl" x="296" y="173">all internal approve</text>
+<text class="lbl" x="296" y="243">client approves</text>
+<text class="lbl" x="345" y="133">change request</text>
+<text class="lbl" x="345" y="213">change request</text>
+<text class="lbl" x="410" y="52" text-anchor="middle">resubmit - resets all decisions</text>
+<text class="lbl" x="86" y="130" text-anchor="middle">skip<tspan x="86" dy="1.1em">internal</tspan></text>
+<text class="lbl" x="70" y="188" text-anchor="middle">internal-<tspan x="70" dy="1.1em">only</tspan></text>
+</svg>
