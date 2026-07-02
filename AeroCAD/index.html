@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A premium, pure client-side DWG and DXF CAD drawing viewer with interactive layer management, scaling, panning, and high-quality vector PDF/PNG exports." />
+    <title>AeroCAD Viewer | Professional DWG & DXF Web Client</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" crossorigin src="/assets/index-C_u1FI_h.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DjfoNrp4.css">
+  </head>
+  <body>
+    <div id="app" class="app-container">
+      
+      <!-- Top Navigation Header -->
+      <header class="app-header">
+        <div class="header-logo">
+          <div class="logo-icon"><i class="fa-solid fa-compass-drafting"></i></div>
+          <div class="logo-text">
+            <span class="logo-primary">Aero</span><span class="logo-secondary">CAD</span>
+            <span class="logo-badge">WEB v1.0</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="btn-load-sample" class="btn btn-secondary" title="Load sample architectural floor plan">
+            <i class="fa-solid fa-building"></i> Load Sample Plan
+          </button>
+          <div class="file-upload-wrapper">
+            <label for="file-input" class="btn btn-primary" id="lbl-file-input">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Upload CAD File
+            </label>
+            <input type="file" id="file-input" accept=".dwg,.dxf" style="display: none;" />
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Layout -->
+      <main class="main-layout">
+        
+        <!-- Left Control Panel (Sidebar) -->
+        <aside class="control-panel glass">
+          
+          <!-- File Details Card -->
+          <section class="panel-section file-info-section">
+            <h2 class="section-title"><i class="fa-solid fa-file-invoice"></i> Drawing Info</h2>
+            <div class="file-details-card">
+              <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span id="info-file-name" class="info-value text-truncate">No drawing loaded</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Format:</span>
+                <span id="info-file-format" class="info-value">N/A</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Layers Count:</span>
+                <span id="info-layers-count" class="info-value">0</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Layer Manager Section -->
+          <section class="panel-section layers-section">
+            <div class="section-header-row">
+              <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Layer Manager</h2>
+              <div class="layer-quick-actions">
+                <button id="btn-layers-all" class="btn-text" title="Enable all layers">All</button>
+                <button id="btn-layers-none" class="btn-text" title="Disable all layers">None</button>
+              </div>
+            </div>
+            <div id="layer-list-container" class="layer-list-container">
+              <div class="no-layers-placeholder">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>Upload a file to manage layers</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Scale & Viewport Section -->
+          <section class="panel-section settings-section">
+            <h2 class="section-title"><i class="fa-solid fa-sliders"></i> Viewport & Scale</h2>
+            
+            <div class="control-group">
+              <label for="select-draw-scale" class="control-label">Drawing Scale</label>
+              <div class="select-wrapper">
+                <select id="select-draw-scale" class="form-select">
+                  <option value="fit" selected>Fit to Screen (Auto)</option>
+                  <option value="1:1">1:1 (True Scale)</option>
+                  <option value="1:10">1:10</option>
+                  <option value="1:20">1:20</option>
+                  <option value="1:50">1:50</option>
+                  <option value="1:100">1:100</option>
+                  <option value="1:200">1:200</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="switch-row">
+                <span class="control-label">Display Grid</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="chk-show-grid" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="viewport-stats">
+              <div class="stat-box">
+                <span class="stat-lbl">Zoom</span>
+                <span id="stat-zoom" class="stat-val">100%</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-lbl">Center (X, Y)</span>
+                <span id="stat-center" class="stat-val">0, 0</span>
+              </div>
+            </div>
+
+            <button id="btn-fit-screen" class="btn btn-secondary btn-full-width">
+              <i class="fa-solid fa-arrows-to-eye"></i> Recenter Viewport
+            </button>
+          </section>
+
+          <!-- Export Tools Section -->
+          <section class="panel-section export-section">
+            <h2 class="section-title"><i class="fa-solid fa-file-export"></i> Print & Export</h2>
+            <div class="export-buttons-grid">
+              <button id="btn-export-png" class="btn btn-export btn-png" disabled>
+                <i class="fa-solid fa-file-image"></i> Export PNG
+              </button>
+              <button id="btn-export-pdf" class="btn btn-export btn-pdf" disabled>
+                <i class="fa-solid fa-file-pdf"></i> Export Vector PDF
+              </button>
+            </div>
+          </section>
+
+        </aside>
+
+        <!-- Viewport Render Area -->
+        <section class="viewport-container" id="drop-zone">
+          <canvas id="cad-canvas"></canvas>
+
+          <!-- Initial Drag and Drop Overlay -->
+          <div id="drop-prompt" class="drop-prompt">
+            <div class="prompt-content">
+              <div class="prompt-icon"><i class="fa-solid fa-cubes"></i></div>
+              <h3>Drag & Drop CAD File</h3>
+              <p>Supports AutoCAD .DWG and .DXF drawings (completely processed offline)</p>
+              <button id="btn-prompt-sample" class="btn btn-secondary mt-4">
+                <i class="fa-solid fa-building"></i> Or try our Sample Floor Plan
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading Overlay -->
+          <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner-container">
+              <div class="spinner"></div>
+              <div class="spinner-logo"><i class="fa-solid fa-compass-drafting"></i></div>
+            </div>
+            <p id="loading-status-text" class="loading-text">Initializing WebAssembly module...</p>
+          </div>
+
+          <!-- Canvas Interactive Controls Overlay -->
+          <div class="viewport-overlay-controls">
+            <button id="btn-zoom-in" class="ctrl-btn" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+            <button id="btn-zoom-out" class="ctrl-btn" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+            <button id="btn-pan-reset" class="ctrl-btn" title="Fit to Screen"><i class="fa-solid fa-expand"></i></button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Status Bar Footer -->
+      <footer class="app-footer">
+        <div class="footer-status">
+          <span class="status-dot green" id="status-dot"></span>
+          <span id="status-text">WebAssembly Engine Ready</span>
+        </div>
+        <div class="footer-coords">
+          <span id="cursor-coords">X: 0.00, Y: 0.00</span>
+        </div>
+      </footer>
+
+    </div>
+
+    <!-- Application Script -->
+  </body>
+</html>
