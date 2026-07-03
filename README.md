@@ -13,7 +13,7 @@ Sometimes you need to stitch two or more PDFs together and don't have access to 
 A full featured browser based Markdown editor and converter that does everthing locally.
 
 ##AeroCAD DWG Viewer
-[AeroCAD](https://grahamlehr.github.io/AeroCAD/) is a simple DWG or DXF viewer for when you need to quickly check that what you've received is correct without having access to VectorWorks or AutoCad.
+[AeroCAD](https://grahamlehr.github.io/AeroCAD/) is a simple DWG or DXF viewer for when you need to quickly check that what you've received is correct without having access to VectorWorks or AutoCad. Toggle layers and save to PDF or PNG.
 
 ## PowerPoint notes to Cue Cards
 [PPTX-Notes-to-Cue-Cards](https://grahamlehr.github.io/PPTX-Notes-to-Cue-Cards.html)
