@@ -4,15 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="A simple, client-side DWG and DXF CAD drawing viewer with interactive layer management, scaling, panning, and exports." />
-    <title>AeroCAD | Simple  DWG & DXF Web Viewer</title>
+    <meta name="description" content="A simple, pure client-side DWG and DXF CAD drawing viewer with interactive layer management, scaling, panning, and high-quality PDF/PNG exports." />
+    <title>AeroCAD Viewer | Simple DWG & DXF Web Viewer</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script type="module" crossorigin src="./assets/index-BRZHo-ai.js"></script>
+    <script type="module" crossorigin src="./assets/index-FGWx-qXU.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-DjfoNrp4.css">
   </head>
   <body>
@@ -24,7 +24,7 @@
           <div class="logo-icon"><i class="fa-solid fa-compass-drafting"></i></div>
           <div class="logo-text">
             <span class="logo-primary">Aero</span><span class="logo-secondary">CAD</span>
-            <span class="logo-badge">WEB v1.0</span>
+            <span class="logo-badge">WEB v1.1</span>
           </div>
         </div>
         <div class="header-actions">
@@ -130,6 +130,18 @@
           <!-- Export Tools Section -->
           <section class="panel-section export-section">
             <h2 class="section-title"><i class="fa-solid fa-file-export"></i> Print & Export</h2>
+            
+            <div class="control-group" style="margin-bottom: 4px;">
+              <label for="select-export-style" class="control-label">Export Color Style</label>
+              <div class="select-wrapper">
+                <select id="select-export-style" class="form-select">
+                  <option value="light" selected>Print Style (White Bg, Dark Colors)</option>
+                  <option value="monochrome">Monochrome (White Bg, Black Lines)</option>
+                  <option value="dark">As Displayed (Dark Bg, Light Colors)</option>
+                </select>
+              </div>
+            </div>
+
             <div class="export-buttons-grid">
               <button id="btn-export-png" class="btn btn-export btn-png" disabled>
                 <i class="fa-solid fa-file-image"></i> Export PNG
