@@ -202,6 +202,10 @@ h2{
   font-size:13px;color:var(--dim);max-width:70ch;
 }
 .caveat b{color:var(--amber);font-weight:500}
+.caveat + .caveat{margin-top:14px}
+.caveat code{background:var(--panel-2);padding:1px 5px;border-radius:2px;color:var(--phos);font-size:12px}
+.caveat em{font-style:normal;color:var(--bone)}
+#secLimit{border-bottom:none}
 
 .hidden{display:none}
 footer{padding:44px 0 70px;color:var(--dim);font-size:12px}
@@ -299,9 +303,18 @@ footer{padding:44px 0 70px;color:var(--dim);font-size:12px}
   <div class="stage-head"><span class="stage-num">04</span><h2>Ten passwords</h2></div>
   <p class="stage-sub">Twelve characters each, drawn from 94 possibilities. That is <code id="oEnt">&mdash;</code> bits of entropy per password, assuming the source noise carried at least that much.</p>
   <div class="pw-list" id="pwList"></div>
+</section>
 
-  <div class="caveat">
-    <b>The honest caveat.</b> Hashing spreads entropy, it does not create it. If your recording is ten seconds of near-silence carrying only a handful of unpredictable bits, SHA-512 gives you output that looks random while remaining exactly as guessable as that handful of bits. The whitening is cosmetic when the source is weak. For real passwords, use <code>crypto.getRandomValues()</code>, which is what your operating system's entropy pool is for.
+<section id="secLimit">
+  <div class="stage-head"><span class="stage-num">LIM</span><h2>The honest limit</h2></div>
+  <p class="stage-sub">Where this method stops working, and what to reach for instead.</p>
+
+  <div class="caveat" style="margin-top:0">
+    <b>Hashing spreads entropy, it does not create it.</b> If your recording is ten seconds of near-silence carrying only a handful of unpredictable bits, SHA-512 gives you output that looks random while remaining exactly as guessable as that handful of bits. Every readout on this page would still show a clean bill of health. Shannon entropy measured on the hashed pool tells you the hash worked, never that the source was any good.
+  </div>
+
+  <div class="caveat" style="border-left-color:var(--phos);background:rgba(110,231,168,.06)">
+    <b style="color:var(--phos)">So use this page to understand the mechanism, not to secure anything.</b> For passwords you actually intend to rely on, call <code>crypto.getRandomValues()</code>. It draws from the operating system's entropy pool, which is continuously reseeded from hardware sources that were designed for the job. That is the button above marked <em>Synthesise noise</em>, and it is the only source on this page whose unpredictability is worth trusting.
   </div>
 </section>
 
