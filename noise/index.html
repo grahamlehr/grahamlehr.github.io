@@ -332,7 +332,7 @@ const COUNT = 10, LEN = 12;
 
 const $ = id => document.getElementById(id);
 const errBox = $('err');
-const showErr = m => { errBox.innerHTML = '<b>Cannot read that file.</b> ' + m; errBox.classList.add('show'); };
+const showErr = (m, head='Cannot read that file.') => { errBox.innerHTML = '<b>'+head+'</b> ' + m; errBox.classList.add('show'); };
 const clearErr = () => errBox.classList.remove('show');
 
 /* ---------------- WAV parsing ---------------- */
@@ -363,6 +363,13 @@ function parseWav(buf){
 }
 
 /* ---------------- maths helpers ---------------- */
+// crypto.getRandomValues() rejects any request over 65,536 bytes, so fill in chunks.
+function randomBytes(len){
+  const out = new Uint8Array(len), MAX = 65536;
+  for (let o=0; o<len; o+=MAX) crypto.getRandomValues(out.subarray(o, Math.min(o+MAX, len)));
+  return out;
+}
+
 function shannon(bytes){
   const f = new Uint32Array(256);
   for (let i=0;i<bytes.length;i++) f[bytes[i]]++;
@@ -371,14 +378,18 @@ function shannon(bytes){
   return h;
 }
 
+// Extract, then expand. Hashing the whole PCM buffer once into a 64-byte seed
+// concentrates its entropy; every further block expands from that seed rather
+// than re-hashing megabytes of audio. Same output distribution, ~100x faster.
 async function buildPool(pcm, need){
+  const seed = new Uint8Array(await crypto.subtle.digest('SHA-512', pcm));
   const blocks = [];
   let total = 0, n = 0;
   while (total < need){
-    const msg = new Uint8Array(pcm.length + 8);
-    msg.set(pcm, 0);
+    const msg = new Uint8Array(seed.length + 8);
+    msg.set(seed, 0);
     // 64-bit big-endian counter
-    const cv = new DataView(msg.buffer, pcm.length, 8);
+    const cv = new DataView(msg.buffer, seed.length, 8);
     cv.setUint32(0, Math.floor(n / 2**32), false);
     cv.setUint32(4, n >>> 0, false);
     const d = new Uint8Array(await crypto.subtle.digest('SHA-512', msg));
@@ -548,9 +559,10 @@ async function run(pcm, meta){
   $('oBytes').textContent = pcm.length.toLocaleString();
   $('srcOut').classList.remove('hidden');
 
-  // pool: need enough to survive rejection. 26.6% loss, so pad generously.
-  const need = Math.ceil(COUNT*LEN / (LIMIT/256)) + 128;
-  const {pool, blocks} = await buildPool(pcm, need);
+  // One pool serves everything. It must be large enough that 94 histogram bins
+  // and 256 entropy bins look flat when they are flat: a few hundred bytes is
+  // nowhere near enough, and reads as low entropy for reasons unrelated to SHA-512.
+  const {pool, blocks} = await buildPool(pcm, 8192);
 
   $('oHraw').textContent   = shannon(pcm.subarray(0, Math.min(pcm.length, 500000))).toFixed(3);
   $('oHwhite').textContent = shannon(pool).toFixed(3);
@@ -594,10 +606,12 @@ drop.onkeydown = e => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); f
 drop.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
 
 $('synth').onclick = async () => {
-  const frames = 44100;                       // 1 second, mono, 16-bit
-  const pcm = new Uint8Array(frames*2);
-  crypto.getRandomValues(pcm);
-  await run(pcm, {rate:44100, channels:1, bits:16});
+  clearErr();
+  try {
+    const frames = 44100;                     // 1 second, mono, 16-bit
+    const pcm = randomBytes(frames*2);        // 88,200 bytes, filled in chunks
+    await run(pcm, {rate:44100, channels:1, bits:16});
+  } catch (e){ showErr(e.message, 'Could not synthesise noise.'); }
 };
 
 drawScope();
