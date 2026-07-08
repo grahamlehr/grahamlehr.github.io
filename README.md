@@ -23,7 +23,7 @@ A full featured browser based Markdown editor and converter that does everthing 
 [AeroCAD](https://grahamlehr.github.io/tools/AeroCAD/) is a simple DWG or DXF viewer for when you need to quickly check that what you've received is correct without having access to VectorWorks or AutoCad. Set zoom, toggle layers and save to PDF or PNG.
 
 **PowerPoint notes to Cue Cards**
-[PPTX-Notes-to-Cue-Cards](https://grahamlehr.github.io/assets/PPTX-Notes-to-Cue-Cards.html)
+[PPTX-Notes-to-Cue-Cards](https://grahamlehr.github.io/tools/PPTX-Notes-to-Cue-Cards.html)
 
 This one is Niche, but it takes the notes from PowerPoint slides and spits out a word document formatted for different cue card sizes. 
 
