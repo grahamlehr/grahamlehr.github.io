@@ -12,9 +12,7 @@ Do what you want with them, but I make no promises that they'll always work etc 
 Sometimes you need to stitch two or more PDFs together and don't have access to Acrobat and don't want to upload your files to some random cloud service. This stiches them and does it all in the browser using pdf-lib javascript.
 
 **Password Generator**
-An experiment to make a password generator
-
-[Noise](https://grahamlehr.github.io/noise)
+An experiment to make a password generator [Noise](https://grahamlehr.github.io/noise)
 
 **MD to PDF**
 [MD to PDF](https://grahamlehr.github.io/tools/MD-2-PDF.html)
