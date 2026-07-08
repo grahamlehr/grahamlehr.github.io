@@ -29,7 +29,7 @@ This one is Niche, but it takes the notes from PowerPoint slides and spits out a
 
 **S⁴ - Simple Site-visit Slide Sorter**
 You're jetlagged, you've seen so many hotels they all blur into one, and now you need to do something with hundreds of photos in your camera roll.
-Enter [S⁴ - The Simple Site-visit Slide Sorter](https://grahamlehr.github.io/s4-app.html). Sort by date, day, location [(if you share photos with location)](https://support.apple.com/en-gb/guide/personal-safety/ips0d7a5df82/web) and export to PPTX or PDF.
+Enter [S⁴ - The Simple Site-visit Slide Sorter](https://grahamlehr.github.io/tools/s4-app.html). Sort by date, day, location [(if you share photos with location)](https://support.apple.com/en-gb/guide/personal-safety/ips0d7a5df82/web) and export to PPTX or PDF.
 
 ## Asset Creation
 
