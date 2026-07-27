@@ -152,7 +152,18 @@
       line-height: 1.4;
     }
 
-    #fileInput {
+    .capture-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .capture-label.secondary .camera-icon {
+      background: #ebe7de;
+      color: var(--ink);
+    }
+
+    .file-input {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -332,6 +343,11 @@
       text-align: center;
     }
 
+    @media (max-width: 520px) {
+      .capture-options { grid-template-columns: 1fr; }
+      .capture-label { min-height: 124px; }
+    }
+
     @media (max-width: 430px) {
       .toolbar { grid-template-columns: 1fr 1fr; }
       .toolbar .primary { grid-column: 1 / -1; }
@@ -371,14 +387,24 @@
     <p id="message" class="message hidden" role="status" aria-live="polite"></p>
 
     <section id="captureCard" class="card capture-card">
-      <label class="capture-label" for="fileInput">
-        <div>
-          <div class="camera-icon" aria-hidden="true">▣</div>
-          <strong>Take a receipt photo</strong>
-          <span>Place the receipt on a contrasting surface and include all four corners.</span>
-        </div>
-      </label>
-      <input id="fileInput" type="file" accept="image/*" capture="environment">
+      <div class="capture-options">
+        <label class="capture-label" for="cameraInput">
+          <div>
+            <div class="camera-icon" aria-hidden="true">▣</div>
+            <strong>Take a receipt photo</strong>
+            <span>Use the rear camera and include all four corners.</span>
+          </div>
+        </label>
+        <label class="capture-label secondary" for="libraryInput">
+          <div>
+            <div class="camera-icon" aria-hidden="true">▧</div>
+            <strong>Choose from Photos</strong>
+            <span>Select an existing receipt image from your camera roll or Files.</span>
+          </div>
+        </label>
+      </div>
+      <input id="cameraInput" class="file-input" type="file" accept="image/*" capture="environment">
+      <input id="libraryInput" class="file-input" type="file" accept="image/*">
     </section>
 
     <section id="editorCard" class="card hidden" aria-labelledby="editTitle">
@@ -411,8 +437,8 @@
             <small>Smaller is ideal for expenses and email.</small>
           </label>
           <select id="sizeSelect">
-            <option value="900">Small</option>
-            <option value="1200" selected>Standard</option>
+            <option value="900" selected>Small</option>
+            <option value="1200">Standard</option>
             <option value="1600">Clear</option>
           </select>
         </div>
@@ -426,7 +452,7 @@
           <label for="qualityRange">JPEG quality
             <small>Lower values produce smaller files.</small>
           </label>
-          <input id="qualityRange" type="range" min="45" max="88" value="68" step="1">
+          <input id="qualityRange" type="range" min="40" max="88" value="55" step="1">
         </div>
       </div>
 
@@ -451,7 +477,8 @@
       const MAX_WORKING_EDGE = 1800;
       const HANDLE_RADIUS_CSS = 22;
 
-      const fileInput = document.getElementById('fileInput');
+      const cameraInput = document.getElementById('cameraInput');
+      const libraryInput = document.getElementById('libraryInput');
       const editorCard = document.getElementById('editorCard');
       const outputCard = document.getElementById('outputCard');
       const editorCanvas = document.getElementById('editorCanvas');
@@ -558,8 +585,8 @@
         };
       }
 
-      fileInput.addEventListener('change', async () => {
-        const file = fileInput.files && fileInput.files[0];
+      async function handleImageSelection(input) {
+        const file = input.files && input.files[0];
         if (!file) return;
 
         hideMessage();
@@ -596,9 +623,12 @@
           console.error(error);
           showMessage(error.message || 'That image could not be opened.', 'error');
         } finally {
-          fileInput.value = '';
+          input.value = '';
         }
-      });
+      }
+
+      cameraInput.addEventListener('change', () => handleImageSelection(cameraInput));
+      libraryInput.addEventListener('change', () => handleImageSelection(libraryInput));
 
       function drawEditor() {
         if (!workingCanvas.width) return;
@@ -976,7 +1006,6 @@
         workingCanvas.width = 0;
         workingCanvas.height = 0;
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => fileInput.click(), 280);
       });
 
       waitForCv();
