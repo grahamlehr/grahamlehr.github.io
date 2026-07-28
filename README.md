@@ -7,27 +7,33 @@ Do what you want with them, but I make no promises that they'll always work etc 
 ## Tools
 
 **PDF Joiner**
+
 [pdf-joiner-v2](https://grahamlehr.github.io/tools/pdf-joiner-v2.html)
 
 Sometimes you need to stitch two or more PDFs together and don't have access to Acrobat and don't want to upload your files to some random cloud service. This stiches them and does it all in the browser using pdf-lib javascript.
 
 **Password Generator**
+
 An experiment to make a password generator [Noise](https://grahamlehr.github.io/noise)
 
 **MD to PDF**
+
 [MD to PDF](https://grahamlehr.github.io/tools/MD-2-PDF.html)
 
 A full featured browser based Markdown editor and converter that does everthing locally.
 
 **AeroCAD DWG Viewer**
+
 [AeroCAD](https://grahamlehr.github.io/tools/AeroCAD/) is a simple DWG or DXF viewer for when you need to quickly check that what you've received is correct without having access to VectorWorks or AutoCad. Set zoom, toggle layers and save to PDF or PNG.
 
 **PowerPoint notes to Cue Cards**
+
 [PPTX-Notes-to-Cue-Cards](https://grahamlehr.github.io/tools/PPTX-Notes-to-Cue-Cards.html)
 
 This one is Niche, but it takes the notes from PowerPoint slides and spits out a word document formatted for different cue card sizes. 
 
 **S⁴ - Simple Site-visit Slide Sorter**
+
 You're jetlagged, you've seen so many hotels they all blur into one, and now you need to do something with hundreds of photos in your camera roll.
 Enter [S⁴ - The Simple Site-visit Slide Sorter](https://grahamlehr.github.io/tools/s4-app.html). Sort by date, day, location [(if you share photos with location)](https://support.apple.com/en-gb/guide/personal-safety/ips0d7a5df82/web) and export to PPTX or PDF.
 
