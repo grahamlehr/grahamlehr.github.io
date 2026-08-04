@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SpotMe web-view probe</title>
+<style>
+  body{font:14px/1.5 system-ui,sans-serif;margin:0;padding:16px;background:#111;color:#eee}
+  h1{font-size:16px;margin:0 0 12px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#8ab;margin:20px 0 6px}
+  pre{background:#1c1c1c;border:1px solid #333;border-radius:6px;padding:10px;
+      white-space:pre-wrap;word-break:break-all;margin:0;font:12px/1.5 ui-monospace,monospace}
+  table{border-collapse:collapse;width:100%;font:12px/1.5 ui-monospace,monospace}
+  td{border-bottom:1px solid #2a2a2a;padding:5px 6px;vertical-align:top;word-break:break-all}
+  td:first-child{color:#8ab;width:34%}
+  .none{color:#777;font-style:italic}
+  button{background:#2a4;color:#000;border:0;border-radius:6px;padding:10px 14px;
+         font:600 14px system-ui;margin-top:16px}
+</style>
+</head>
+<body>
+<h1>SpotMe web-view probe</h1>
+
+<h2>Full URL</h2>
+<pre id="href"></pre>
+
+<h2>Query parameters</h2>
+<table id="query"></table>
+
+<h2>Fragment (#) parameters</h2>
+<table id="hash"></table>
+
+<h2>Frame context</h2>
+<table id="frame"></table>
+
+<h2>postMessage from parent <span id="pmcount"></span></h2>
+<pre id="pm" class="none">Listening… messages appear here as they arrive.</pre>
+
+<button onclick="copyAll()">Copy everything</button>
+
+<script>
+function rows(el, pairs) {
+  const t = document.getElementById(el);
+  if (!pairs.length) { t.innerHTML = '<tr><td colspan="2" class="none">none</td></tr>'; return; }
+  t.innerHTML = pairs.map(([k, v]) =>
+    `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+}
+const esc = s => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+
+document.getElementById('href').textContent = location.href;
+rows('query', [...new URLSearchParams(location.search)]);
+rows('hash',  [...new URLSearchParams(location.hash.replace(/^#/, ''))]);
+
+// document.referrer is the parent's origin — this is the value you need for
+// Content-Security-Policy: frame-ancestors on the real bridge.
+rows('frame', [
+  ['framed?',           window.top !== window.self ? 'YES — inside an iframe' : 'NO — top-level'],
+  ['document.referrer', document.referrer || '(empty)'],
+  ['window.name',       window.name || '(empty)'],
+  ['ancestorOrigins',   (location.ancestorOrigins && [...location.ancestorOrigins].join(', ')) || '(unavailable)'],
+  ['userAgent',         navigator.userAgent]
+]);
+
+// The ID may arrive by postMessage rather than in the URL — that is the case
+// this page exists to catch, because nothing else would reveal it.
+let msgs = [];
+addEventListener('message', e => {
+  msgs.push({ origin: e.origin, data: e.data });
+  const pm = document.getElementById('pm');
+  pm.className = '';
+  pm.textContent = msgs.map((m, i) =>
+    `[${i + 1}] origin: ${m.origin}\n    data: ${
+      typeof m.data === 'string' ? m.data : JSON.stringify(m.data, null, 2)
+    }`).join('\n\n');
+  document.getElementById('pmcount').textContent = `(${msgs.length})`;
+});
+
+// Some hosts only emit context when asked. Harmless if nobody is listening.
+try { parent.postMessage({ type: 'ready', source: 'probe' }, '*'); } catch (e) {}
+
+function copyAll() {
+  const text = [
+    'URL: ' + location.href,
+    'referrer: ' + document.referrer,
+    'framed: ' + (window.top !== window.self),
+    'ua: ' + navigator.userAgent,
+    'postMessage: ' + JSON.stringify(msgs, null, 2)
+  ].join('\n');
+  navigator.clipboard?.writeText(text);
+}
+</script>
+</body>
+</html>
