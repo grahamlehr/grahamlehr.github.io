@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UVC PTZ Control Surface</title>
+<title>UVC Camera Control Surface</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -28,8 +28,7 @@
   body {
     margin: 0;
     padding: 28px 20px 60px;
-    background:
-      radial-gradient(120% 90% at 50% -10%, #322e29 0%, #171614 60%);
+    background: radial-gradient(120% 90% at 50% -10%, #322e29 0%, #171614 60%);
     background-attachment: fixed;
     color: var(--text);
     font-family: var(--sans);
@@ -38,145 +37,81 @@
     min-height: 100vh;
   }
 
-  .rig { max-width: 1120px; margin: 0 auto; }
+  .rig { max-width: 1180px; margin: 0 auto; }
 
-  /* ---- masthead ---- */
   header {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    flex-wrap: wrap;
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
     border-bottom: 1px solid var(--engrave);
-    padding-bottom: 14px;
-    margin-bottom: 22px;
+    padding-bottom: 14px; margin-bottom: 22px;
   }
   h1 {
-    font-family: var(--mono);
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    margin: 0;
-    color: var(--amber);
+    font-family: var(--mono); font-size: 15px; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase; margin: 0; color: var(--amber);
   }
-  .sub {
-    font-family: var(--mono);
-    font-size: 11.5px;
-    color: var(--label);
-    letter-spacing: 0.04em;
-  }
+  .sub { font-family: var(--mono); font-size: 11.5px; color: var(--label); letter-spacing: 0.04em; }
   .tally {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--label);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin-left: auto; font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--label);
+    display: flex; align-items: center; gap: 8px;
   }
-  .lamp {
-    width: 9px; height: 9px; border-radius: 50%;
-    background: #3a3630;
-    box-shadow: inset 0 0 0 1px #0006;
-  }
+  .lamp { width: 9px; height: 9px; border-radius: 50%; background: #3a3630; box-shadow: inset 0 0 0 1px #0006; }
   .lamp.live { background: var(--tally); box-shadow: 0 0 10px var(--tally); }
 
-  /* ---- panels ---- */
-  .grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 18px;
-    align-items: start;
-  }
-  @media (max-width: 880px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 18px; align-items: start; }
+  @media (max-width: 920px) { .grid { grid-template-columns: minmax(0,1fr); } }
 
   .panel {
     background: linear-gradient(180deg, var(--panel-hi), var(--panel));
-    border: 1px solid var(--engrave);
-    border-radius: 3px;
+    border: 1px solid var(--engrave); border-radius: 3px;
     box-shadow: 0 1px 0 #ffffff0d inset, 0 8px 24px #0000004d;
-    padding: 16px;
-    margin-bottom: 18px;
+    padding: 16px; margin-bottom: 18px;
   }
   .panel h2 {
-    font-family: var(--mono);
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--label);
-    margin: 0 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--engrave);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--label);
+    margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--engrave);
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
   }
-  .panel h2 em { font-style: normal; color: var(--amber-dim); }
+  .panel h2 em { font-style: normal; color: var(--amber-dim); letter-spacing: 0.06em; text-transform: none; font-size: 10px; }
 
-  /* ---- controls ---- */
   button, select {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text);
+    font-family: var(--mono); font-size: 12px; color: var(--text);
     background: linear-gradient(180deg, #3a352f, #2a2621);
-    border: 1px solid #100f0e;
-    border-radius: 2px;
+    border: 1px solid #100f0e; border-radius: 2px;
     box-shadow: 0 1px 0 #ffffff14 inset, 0 1px 2px #0006;
-    padding: 8px 12px;
-    cursor: pointer;
-    letter-spacing: 0.05em;
+    padding: 8px 12px; cursor: pointer; letter-spacing: 0.05em;
   }
-  button:hover:not(:disabled) { background: linear-gradient(180deg, #443e37, #322d27); }
-  button:active:not(:disabled) {
-    background: var(--panel-lo);
-    box-shadow: 0 2px 4px #0009 inset;
-    transform: translateY(1px);
-  }
-  button:disabled { opacity: 0.34; cursor: not-allowed; }
+  button:hover:not(:disabled), select:hover:not(:disabled) { background: linear-gradient(180deg, #443e37, #322d27); }
+  button:active:not(:disabled) { background: var(--panel-lo); box-shadow: 0 2px 4px #0009 inset; transform: translateY(1px); }
+  button:disabled, select:disabled { opacity: 0.34; cursor: not-allowed; }
   button:focus-visible, select:focus-visible, input:focus-visible, .pad:focus-visible {
-    outline: 2px solid var(--amber);
-    outline-offset: 2px;
+    outline: 2px solid var(--amber); outline-offset: 2px;
   }
   button.primary {
     background: linear-gradient(180deg, #d38f21, #a86c12);
-    color: #17140f;
-    font-weight: 600;
-    border-color: #0d0b08;
+    color: #17140f; font-weight: 600; border-color: #0d0b08;
   }
   button.primary:hover:not(:disabled) { background: linear-gradient(180deg, #f0a52c, #bd7a15); }
-  select { width: 100%; padding: 8px; }
+  button.sm { padding: 5px 8px; font-size: 10.5px; }
+  select { width: 100%; padding: 7px 8px; }
 
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .row + .row { margin-top: 10px; }
+  .grow { flex: 1 1 140px; min-width: 120px; }
 
   label.field {
-    display: block;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--label);
-    margin-bottom: 6px;
+    display: block; font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--label); margin-bottom: 5px;
   }
 
-  /* ---- joystick pad: the signature ---- */
+  /* ---- pad ---- */
   .stage { display: flex; gap: 18px; flex-wrap: wrap; }
-  .pad-wrap { flex: 0 0 auto; }
   .pad {
-    position: relative;
-    width: 260px; height: 260px;
-    background:
-      linear-gradient(180deg, #191817, #121110);
-    border: 1px solid #0d0c0b;
-    border-radius: 3px;
+    position: relative; width: 240px; height: 240px;
+    background: linear-gradient(180deg, #191817, #121110);
+    border: 1px solid #0d0c0b; border-radius: 3px;
     box-shadow: 0 3px 10px #0009 inset;
-    cursor: crosshair;
-    touch-action: none;
-    overflow: hidden;
+    cursor: crosshair; touch-action: none; overflow: hidden;
   }
   .pad.disabled { cursor: not-allowed; opacity: 0.4; }
   .pad .grid-lines {
@@ -184,94 +119,83 @@
     background-image:
       linear-gradient(to right, #ffffff08 1px, transparent 1px),
       linear-gradient(to bottom, #ffffff08 1px, transparent 1px);
-    background-size: 26px 26px;
+    background-size: 24px 24px;
   }
-  .pad .axis-h, .pad .axis-v {
-    position: absolute; background: var(--engrave);
-  }
+  .pad .axis-h, .pad .axis-v { position: absolute; background: var(--engrave); }
   .pad .axis-h { left: 0; right: 0; top: 50%; height: 1px; }
   .pad .axis-v { top: 0; bottom: 0; left: 50%; width: 1px; }
   .reticle {
-    position: absolute;
-    width: 26px; height: 26px;
-    margin: -13px 0 0 -13px;
-    border: 1.5px solid var(--amber);
-    border-radius: 50%;
-    box-shadow: 0 0 12px #ffab2e55;
-    transition: left 90ms linear, top 90ms linear;
+    position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+    border: 1.5px solid var(--amber); border-radius: 50%;
+    box-shadow: 0 0 12px #ffab2e55; transition: left 90ms linear, top 90ms linear;
     pointer-events: none;
   }
-  .reticle::before, .reticle::after {
-    content: ""; position: absolute; background: var(--amber);
-  }
+  .reticle::before, .reticle::after { content: ""; position: absolute; background: var(--amber); }
   .reticle::before { left: 50%; top: -7px; bottom: -7px; width: 1px; margin-left: -0.5px; }
   .reticle::after  { top: 50%; left: -7px; right: -7px; height: 1px; margin-top: -0.5px; }
-  .pad-hint {
-    font-family: var(--mono); font-size: 10px; color: var(--label);
-    letter-spacing: 0.1em; margin-top: 8px; text-align: center;
-  }
+  .pad-hint { font-family: var(--mono); font-size: 10px; color: var(--label); letter-spacing: 0.1em; margin-top: 8px; text-align: center; }
 
-  /* ---- telemetry ---- */
-  .telemetry { flex: 1 1 240px; min-width: 220px; }
-  .axis-block { margin-bottom: 14px; }
-  .axis-head {
-    display: flex; justify-content: space-between; align-items: baseline;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  /* ---- control rows ---- */
+  .ctrl { margin-bottom: 13px; }
+  .ctrl.gated { opacity: 0.45; }
+  .ctrl-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.13em;
     text-transform: uppercase; color: var(--label); margin-bottom: 5px;
   }
-  .axis-head b { color: var(--amber); font-weight: 500; letter-spacing: 0.02em; font-size: 13px; }
-  .axis-head .rng { font-size: 9.5px; color: #6a6459; letter-spacing: 0.05em; }
+  .ctrl-head b { color: var(--amber); font-weight: 500; letter-spacing: 0.02em; font-size: 13px; text-transform: none; }
+  .ctrl-head .rng { font-size: 9px; color: #6a6459; letter-spacing: 0.04em; text-transform: none; }
+  .ctrl-note { font-family: var(--mono); font-size: 9.5px; color: var(--amber-dim); margin-top: 3px; }
+
   input[type=range] {
-    width: 100%; height: 22px; -webkit-appearance: none; appearance: none;
-    background: transparent; cursor: pointer;
+    width: 100%; height: 20px; -webkit-appearance: none; appearance: none;
+    background: transparent; cursor: pointer; display: block;
   }
-  input[type=range]::-webkit-slider-runnable-track {
-    height: 4px; background: var(--panel-lo); border: 1px solid #0e0d0c; border-radius: 2px;
-  }
-  input[type=range]::-moz-range-track {
-    height: 4px; background: var(--panel-lo); border: 1px solid #0e0d0c; border-radius: 2px;
-  }
+  input[type=range]::-webkit-slider-runnable-track { height: 4px; background: var(--panel-lo); border: 1px solid #0e0d0c; border-radius: 2px; }
+  input[type=range]::-moz-range-track { height: 4px; background: var(--panel-lo); border: 1px solid #0e0d0c; border-radius: 2px; }
   input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 12px; height: 20px; margin-top: -9px;
-    background: linear-gradient(180deg, #d8d1c4, #8e887c);
-    border: 1px solid #0d0c0b; border-radius: 2px;
+    -webkit-appearance: none; width: 12px; height: 19px; margin-top: -8px;
+    background: linear-gradient(180deg, #d8d1c4, #8e887c); border: 1px solid #0d0c0b; border-radius: 2px;
   }
   input[type=range]::-moz-range-thumb {
-    width: 12px; height: 20px;
-    background: linear-gradient(180deg, #d8d1c4, #8e887c);
+    width: 12px; height: 19px; background: linear-gradient(180deg, #d8d1c4, #8e887c);
     border: 1px solid #0d0c0b; border-radius: 2px;
   }
   input[type=range]:disabled { opacity: 0.3; }
 
-  .unsupported {
-    font-family: var(--mono); font-size: 10.5px; color: #6a6459;
-    letter-spacing: 0.06em; padding: 3px 0;
+  .seg { display: flex; gap: 4px; flex-wrap: wrap; }
+  .seg button { flex: 1 1 auto; padding: 6px 8px; font-size: 10.5px; }
+  .seg button.on {
+    background: linear-gradient(180deg, #d38f21, #a86c12); color: #17140f; font-weight: 600;
+  }
+
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0 22px; }
+
+  .absent {
+    font-family: var(--mono); font-size: 10px; line-height: 1.8; color: #6a6459;
+    letter-spacing: 0.04em; border-top: 1px dashed var(--engrave); padding-top: 10px; margin-top: 4px;
+  }
+  .absent b { color: var(--label); font-weight: 500; }
+
+  .empty-state {
+    font-family: var(--mono); font-size: 11px; color: var(--label); letter-spacing: 0.05em;
+    padding: 6px 0;
   }
 
   /* ---- presets ---- */
   .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .preset {
-    display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
-    padding: 9px 10px; min-height: 52px; text-align: left; width: 100%;
-  }
-  .preset .n {
-    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; color: var(--label);
-  }
+  .preset { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 9px 10px; min-height: 52px; text-align: left; width: 100%; }
+  .preset .n { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; color: var(--label); }
   .preset .v { font-family: var(--mono); font-size: 10px; color: #5f5951; }
   .preset.set .v { color: var(--ok); }
   .preset.set .n { color: var(--amber); }
 
-  /* ---- video ---- */
+  /* ---- monitor ---- */
   .monitor {
-    position: relative;
-    background: #0c0b0a;
-    border: 1px solid #0d0c0b;
-    border-radius: 2px;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    box-shadow: 0 3px 10px #0009 inset;
+    position: relative; background: #0c0b0a; border: 1px solid #0d0c0b; border-radius: 2px;
+    aspect-ratio: 16 / 9; overflow: hidden; box-shadow: 0 3px 10px #0009 inset;
   }
-  video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  video { width: 100%; height: 100%; object-fit: contain; display: block; background: #0c0b0a; }
   .monitor.hidden-preview video { visibility: hidden; }
   .monitor .placeholder {
     position: absolute; inset: 0; display: grid; place-items: center;
@@ -279,12 +203,22 @@
     text-transform: uppercase; color: #4a453e; text-align: center; padding: 20px;
   }
 
+  .readout {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+    display: flex; justify-content: space-between; gap: 10px; padding: 4px 0;
+    border-bottom: 1px solid #ffffff08;
+  }
+  .readout:last-child { border-bottom: 0; }
+  .readout span:first-child { color: var(--label); }
+  .readout span:last-child { color: var(--text); }
+  .readout.warn span:last-child { color: var(--tally); }
+  .readout.good span:last-child { color: var(--ok); }
+
   /* ---- log ---- */
   .log {
     font-family: var(--mono); font-size: 11px; line-height: 1.65;
     background: var(--panel-lo); border: 1px solid #0d0c0b; border-radius: 2px;
-    padding: 10px 12px; height: 190px; overflow-y: auto;
-    box-shadow: 0 2px 8px #0006 inset;
+    padding: 10px 12px; height: 200px; overflow-y: auto; box-shadow: 0 2px 8px #0006 inset;
   }
   .log div { display: flex; gap: 9px; white-space: pre-wrap; word-break: break-word; }
   .log time { color: #5c564d; flex: 0 0 auto; }
@@ -293,34 +227,28 @@
   .log .m-info span { color: #b8b1a5; }
   .log .m-warn span { color: var(--amber); }
 
-  .note {
-    font-family: var(--mono); font-size: 10.5px; line-height: 1.7;
-    color: var(--label); letter-spacing: 0.02em;
-  }
+  .note { font-family: var(--mono); font-size: 10.5px; line-height: 1.7; color: var(--label); letter-spacing: 0.02em; }
   .note b { color: var(--text); font-weight: 500; }
-  code {
-    font-family: var(--mono); font-size: 10.5px;
-    background: var(--panel-lo); padding: 1px 5px; border-radius: 2px; color: var(--amber);
-  }
+  code { font-family: var(--mono); font-size: 10.5px; background: var(--panel-lo); padding: 1px 5px; border-radius: 2px; color: var(--amber); }
 
   .banner {
-    border: 1px solid var(--tally); background: #ff3b301a;
-    color: #ffb4b0; padding: 10px 14px; border-radius: 3px;
-    font-family: var(--mono); font-size: 11.5px; margin-bottom: 18px;
+    border: 1px solid var(--tally); background: #ff3b301a; color: #ffb4b0;
+    padding: 10px 14px; border-radius: 3px; font-family: var(--mono); font-size: 11.5px; margin-bottom: 18px;
   }
   .banner code { background: #00000040; color: #ffd4a1; }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
-  }
+  .check { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10.5px; color: var(--label); letter-spacing: 0.05em; cursor: pointer; }
+  .check input { accent-color: var(--amber); width: 14px; height: 14px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 <div class="rig">
 
   <header>
-    <h1>UVC PTZ Control Surface</h1>
-    <span class="sub">Chrome MediaStreamTrack pan / tilt / zoom test rig</span>
+    <h1>UVC Camera Control Surface</h1>
+    <span class="sub">format · movement · imaging</span>
     <span class="tally"><span class="lamp" id="lamp"></span><span id="tallyText">Camera closed</span></span>
   </header>
 
@@ -332,54 +260,64 @@
 
   <div class="grid">
 
-    <!-- LEFT COLUMN -->
+    <!-- LEFT -->
     <div>
       <div class="panel">
         <h2>Camera <em id="apiSupport">checking API…</em></h2>
         <div class="row">
-          <div style="flex:1 1 260px; min-width:200px;">
+          <div class="grow" style="flex:1 1 100%">
             <label class="field" for="deviceSel">Device</label>
             <select id="deviceSel"><option>Grant permission to list devices</option></select>
           </div>
         </div>
         <div class="row">
+          <div class="grow">
+            <label class="field" for="resSel">Open at</label>
+            <select id="resSel">
+              <option value="1920x1080" selected>1920 × 1080 · 16:9</option>
+              <option value="1280x720">1280 × 720 · 16:9</option>
+              <option value="960x540">960 × 540 · 16:9</option>
+              <option value="640x360">640 × 360 · 16:9</option>
+              <option value="640x480">640 × 480 · 4:3</option>
+              <option value="">browser default</option>
+            </select>
+          </div>
+          <div class="grow">
+            <label class="field" for="fpsSel">Frame rate</label>
+            <select id="fpsSel">
+              <option value="30" selected>30</option>
+              <option value="25">25</option>
+              <option value="60">60</option>
+              <option value="24">24</option>
+              <option value="">any</option>
+            </select>
+          </div>
+          <div class="grow" style="flex:0 1 auto; padding-top:16px">
+            <label class="check"><input type="checkbox" id="exactChk"> demand exactly</label>
+          </div>
+        </div>
+        <div class="row">
           <button class="primary" id="openBtn">Open camera</button>
           <button id="closeBtn" disabled>Release camera</button>
+          <button id="applyFmtBtn" disabled>Apply format live</button>
           <button id="refreshBtn">Rescan devices</button>
           <button id="previewBtn" disabled>Hide preview</button>
         </div>
       </div>
 
       <div class="panel">
-        <h2>Control <em id="ctrlState">no track</em></h2>
+        <h2>Movement <em id="ctrlState">no track</em></h2>
         <div class="stage">
-          <div class="pad-wrap">
+          <div>
             <div class="pad disabled" id="pad" tabindex="0" role="application"
                  aria-label="Pan and tilt pad. Click or drag to aim. Arrow keys nudge.">
-              <div class="grid-lines"></div>
-              <div class="axis-h"></div>
-              <div class="axis-v"></div>
+              <div class="grid-lines"></div><div class="axis-h"></div><div class="axis-v"></div>
               <div class="reticle" id="reticle" style="left:50%; top:50%"></div>
             </div>
-            <div class="pad-hint">drag to aim &nbsp;·&nbsp; arrow keys nudge &nbsp;·&nbsp; shift = coarse</div>
+            <div class="pad-hint">drag to aim · arrows nudge · shift = coarse</div>
           </div>
-
-          <div class="telemetry">
-            <div class="axis-block" data-axis="pan">
-              <div class="axis-head"><span>Pan <b class="val">—</b></span><span class="rng">—</span></div>
-              <input type="range" disabled>
-              <div class="unsupported" hidden>not offered by this camera</div>
-            </div>
-            <div class="axis-block" data-axis="tilt">
-              <div class="axis-head"><span>Tilt <b class="val">—</b></span><span class="rng">—</span></div>
-              <input type="range" disabled>
-              <div class="unsupported" hidden>not offered by this camera</div>
-            </div>
-            <div class="axis-block" data-axis="zoom">
-              <div class="axis-head"><span>Zoom <b class="val">—</b></span><span class="rng">—</span></div>
-              <input type="range" disabled>
-              <div class="unsupported" hidden>not offered by this camera</div>
-            </div>
+          <div style="flex:1 1 240px; min-width:220px">
+            <div id="ptzControls"></div>
             <div class="row">
               <button id="homeBtn" disabled>Centre</button>
               <button id="capsBtn" disabled>Dump capabilities</button>
@@ -389,16 +327,27 @@
       </div>
 
       <div class="panel">
-        <h2>Presets <em>click to recall · shift-click to store</em></h2>
+        <h2>Imaging <em id="imagingState">no track</em></h2>
+        <div class="cols" id="imagingControls"></div>
+        <div class="empty-state" id="imagingEmpty">Open the camera to see what it exposes.</div>
+        <div class="absent" id="imagingAbsent" hidden></div>
+        <div class="row" style="margin-top:12px">
+          <button id="resetImgBtn" disabled>Reset to opening values</button>
+          <button id="autoAllBtn" disabled>All modes to continuous</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Position presets <em>click to recall · shift-click to store</em></h2>
         <div class="presets" id="presets"></div>
         <div class="row" style="margin-top:10px">
           <button id="clearPresets" disabled>Clear all</button>
-          <span class="note">Held in memory only, so they go on reload.</span>
+          <span class="note">Stores every writable control, not just pan and tilt. Memory only.</span>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT COLUMN -->
+    <!-- RIGHT -->
     <div>
       <div class="panel">
         <h2>Preview</h2>
@@ -406,10 +355,11 @@
           <video id="video" autoplay playsinline muted></video>
           <div class="placeholder" id="placeholder">no signal</div>
         </div>
-        <div class="note" style="margin-top:10px">
-          Hiding the preview keeps the track open. Use it to check the camera still
-          responds while the tab is not showing video, which is closer to how it
-          behaves next to Teams.
+        <div style="margin-top:10px" id="fmtReadout">
+          <div class="readout"><span>negotiated</span><span id="roSize">—</span></div>
+          <div class="readout"><span>aspect</span><span id="roAspect">—</span></div>
+          <div class="readout"><span>frame rate</span><span id="roFps">—</span></div>
+          <div class="readout"><span>device</span><span id="roLabel">—</span></div>
         </div>
       </div>
 
@@ -419,15 +369,18 @@
       </div>
 
       <div class="panel">
-        <h2>Reading the result</h2>
+        <h2>Notes</h2>
         <div class="note">
-          <b>OverconstrainedError</b> means the camera has no UVC PTZ controls that Chrome can see.<br><br>
-          <b>NotReadableError</b> means something else holds the device. That is the Teams
-          contention case, and it is the usual failure on macOS.<br><br>
-          <b>NotAllowedError</b> means the movement permission was declined. Reset it under the
-          padlock in the address bar, in "use and move your camera".<br><br>
-          Pan and tilt are usually arcseconds, so 36000 is 10 degrees. Zoom units are whatever
-          the vendor felt like.
+          <b>Aspect ratio.</b> On Windows the Frame Server hands other apps the format the
+          first client negotiated. Open at 1920 × 1080 here and Teams inherits 16:9. Leave it
+          on browser default and Teams inherits Chrome's 640 × 480.<br><br>
+          <b>Shutter.</b> <code>exposureTime</code> is in 100 µs units, so 100 is 1/100 s. The
+          equivalent fraction is shown next to the value.<br><br>
+          <b>Gated controls.</b> Shutter, ISO, colour temperature and focus distance only bite
+          in manual mode. Moving one switches its mode for you.<br><br>
+          <b>Missing controls.</b> Chrome only exposes what the Media Capture spec defines.
+          Gain, gamma, hue, backlight compensation and power line frequency have no web
+          equivalent, so no browser can reach them on any camera.
         </div>
       </div>
     </div>
@@ -442,40 +395,64 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  const AXES = ["pan", "tilt", "zoom"];
+  const PTZ = ["pan", "tilt", "zoom"];
   const PRESET_COUNT = 6;
 
+  // Controls Chrome can expose on a video track, ordered as a camera menu would be.
+  const MODE_CONTROLS = [
+    { key: "exposureMode",     label: "Exposure" },
+    { key: "whiteBalanceMode", label: "White balance" },
+    { key: "focusMode",        label: "Focus" }
+  ];
+
+  const NUM_CONTROLS = [
+    { key: "exposureTime",         label: "Shutter",        gate: ["exposureMode", "manual"], shutter: true },
+    { key: "exposureCompensation", label: "Exposure comp" },
+    { key: "iso",                  label: "ISO",            gate: ["exposureMode", "manual"] },
+    { key: "colorTemperature",     label: "Colour temp",    gate: ["whiteBalanceMode", "manual"], unit: "K" },
+    { key: "focusDistance",        label: "Focus distance", gate: ["focusMode", "manual"] },
+    { key: "brightness",           label: "Brightness" },
+    { key: "contrast",             label: "Contrast" },
+    { key: "saturation",           label: "Saturation" },
+    { key: "sharpness",            label: "Sharpness" }
+  ];
+
+  const BOOL_CONTROLS = [
+    { key: "torch",          label: "Torch" },
+    { key: "backgroundBlur", label: "Background blur" }
+  ];
+
+  const PTZ_LABEL = { pan: "Pan", tilt: "Tilt", zoom: "Zoom" };
+  const ALL_KEYS = [
+    ...PTZ,
+    ...MODE_CONTROLS.map(c => c.key),
+    ...NUM_CONTROLS.map(c => c.key),
+    ...BOOL_CONTROLS.map(c => c.key)
+  ];
+
   const el = {
-    log: $("#log"),
-    lamp: $("#lamp"),
-    tallyText: $("#tallyText"),
-    apiSupport: $("#apiSupport"),
-    ctrlState: $("#ctrlState"),
-    deviceSel: $("#deviceSel"),
-    openBtn: $("#openBtn"),
-    closeBtn: $("#closeBtn"),
-    refreshBtn: $("#refreshBtn"),
-    previewBtn: $("#previewBtn"),
-    homeBtn: $("#homeBtn"),
-    capsBtn: $("#capsBtn"),
-    pad: $("#pad"),
-    reticle: $("#reticle"),
-    video: $("#video"),
-    monitor: $("#monitor"),
-    placeholder: $("#placeholder"),
-    presets: $("#presets"),
-    clearPresets: $("#clearPresets")
+    log: $("#log"), lamp: $("#lamp"), tallyText: $("#tallyText"),
+    apiSupport: $("#apiSupport"), ctrlState: $("#ctrlState"), imagingState: $("#imagingState"),
+    deviceSel: $("#deviceSel"), resSel: $("#resSel"), fpsSel: $("#fpsSel"), exactChk: $("#exactChk"),
+    openBtn: $("#openBtn"), closeBtn: $("#closeBtn"), applyFmtBtn: $("#applyFmtBtn"),
+    refreshBtn: $("#refreshBtn"), previewBtn: $("#previewBtn"),
+    homeBtn: $("#homeBtn"), capsBtn: $("#capsBtn"),
+    pad: $("#pad"), reticle: $("#reticle"),
+    ptzControls: $("#ptzControls"), imagingControls: $("#imagingControls"),
+    imagingEmpty: $("#imagingEmpty"), imagingAbsent: $("#imagingAbsent"),
+    resetImgBtn: $("#resetImgBtn"), autoAllBtn: $("#autoAllBtn"),
+    video: $("#video"), monitor: $("#monitor"), placeholder: $("#placeholder"),
+    presets: $("#presets"), clearPresets: $("#clearPresets"),
+    roSize: $("#roSize"), roAspect: $("#roAspect"), roFps: $("#roFps"), roLabel: $("#roLabel")
   };
 
-  let stream = null;
-  let track = null;
-  let caps = {};
-  let current = {};          // last known pan/tilt/zoom
+  let stream = null, track = null;
+  let caps = {}, current = {}, opening = null;   // opening = settings snapshot at open
   let presets = new Array(PRESET_COUNT).fill(null);
-  let applying = false;      // serialise applyConstraints
-  let queued = null;
+  let applying = false, queued = null;
+  const widgets = {};                            // key -> {input, valEl, wrap}
 
-  // ---------- logging ----------
+  // ---------- log ----------
   function log(msg, kind = "info") {
     const line = document.createElement("div");
     line.className = "m-" + kind;
@@ -488,83 +465,237 @@
     el.log.scrollTop = el.log.scrollHeight;
   }
 
-  // ---------- capability plumbing ----------
-  const has = (axis) => !!(caps && caps[axis] && typeof caps[axis].max === "number");
-  const clamp = (axis, v) => Math.min(caps[axis].max, Math.max(caps[axis].min, v));
+  // ---------- capability helpers ----------
+  const numeric = (k) => !!(caps[k] && typeof caps[k].max === "number" && caps[k].max !== caps[k].min);
+  const enumer  = (k) => !!(caps[k] && Array.isArray(caps[k]) && caps[k].length);
+  const boolean = (k) => !!(caps[k] && Array.isArray(caps[k]) && caps[k].includes(true));
+  const clamp   = (k, v) => Math.min(caps[k].max, Math.max(caps[k].min, v));
 
-  function snap(axis, v) {
-    const c = caps[axis];
-    const step = c.step || 1;
-    return clamp(axis, Math.round((v - c.min) / step) * step + c.min);
+  function snap(k, v) {
+    const c = caps[k], step = c.step || 1;
+    return clamp(k, Math.round((v - c.min) / step) * step + c.min);
   }
 
-  async function move(changes) {
+  function fmtShutter(v) {
+    if (!v) return "";
+    const secs = v / 10000;                       // 100 µs units
+    return secs >= 1 ? `${secs.toFixed(1)} s` : `1/${Math.round(1 / secs)} s`;
+  }
+
+  // ---------- the one write path ----------
+  async function apply(changes, why) {
     if (!track) return;
-    Object.assign(current, changes);
     if (applying) { queued = { ...(queued || {}), ...changes }; return; }
     applying = true;
     const payload = {};
-    for (const a of AXES) if (a in changes && has(a)) payload[a] = snap(a, changes[a]);
+    for (const [k, v] of Object.entries(changes)) {
+      if (numeric(k)) payload[k] = snap(k, v);
+      else if (enumer(k) && caps[k].includes(v)) payload[k] = v;
+      else if (boolean(k)) payload[k] = !!v;
+    }
     try {
-      await track.applyConstraints({ advanced: [payload] });
-      const s = track.getSettings();
-      for (const a of AXES) if (typeof s[a] === "number") current[a] = s[a];
-      paint();
+      if (Object.keys(payload).length) await track.applyConstraints({ advanced: [payload] });
+      readSettings();
+      paintAll();
     } catch (err) {
-      log(`applyConstraints rejected (${err.name}): ${err.message}`, "err");
+      log(`${why || "applyConstraints"} rejected (${err.name}): ${err.message}`, "err");
     } finally {
       applying = false;
-      if (queued) { const q = queued; queued = null; move(q); }
+      if (queued) { const q = queued; queued = null; apply(q, why); }
     }
   }
 
-  // ---------- painting ----------
-  function paint() {
-    for (const axis of AXES) {
-      const block = $(`.axis-block[data-axis="${axis}"]`);
-      const valEl = $(".val", block);
-      const rngEl = $(".rng", block);
-      const slider = $("input", block);
-      const none = $(".unsupported", block);
-      if (!has(axis)) {
-        valEl.textContent = "—";
-        rngEl.textContent = "";
-        slider.hidden = true;
-        none.hidden = false;
-        continue;
-      }
-      slider.hidden = false;
-      none.hidden = true;
-      const c = caps[axis];
-      slider.min = c.min; slider.max = c.max; slider.step = c.step || 1;
-      slider.disabled = !track;
-      if (typeof current[axis] === "number") slider.value = current[axis];
-      valEl.textContent = typeof current[axis] === "number" ? current[axis] : "—";
-      rngEl.textContent = `${c.min} … ${c.max} / ${c.step || 1}`;
+  function readSettings() {
+    if (!track) return;
+    const s = track.getSettings();
+    for (const k of ALL_KEYS) if (k in s) current[k] = s[k];
+    paintFormat(s);
+  }
+
+  function gateOpen(ctrl) {
+    if (!ctrl.gate) return true;
+    const [modeKey, needed] = ctrl.gate;
+    if (!enumer(modeKey)) return true;            // no mode control, assume writable
+    return current[modeKey] === needed;
+  }
+
+  // ---------- builders ----------
+  function numericWidget(host, key, label, opts = {}) {
+    const wrap = document.createElement("div");
+    wrap.className = "ctrl";
+    const c = caps[key];
+    wrap.innerHTML = `
+      <div class="ctrl-head">
+        <span>${label} <b class="val">—</b></span>
+        <span class="rng">${c.min} … ${c.max} / ${c.step || 1}${opts.unit ? " " + opts.unit : ""}</span>
+      </div>`;
+    const input = document.createElement("input");
+    input.type = "range";
+    input.min = c.min; input.max = c.max; input.step = c.step || 1;
+    input.value = typeof current[key] === "number" ? current[key] : c.min;
+    input.setAttribute("aria-label", label);
+    wrap.append(input);
+    if (opts.gate) {
+      const n = document.createElement("div");
+      n.className = "ctrl-note";
+      n.textContent = `needs ${opts.gate[0].replace("Mode", "")} in ${opts.gate[1]}`;
+      wrap.append(n);
     }
-    // reticle
-    if (has("pan") || has("tilt")) {
-      const fx = has("pan")
-        ? (current.pan - caps.pan.min) / (caps.pan.max - caps.pan.min) : 0.5;
-      const fy = has("tilt")
-        ? 1 - (current.tilt - caps.tilt.min) / (caps.tilt.max - caps.tilt.min) : 0.5;
+    input.addEventListener("input", () => {
+      const changes = { [key]: Number(input.value) };
+      if (opts.gate && !gateOpen(opts)) {
+        const [modeKey, needed] = opts.gate;
+        changes[modeKey] = needed;
+        log(`${modeKey} switched to ${needed} so ${key} can be set`, "warn");
+      }
+      apply(changes, key);
+    });
+    host.append(wrap);
+    widgets[key] = { wrap, input, valEl: $(".val", wrap), opts };
+  }
+
+  function modeWidget(host, key, label) {
+    const wrap = document.createElement("div");
+    wrap.className = "ctrl";
+    wrap.innerHTML = `<div class="ctrl-head"><span>${label} mode</span></div>`;
+    const seg = document.createElement("div");
+    seg.className = "seg";
+    for (const mode of caps[key]) {
+      const b = document.createElement("button");
+      b.textContent = mode.replace("single-shot", "one shot");
+      b.dataset.mode = mode;
+      b.addEventListener("click", () => apply({ [key]: mode }, key));
+      seg.append(b);
+    }
+    wrap.append(seg);
+    host.append(wrap);
+    widgets[key] = { wrap, seg, opts: {} };
+  }
+
+  function boolWidget(host, key, label) {
+    const wrap = document.createElement("div");
+    wrap.className = "ctrl";
+    wrap.innerHTML = `<div class="ctrl-head"><span>${label}</span></div>`;
+    const seg = document.createElement("div");
+    seg.className = "seg";
+    for (const [txt, val] of [["off", false], ["on", true]]) {
+      const b = document.createElement("button");
+      b.textContent = txt; b.dataset.mode = String(val);
+      b.addEventListener("click", () => apply({ [key]: val }, key));
+      seg.append(b);
+    }
+    wrap.append(seg);
+    host.append(wrap);
+    widgets[key] = { wrap, seg, opts: {} };
+  }
+
+  function buildControls() {
+    el.ptzControls.innerHTML = "";
+    el.imagingControls.innerHTML = "";
+    for (const k of Object.keys(widgets)) delete widgets[k];
+
+    for (const axis of PTZ) {
+      if (numeric(axis)) numericWidget(el.ptzControls, axis, PTZ_LABEL[axis]);
+    }
+    if (!PTZ.some(numeric)) {
+      el.ptzControls.innerHTML = '<div class="empty-state">This camera reports no movable axes.</div>';
+    }
+
+    const absent = [];
+    for (const c of MODE_CONTROLS) {
+      if (enumer(c.key)) modeWidget(el.imagingControls, c.key, c.label); else absent.push(c.key);
+    }
+    for (const c of NUM_CONTROLS) {
+      if (numeric(c.key)) numericWidget(el.imagingControls, c.key, c.label, c); else absent.push(c.key);
+    }
+    for (const c of BOOL_CONTROLS) {
+      if (boolean(c.key)) boolWidget(el.imagingControls, c.key, c.label); else absent.push(c.key);
+    }
+
+    const anyImaging = el.imagingControls.children.length > 0;
+    el.imagingEmpty.hidden = anyImaging;
+    if (!anyImaging) el.imagingEmpty.textContent = "This camera exposes no imaging controls to the browser.";
+    el.imagingState.textContent = anyImaging
+      ? `${el.imagingControls.children.length} control${el.imagingControls.children.length === 1 ? "" : "s"}`
+      : "none exposed";
+
+    el.imagingAbsent.hidden = !absent.length;
+    if (absent.length) el.imagingAbsent.innerHTML = `<b>Not offered:</b> ${absent.join(", ")}`;
+  }
+
+  // ---------- painting ----------
+  function paintAll() {
+    for (const [key, w] of Object.entries(widgets)) {
+      const v = current[key];
+      if (w.input) {
+        if (typeof v === "number") { w.input.value = v; if (w.valEl) w.valEl.textContent = v; }
+        else if (w.valEl) w.valEl.textContent = "—";
+        if (w.valEl && w.opts && w.opts.shutter && typeof v === "number") {
+          w.valEl.textContent = `${v}  ${fmtShutter(v)}`;
+        }
+        const open = gateOpen(w.opts || {});
+        w.wrap.classList.toggle("gated", !open);
+      }
+      if (w.seg) {
+        $$("button", w.seg).forEach(b => b.classList.toggle("on", String(v) === b.dataset.mode));
+      }
+    }
+
+    if (numeric("pan") || numeric("tilt")) {
+      const fx = numeric("pan")  ? (current.pan  - caps.pan.min)  / (caps.pan.max  - caps.pan.min)  : 0.5;
+      const fy = numeric("tilt") ? 1 - (current.tilt - caps.tilt.min) / (caps.tilt.max - caps.tilt.min) : 0.5;
       el.reticle.style.left = (fx * 100) + "%";
       el.reticle.style.top  = (fy * 100) + "%";
     }
     paintPresets();
   }
 
+  function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+
+  function paintFormat(s) {
+    if (!s || !s.width) {
+      el.roSize.textContent = el.roAspect.textContent = el.roFps.textContent = el.roLabel.textContent = "—";
+      el.roAspect.parentElement.className = "readout";
+      return;
+    }
+    el.roSize.textContent = `${s.width} × ${s.height}`;
+    const g = gcd(s.width, s.height) || 1;
+    const w = s.width / g, h = s.height / g;
+    const ratio = s.width / s.height;
+    const sixteenNine = Math.abs(ratio - 16 / 9) < 0.02;
+    el.roAspect.textContent = `${w}:${h}` + (sixteenNine ? "" : "  not 16:9");
+    el.roAspect.parentElement.className = "readout " + (sixteenNine ? "good" : "warn");
+    el.roFps.textContent = s.frameRate ? `${Math.round(s.frameRate * 100) / 100} fps` : "—";
+    el.roLabel.textContent = (track && track.label) || "—";
+    el.monitor.style.aspectRatio = `${s.width} / ${s.height}`;
+  }
+
   function setLive(on) {
     el.lamp.classList.toggle("live", on);
     el.tallyText.textContent = on ? "Camera open" : "Camera closed";
-    el.closeBtn.disabled = !on;
-    el.previewBtn.disabled = !on;
-    el.homeBtn.disabled = !on || !(has("pan") || has("tilt"));
-    el.capsBtn.disabled = !on;
-    el.clearPresets.disabled = !on;
+    for (const b of [el.closeBtn, el.previewBtn, el.capsBtn, el.clearPresets, el.applyFmtBtn, el.resetImgBtn, el.autoAllBtn]) {
+      b.disabled = !on;
+    }
+    el.homeBtn.disabled = !on || !(numeric("pan") || numeric("tilt"));
     el.openBtn.disabled = on;
-    el.pad.classList.toggle("disabled", !on || !(has("pan") || has("tilt")));
+    el.pad.classList.toggle("disabled", !on || !(numeric("pan") || numeric("tilt")));
     el.placeholder.hidden = on;
+    if (on && !MODE_CONTROLS.some(c => enumer(c.key))) el.autoAllBtn.disabled = true;
+  }
+
+  // ---------- format constraints ----------
+  function formatConstraints() {
+    const out = {};
+    const kind = el.exactChk.checked ? "exact" : "ideal";
+    const res = el.resSel.value;
+    if (res) {
+      const [w, h] = res.split("x").map(Number);
+      out.width = { [kind]: w };
+      out.height = { [kind]: h };
+    }
+    const fps = el.fpsSel.value;
+    if (fps) out.frameRate = { [kind]: Number(fps) };
+    return out;
   }
 
   // ---------- devices ----------
@@ -572,17 +703,16 @@
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const cams = devices.filter(d => d.kind === "videoinput");
+      const keep = el.deviceSel.value;
       el.deviceSel.innerHTML = "";
-      if (!cams.length) {
-        el.deviceSel.innerHTML = "<option>no video inputs found</option>";
-        return;
-      }
+      if (!cams.length) { el.deviceSel.innerHTML = "<option>no video inputs found</option>"; return; }
       for (const c of cams) {
         const o = document.createElement("option");
         o.value = c.deviceId;
         o.textContent = c.label || `camera ${c.deviceId.slice(0, 8)}… (label hidden until permission)`;
         el.deviceSel.append(o);
       }
+      if (keep) el.deviceSel.value = keep;
       log(`${cams.length} video input${cams.length === 1 ? "" : "s"} found`, "info");
     } catch (err) {
       log(`enumerateDevices failed (${err.name}): ${err.message}`, "err");
@@ -594,25 +724,27 @@
     close(true);
     const deviceId = el.deviceSel.value;
     const base = deviceId && deviceId.length > 4 ? { deviceId: { exact: deviceId } } : {};
+    const fmt = formatConstraints();
     let ptzOk = true;
 
     try {
-      log("requesting camera with pan/tilt/zoom…", "info");
+      log("requesting camera with movement permission…", "info");
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { ...base, pan: true, tilt: true, zoom: true }
+        video: { ...base, ...fmt, pan: true, tilt: true, zoom: true }
       });
     } catch (err) {
-      log(`PTZ request failed (${err.name}): ${err.message}`, "err");
+      log(`request failed (${err.name}): ${err.message}`, "err");
       if (err.name === "NotReadableError") {
-        log("device is held by another app. Close the other app or accept that this OS will not share.", "warn");
+        log("device is held by another app. Open it here first, then start Teams.", "warn");
         return;
       }
       ptzOk = false;
       try {
-        log("retrying without PTZ constraints to inspect the device…", "warn");
-        stream = await navigator.mediaDevices.getUserMedia({ video: { ...base } });
+        log("retrying without movement constraints…", "warn");
+        stream = await navigator.mediaDevices.getUserMedia({ video: { ...base, ...fmt } });
       } catch (err2) {
-        log(`plain camera request also failed (${err2.name}): ${err2.message}`, "err");
+        log(`plain request also failed (${err2.name}): ${err2.message}`, "err");
+        if (el.exactChk.checked) log("try clearing 'demand exactly', the camera may not offer that format", "warn");
         return;
       }
     }
@@ -621,32 +753,43 @@
     el.video.srcObject = stream;
     caps = typeof track.getCapabilities === "function" ? track.getCapabilities() : {};
     current = {};
-    const s = track.getSettings();
-    for (const a of AXES) if (typeof s[a] === "number") current[a] = s[a];
-    for (const a of AXES) if (has(a) && typeof current[a] !== "number") current[a] = caps[a].min;
+    readSettings();
+    for (const k of ALL_KEYS) if (numeric(k) && typeof current[k] !== "number") current[k] = caps[k].min;
+    opening = { ...current };
 
-    const found = AXES.filter(has);
+    const moves = PTZ.filter(numeric);
     log(`open: ${track.label || "unnamed device"}`, "ok");
-    log(found.length
-      ? `controllable: ${found.join(", ")}`
-      : "no pan/tilt/zoom capabilities reported by this camera", found.length ? "ok" : "warn");
-    if (ptzOk && !found.length) {
-      log("permission was granted but the camera exposes nothing to move.", "warn");
-    }
-    el.ctrlState.textContent = found.length ? found.join(" / ") : "no movable axes";
+    log(moves.length ? `movement: ${moves.join(", ")}` : "no movement axes reported", moves.length ? "ok" : "warn");
+    if (ptzOk && !moves.length) log("movement permission granted but nothing to move", "warn");
+    el.ctrlState.textContent = moves.length ? moves.join(" / ") : "no movable axes";
+
+    buildControls();
     setLive(true);
-    paint();
+    paintAll();
+
+    const s = track.getSettings();
+    if (s.width && Math.abs(s.width / s.height - 16 / 9) > 0.02) {
+      log(`negotiated ${s.width}×${s.height}, which is not 16:9. Teams will inherit this.`, "warn");
+    }
   }
 
   function close(quiet) {
     if (stream) stream.getTracks().forEach(t => t.stop());
-    stream = null; track = null; caps = {}; current = {};
+    stream = null; track = null; caps = {}; current = {}; opening = null;
     el.video.srcObject = null;
     el.monitor.classList.remove("hidden-preview");
+    el.monitor.style.aspectRatio = "16 / 9";
     el.previewBtn.textContent = "Hide preview";
     el.ctrlState.textContent = "no track";
+    el.imagingState.textContent = "no track";
+    el.ptzControls.innerHTML = "";
+    el.imagingControls.innerHTML = "";
+    el.imagingAbsent.hidden = true;
+    el.imagingEmpty.hidden = false;
+    el.imagingEmpty.textContent = "Open the camera to see what it exposes.";
+    for (const k of Object.keys(widgets)) delete widgets[k];
+    paintFormat(null);
     setLive(false);
-    $$(".axis-block input").forEach(i => i.disabled = true);
     if (!quiet) log("camera released", "info");
   }
 
@@ -657,17 +800,15 @@
     const fx = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
     const fy = Math.min(1, Math.max(0, (clientY - r.top) / r.height));
     const next = {};
-    if (has("pan"))  next.pan  = caps.pan.min + fx * (caps.pan.max - caps.pan.min);
-    if (has("tilt")) next.tilt = caps.tilt.min + (1 - fy) * (caps.tilt.max - caps.tilt.min);
-    move(next);
+    if (numeric("pan"))  next.pan  = caps.pan.min + fx * (caps.pan.max - caps.pan.min);
+    if (numeric("tilt")) next.tilt = caps.tilt.min + (1 - fy) * (caps.tilt.max - caps.tilt.min);
+    apply(next, "pan/tilt");
   }
 
   let dragging = false;
   el.pad.addEventListener("pointerdown", (e) => {
     if (!track) return;
-    dragging = true;
-    el.pad.setPointerCapture(e.pointerId);
-    padTo(e.clientX, e.clientY);
+    dragging = true; el.pad.setPointerCapture(e.pointerId); padTo(e.clientX, e.clientY);
   });
   el.pad.addEventListener("pointermove", (e) => { if (dragging) padTo(e.clientX, e.clientY); });
   el.pad.addEventListener("pointerup", () => { dragging = false; });
@@ -680,29 +821,17 @@
     if (!m) return;
     e.preventDefault();
     const [axis, dir] = m;
-    if (!has(axis)) return;
+    if (!numeric(axis)) return;
     const span = caps[axis].max - caps[axis].min;
-    const delta = dir * span * (e.shiftKey ? 0.1 : 0.02);
-    move({ [axis]: clamp(axis, (current[axis] ?? caps[axis].min) + delta) });
+    apply({ [axis]: clamp(axis, (current[axis] ?? caps[axis].min) + dir * span * (e.shiftKey ? 0.1 : 0.02)) }, axis);
   });
-
-  // ---------- sliders ----------
-  for (const axis of AXES) {
-    const slider = $(`.axis-block[data-axis="${axis}"] input`);
-    slider.addEventListener("input", () => {
-      if (!track || !has(axis)) return;
-      move({ [axis]: Number(slider.value) });
-    });
-  }
 
   // ---------- presets ----------
   function paintPresets() {
     $$(".preset", el.presets).forEach((b, i) => {
       const p = presets[i];
       b.classList.toggle("set", !!p);
-      $(".v", b).textContent = p
-        ? AXES.filter(a => a in p).map(a => `${a[0].toUpperCase()}${Math.round(p[a])}`).join(" ")
-        : "empty";
+      $(".v", b).textContent = p ? `${Object.keys(p).length} values` : "empty";
     });
   }
 
@@ -714,15 +843,15 @@
       if (!track) { log("open the camera first", "warn"); return; }
       if (e.shiftKey) {
         const snapshot = {};
-        for (const a of AXES) if (has(a) && typeof current[a] === "number") snapshot[a] = current[a];
+        for (const k of ALL_KEYS) if (k in current && (numeric(k) || enumer(k) || boolean(k))) snapshot[k] = current[k];
         presets[i] = snapshot;
-        log(`preset ${i + 1} stored`, "ok");
+        log(`preset ${i + 1} stored, ${Object.keys(snapshot).length} values`, "ok");
         paintPresets();
       } else if (presets[i]) {
-        move({ ...presets[i] });
+        apply({ ...presets[i] }, `preset ${i + 1}`);
         log(`preset ${i + 1} recalled`, "info");
       } else {
-        log(`preset ${i + 1} is empty. Shift-click to store the current position.`, "warn");
+        log(`preset ${i + 1} is empty. Shift-click to store.`, "warn");
       }
     });
     el.presets.append(b);
@@ -730,18 +859,27 @@
   paintPresets();
 
   el.clearPresets.addEventListener("click", () => {
-    presets = new Array(PRESET_COUNT).fill(null);
-    paintPresets();
-    log("presets cleared", "info");
+    presets = new Array(PRESET_COUNT).fill(null); paintPresets(); log("presets cleared", "info");
   });
 
   // ---------- buttons ----------
-  el.openBtn.addEventListener("click", async () => {
-    await open();
-    await listDevices();          // labels appear once permission is granted
-  });
+  el.openBtn.addEventListener("click", async () => { await open(); await listDevices(); });
   el.closeBtn.addEventListener("click", () => close());
   el.refreshBtn.addEventListener("click", listDevices);
+
+  el.applyFmtBtn.addEventListener("click", async () => {
+    if (!track) return;
+    const fmt = formatConstraints();
+    if (!Object.keys(fmt).length) { log("no format selected", "warn"); return; }
+    try {
+      await track.applyConstraints(fmt);
+      readSettings();
+      log("format applied to the live track", "ok");
+      log("if Teams already has the camera it may keep the old format until it reopens it", "warn");
+    } catch (err) {
+      log(`format change rejected (${err.name}): ${err.message}`, "err");
+    }
+  });
 
   el.previewBtn.addEventListener("click", () => {
     const hidden = el.monitor.classList.toggle("hidden-preview");
@@ -751,17 +889,33 @@
 
   el.homeBtn.addEventListener("click", () => {
     const next = {};
-    for (const a of ["pan", "tilt"]) if (has(a)) next[a] = (caps[a].min + caps[a].max) / 2;
-    move(next);
+    for (const a of ["pan", "tilt"]) if (numeric(a)) next[a] = (caps[a].min + caps[a].max) / 2;
+    apply(next, "centre");
     log("centring", "info");
   });
 
+  el.resetImgBtn.addEventListener("click", () => {
+    if (!opening) return;
+    const next = {};
+    for (const k of ALL_KEYS) if (!PTZ.includes(k) && k in opening) next[k] = opening[k];
+    apply(next, "reset");
+    log("imaging restored to opening values", "info");
+  });
+
+  el.autoAllBtn.addEventListener("click", () => {
+    const next = {};
+    for (const c of MODE_CONTROLS) {
+      if (enumer(c.key) && caps[c.key].includes("continuous")) next[c.key] = "continuous";
+    }
+    if (!Object.keys(next).length) { log("no continuous modes available", "warn"); return; }
+    apply(next, "auto");
+    log("modes set to continuous", "info");
+  });
+
   el.capsBtn.addEventListener("click", () => {
-    log("getCapabilities(): " + JSON.stringify(
-      Object.fromEntries(AXES.filter(has).map(a => [a, caps[a]]))), "info");
-    log("getSettings(): " + JSON.stringify(
-      Object.fromEntries(Object.entries(track.getSettings())
-        .filter(([k]) => AXES.includes(k)))), "info");
+    const relevant = Object.fromEntries(Object.entries(caps).filter(([k]) => ALL_KEYS.includes(k)));
+    log("getCapabilities(): " + JSON.stringify(relevant), "info");
+    log("getSettings(): " + JSON.stringify(track.getSettings()), "info");
   });
 
   // ---------- boot ----------
@@ -774,20 +928,19 @@
       return;
     }
     const sc = navigator.mediaDevices.getSupportedConstraints();
-    const supported = AXES.filter(a => sc[a]);
-    el.apiSupport.textContent = supported.length === 3
-      ? "browser supports pan/tilt/zoom"
-      : supported.length
-        ? "browser supports " + supported.join(", ") + " only"
-        : "browser has no PTZ constraints";
-    log(`browser constraint support: ${supported.length ? supported.join(", ") : "none"}`,
-        supported.length === 3 ? "ok" : "warn");
-    if (!supported.length) {
-      log("this browser cannot drive PTZ. Chrome or Edge on desktop is needed.", "err");
-    }
+    const movement = PTZ.filter(a => sc[a]);
+    const imaging = [...MODE_CONTROLS, ...NUM_CONTROLS, ...BOOL_CONTROLS].map(c => c.key).filter(k => sc[k]);
+    el.apiSupport.textContent = movement.length === 3
+      ? `movement + ${imaging.length} imaging constraints`
+      : movement.length ? `${movement.join(", ")} only` : "no movement constraints";
+    log(`browser movement constraints: ${movement.length ? movement.join(", ") : "none"}`,
+        movement.length === 3 ? "ok" : "warn");
+    log(`browser imaging constraints: ${imaging.length ? imaging.join(", ") : "none"}`,
+        imaging.length ? "ok" : "warn");
+    if (!movement.length) log("this browser cannot drive PTZ. Use Chrome or Edge on desktop.", "err");
     listDevices();
     navigator.mediaDevices.addEventListener?.("devicechange", listDevices);
-    log("ready. Open the camera, then accept both prompts.", "info");
+    log("ready. Open here first, then start Teams.", "info");
   }
 
   boot();
