@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UVC PTZ Control Surface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --panel:      #23211e;
+    --panel-hi:   #2e2b27;
+    --panel-lo:   #1a1917;
+    --engrave:    #4a453e;
+    --label:      #8b8378;
+    --text:       #e6e0d6;
+    --amber:      #ffab2e;
+    --amber-dim:  #7a5417;
+    --tally:      #ff3b30;
+    --ok:         #4fd48a;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 28px 20px 60px;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #322e29 0%, #171614 60%);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .rig { max-width: 1120px; margin: 0 auto; }
+
+  /* ---- masthead ---- */
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--engrave);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--amber);
+  }
+  .sub {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--label);
+    letter-spacing: 0.04em;
+  }
+  .tally {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--label);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lamp {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #3a3630;
+    box-shadow: inset 0 0 0 1px #0006;
+  }
+  .lamp.live { background: var(--tally); box-shadow: 0 0 10px var(--tally); }
+
+  /* ---- panels ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 18px;
+    align-items: start;
+  }
+  @media (max-width: 880px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+  .panel {
+    background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+    border: 1px solid var(--engrave);
+    border-radius: 3px;
+    box-shadow: 0 1px 0 #ffffff0d inset, 0 8px 24px #0000004d;
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+  .panel h2 {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--engrave);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel h2 em { font-style: normal; color: var(--amber-dim); }
+
+  /* ---- controls ---- */
+  button, select {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    background: linear-gradient(180deg, #3a352f, #2a2621);
+    border: 1px solid #100f0e;
+    border-radius: 2px;
+    box-shadow: 0 1px 0 #ffffff14 inset, 0 1px 2px #0006;
+    padding: 8px 12px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  button:hover:not(:disabled) { background: linear-gradient(180deg, #443e37, #322d27); }
+  button:active:not(:disabled) {
+    background: var(--panel-lo);
+    box-shadow: 0 2px 4px #0009 inset;
+    transform: translateY(1px);
+  }
+  button:disabled { opacity: 0.34; cursor: not-allowed; }
+  button:focus-visible, select:focus-visible, input:focus-visible, .pad:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+  button.primary {
+    background: linear-gradient(180deg, #d38f21, #a86c12);
+    color: #17140f;
+    font-weight: 600;
+    border-color: #0d0b08;
+  }
+  button.primary:hover:not(:disabled) { background: linear-gradient(180deg, #f0a52c, #bd7a15); }
+  select { width: 100%; padding: 8px; }
+
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .row + .row { margin-top: 10px; }
+
+  label.field {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin-bottom: 6px;
+  }
+
+  /* ---- joystick pad: the signature ---- */
+  .stage { display: flex; gap: 18px; flex-wrap: wrap; }
+  .pad-wrap { flex: 0 0 auto; }
+  .pad {
+    position: relative;
+    width: 260px; height: 260px;
+    background:
+      linear-gradient(180deg, #191817, #121110);
+    border: 1px solid #0d0c0b;
+    border-radius: 3px;
+    box-shadow: 0 3px 10px #0009 inset;
+    cursor: crosshair;
+    touch-action: none;
+    overflow: hidden;
+  }
+  .pad.disabled { cursor: not-allowed; opacity: 0.4; }
+  .pad .grid-lines {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, #ffffff08 1px, transparent 1px),
+      linear-gradient(to bottom, #ffffff08 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  .pad .axis-h, .pad .axis-v {
+    position: absolute; background: var(--engrave);
+  }
+  .pad .axis-h { left: 0; right: 0; top: 50%; height: 1px; }
+  .pad .axis-v { top: 0; bottom: 0; left: 50%; width: 1px; }
+  .reticle {
+    position: absolute;
+    width: 26px; height: 26px;
+    margin: -13px 0 0 -13px;
+    border: 1.5px solid var(--amber);
+    border-radius: 50%;
+    box-shadow: 0 0 12px #ffab2e55;
+    transition: left 90ms linear, top 90ms linear;
+    pointer-events: none;
+  }
+  .reticle::before, .reticle::after {
+    content: ""; position: absolute; background: var(--amber);
+  }
+  .reticle::before { left: 50%; top: -7px; bottom: -7px; width: 1px; margin-left: -0.5px; }
+  .reticle::after  { top: 50%; left: -7px; right: -7px; height: 1px; margin-top: -0.5px; }
+  .pad-hint {
+    font-family: var(--mono); font-size: 10px; color: var(--label);
+    letter-spacing: 0.1em; margin-top: 8px; text-align: center;
+  }
+
+  /* ---- telemetry ---- */
+  .telemetry { flex: 1 1 240px; min-width: 220px; }
+  .axis-block { margin-bottom: 14px; }
+  .axis-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--label); margin-bottom: 5px;
+  }
+  .axis-head b { color: var(--amber); font-weight: 500; letter-spacing: 0.02em; font-size: 13px; }
+  .axis-head .rng { font-size: 9.5px; color: #6a6459; letter-spacing: 0.05em; }
+  input[type=range] {
+    width: 100%; height: 22px; -webkit-appearance: none; appearance: none;
+    background: transparent; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; background: var(--panel-lo); border: 1px solid #0e0d0c; border-radius: 2px;
+  }
+  input[type=range]::-moz-range-track {
+    height: 4px; background: var(--panel-lo); border: 1px solid #0e0d0c; border-radius: 2px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 12px; height: 20px; margin-top: -9px;
+    background: linear-gradient(180deg, #d8d1c4, #8e887c);
+    border: 1px solid #0d0c0b; border-radius: 2px;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 12px; height: 20px;
+    background: linear-gradient(180deg, #d8d1c4, #8e887c);
+    border: 1px solid #0d0c0b; border-radius: 2px;
+  }
+  input[type=range]:disabled { opacity: 0.3; }
+
+  .unsupported {
+    font-family: var(--mono); font-size: 10.5px; color: #6a6459;
+    letter-spacing: 0.06em; padding: 3px 0;
+  }
+
+  /* ---- presets ---- */
+  .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .preset {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+    padding: 9px 10px; min-height: 52px; text-align: left; width: 100%;
+  }
+  .preset .n {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; color: var(--label);
+  }
+  .preset .v { font-family: var(--mono); font-size: 10px; color: #5f5951; }
+  .preset.set .v { color: var(--ok); }
+  .preset.set .n { color: var(--amber); }
+
+  /* ---- video ---- */
+  .monitor {
+    position: relative;
+    background: #0c0b0a;
+    border: 1px solid #0d0c0b;
+    border-radius: 2px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    box-shadow: 0 3px 10px #0009 inset;
+  }
+  video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .monitor.hidden-preview video { visibility: hidden; }
+  .monitor .placeholder {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: #4a453e; text-align: center; padding: 20px;
+  }
+
+  /* ---- log ---- */
+  .log {
+    font-family: var(--mono); font-size: 11px; line-height: 1.65;
+    background: var(--panel-lo); border: 1px solid #0d0c0b; border-radius: 2px;
+    padding: 10px 12px; height: 190px; overflow-y: auto;
+    box-shadow: 0 2px 8px #0006 inset;
+  }
+  .log div { display: flex; gap: 9px; white-space: pre-wrap; word-break: break-word; }
+  .log time { color: #5c564d; flex: 0 0 auto; }
+  .log .m-err span { color: var(--tally); }
+  .log .m-ok span { color: var(--ok); }
+  .log .m-info span { color: #b8b1a5; }
+  .log .m-warn span { color: var(--amber); }
+
+  .note {
+    font-family: var(--mono); font-size: 10.5px; line-height: 1.7;
+    color: var(--label); letter-spacing: 0.02em;
+  }
+  .note b { color: var(--text); font-weight: 500; }
+  code {
+    font-family: var(--mono); font-size: 10.5px;
+    background: var(--panel-lo); padding: 1px 5px; border-radius: 2px; color: var(--amber);
+  }
+
+  .banner {
+    border: 1px solid var(--tally); background: #ff3b301a;
+    color: #ffb4b0; padding: 10px 14px; border-radius: 3px;
+    font-family: var(--mono); font-size: 11.5px; margin-bottom: 18px;
+  }
+  .banner code { background: #00000040; color: #ffd4a1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="rig">
+
+  <header>
+    <h1>UVC PTZ Control Surface</h1>
+    <span class="sub">Chrome MediaStreamTrack pan / tilt / zoom test rig</span>
+    <span class="tally"><span class="lamp" id="lamp"></span><span id="tallyText">Camera closed</span></span>
+  </header>
+
+  <div id="secureBanner" class="banner" hidden>
+    Not a secure context, so the camera API is unavailable. Serve this file over
+    <code>http://localhost</code> instead of opening it from disk. From this file's folder:
+    <code>python3 -m http.server 8000</code>
+  </div>
+
+  <div class="grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+      <div class="panel">
+        <h2>Camera <em id="apiSupport">checking API…</em></h2>
+        <div class="row">
+          <div style="flex:1 1 260px; min-width:200px;">
+            <label class="field" for="deviceSel">Device</label>
+            <select id="deviceSel"><option>Grant permission to list devices</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <button class="primary" id="openBtn">Open camera</button>
+          <button id="closeBtn" disabled>Release camera</button>
+          <button id="refreshBtn">Rescan devices</button>
+          <button id="previewBtn" disabled>Hide preview</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Control <em id="ctrlState">no track</em></h2>
+        <div class="stage">
+          <div class="pad-wrap">
+            <div class="pad disabled" id="pad" tabindex="0" role="application"
+                 aria-label="Pan and tilt pad. Click or drag to aim. Arrow keys nudge.">
+              <div class="grid-lines"></div>
+              <div class="axis-h"></div>
+              <div class="axis-v"></div>
+              <div class="reticle" id="reticle" style="left:50%; top:50%"></div>
+            </div>
+            <div class="pad-hint">drag to aim &nbsp;·&nbsp; arrow keys nudge &nbsp;·&nbsp; shift = coarse</div>
+          </div>
+
+          <div class="telemetry">
+            <div class="axis-block" data-axis="pan">
+              <div class="axis-head"><span>Pan <b class="val">—</b></span><span class="rng">—</span></div>
+              <input type="range" disabled>
+              <div class="unsupported" hidden>not offered by this camera</div>
+            </div>
+            <div class="axis-block" data-axis="tilt">
+              <div class="axis-head"><span>Tilt <b class="val">—</b></span><span class="rng">—</span></div>
+              <input type="range" disabled>
+              <div class="unsupported" hidden>not offered by this camera</div>
+            </div>
+            <div class="axis-block" data-axis="zoom">
+              <div class="axis-head"><span>Zoom <b class="val">—</b></span><span class="rng">—</span></div>
+              <input type="range" disabled>
+              <div class="unsupported" hidden>not offered by this camera</div>
+            </div>
+            <div class="row">
+              <button id="homeBtn" disabled>Centre</button>
+              <button id="capsBtn" disabled>Dump capabilities</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Presets <em>click to recall · shift-click to store</em></h2>
+        <div class="presets" id="presets"></div>
+        <div class="row" style="margin-top:10px">
+          <button id="clearPresets" disabled>Clear all</button>
+          <span class="note">Held in memory only, so they go on reload.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <div class="panel">
+        <h2>Preview</h2>
+        <div class="monitor" id="monitor">
+          <video id="video" autoplay playsinline muted></video>
+          <div class="placeholder" id="placeholder">no signal</div>
+        </div>
+        <div class="note" style="margin-top:10px">
+          Hiding the preview keeps the track open. Use it to check the camera still
+          responds while the tab is not showing video, which is closer to how it
+          behaves next to Teams.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Log</h2>
+        <div class="log" id="log"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Reading the result</h2>
+        <div class="note">
+          <b>OverconstrainedError</b> means the camera has no UVC PTZ controls that Chrome can see.<br><br>
+          <b>NotReadableError</b> means something else holds the device. That is the Teams
+          contention case, and it is the usual failure on macOS.<br><br>
+          <b>NotAllowedError</b> means the movement permission was declined. Reset it under the
+          padlock in the address bar, in "use and move your camera".<br><br>
+          Pan and tilt are usually arcseconds, so 36000 is 10 degrees. Zoom units are whatever
+          the vendor felt like.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  const AXES = ["pan", "tilt", "zoom"];
+  const PRESET_COUNT = 6;
+
+  const el = {
+    log: $("#log"),
+    lamp: $("#lamp"),
+    tallyText: $("#tallyText"),
+    apiSupport: $("#apiSupport"),
+    ctrlState: $("#ctrlState"),
+    deviceSel: $("#deviceSel"),
+    openBtn: $("#openBtn"),
+    closeBtn: $("#closeBtn"),
+    refreshBtn: $("#refreshBtn"),
+    previewBtn: $("#previewBtn"),
+    homeBtn: $("#homeBtn"),
+    capsBtn: $("#capsBtn"),
+    pad: $("#pad"),
+    reticle: $("#reticle"),
+    video: $("#video"),
+    monitor: $("#monitor"),
+    placeholder: $("#placeholder"),
+    presets: $("#presets"),
+    clearPresets: $("#clearPresets")
+  };
+
+  let stream = null;
+  let track = null;
+  let caps = {};
+  let current = {};          // last known pan/tilt/zoom
+  let presets = new Array(PRESET_COUNT).fill(null);
+  let applying = false;      // serialise applyConstraints
+  let queued = null;
+
+  // ---------- logging ----------
+  function log(msg, kind = "info") {
+    const line = document.createElement("div");
+    line.className = "m-" + kind;
+    const t = document.createElement("time");
+    t.textContent = new Date().toTimeString().slice(0, 8);
+    const s = document.createElement("span");
+    s.textContent = msg;
+    line.append(t, s);
+    el.log.append(line);
+    el.log.scrollTop = el.log.scrollHeight;
+  }
+
+  // ---------- capability plumbing ----------
+  const has = (axis) => !!(caps && caps[axis] && typeof caps[axis].max === "number");
+  const clamp = (axis, v) => Math.min(caps[axis].max, Math.max(caps[axis].min, v));
+
+  function snap(axis, v) {
+    const c = caps[axis];
+    const step = c.step || 1;
+    return clamp(axis, Math.round((v - c.min) / step) * step + c.min);
+  }
+
+  async function move(changes) {
+    if (!track) return;
+    Object.assign(current, changes);
+    if (applying) { queued = { ...(queued || {}), ...changes }; return; }
+    applying = true;
+    const payload = {};
+    for (const a of AXES) if (a in changes && has(a)) payload[a] = snap(a, changes[a]);
+    try {
+      await track.applyConstraints({ advanced: [payload] });
+      const s = track.getSettings();
+      for (const a of AXES) if (typeof s[a] === "number") current[a] = s[a];
+      paint();
+    } catch (err) {
+      log(`applyConstraints rejected (${err.name}): ${err.message}`, "err");
+    } finally {
+      applying = false;
+      if (queued) { const q = queued; queued = null; move(q); }
+    }
+  }
+
+  // ---------- painting ----------
+  function paint() {
+    for (const axis of AXES) {
+      const block = $(`.axis-block[data-axis="${axis}"]`);
+      const valEl = $(".val", block);
+      const rngEl = $(".rng", block);
+      const slider = $("input", block);
+      const none = $(".unsupported", block);
+      if (!has(axis)) {
+        valEl.textContent = "—";
+        rngEl.textContent = "";
+        slider.hidden = true;
+        none.hidden = false;
+        continue;
+      }
+      slider.hidden = false;
+      none.hidden = true;
+      const c = caps[axis];
+      slider.min = c.min; slider.max = c.max; slider.step = c.step || 1;
+      slider.disabled = !track;
+      if (typeof current[axis] === "number") slider.value = current[axis];
+      valEl.textContent = typeof current[axis] === "number" ? current[axis] : "—";
+      rngEl.textContent = `${c.min} … ${c.max} / ${c.step || 1}`;
+    }
+    // reticle
+    if (has("pan") || has("tilt")) {
+      const fx = has("pan")
+        ? (current.pan - caps.pan.min) / (caps.pan.max - caps.pan.min) : 0.5;
+      const fy = has("tilt")
+        ? 1 - (current.tilt - caps.tilt.min) / (caps.tilt.max - caps.tilt.min) : 0.5;
+      el.reticle.style.left = (fx * 100) + "%";
+      el.reticle.style.top  = (fy * 100) + "%";
+    }
+    paintPresets();
+  }
+
+  function setLive(on) {
+    el.lamp.classList.toggle("live", on);
+    el.tallyText.textContent = on ? "Camera open" : "Camera closed";
+    el.closeBtn.disabled = !on;
+    el.previewBtn.disabled = !on;
+    el.homeBtn.disabled = !on || !(has("pan") || has("tilt"));
+    el.capsBtn.disabled = !on;
+    el.clearPresets.disabled = !on;
+    el.openBtn.disabled = on;
+    el.pad.classList.toggle("disabled", !on || !(has("pan") || has("tilt")));
+    el.placeholder.hidden = on;
+  }
+
+  // ---------- devices ----------
+  async function listDevices() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cams = devices.filter(d => d.kind === "videoinput");
+      el.deviceSel.innerHTML = "";
+      if (!cams.length) {
+        el.deviceSel.innerHTML = "<option>no video inputs found</option>";
+        return;
+      }
+      for (const c of cams) {
+        const o = document.createElement("option");
+        o.value = c.deviceId;
+        o.textContent = c.label || `camera ${c.deviceId.slice(0, 8)}… (label hidden until permission)`;
+        el.deviceSel.append(o);
+      }
+      log(`${cams.length} video input${cams.length === 1 ? "" : "s"} found`, "info");
+    } catch (err) {
+      log(`enumerateDevices failed (${err.name}): ${err.message}`, "err");
+    }
+  }
+
+  // ---------- open / close ----------
+  async function open() {
+    close(true);
+    const deviceId = el.deviceSel.value;
+    const base = deviceId && deviceId.length > 4 ? { deviceId: { exact: deviceId } } : {};
+    let ptzOk = true;
+
+    try {
+      log("requesting camera with pan/tilt/zoom…", "info");
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { ...base, pan: true, tilt: true, zoom: true }
+      });
+    } catch (err) {
+      log(`PTZ request failed (${err.name}): ${err.message}`, "err");
+      if (err.name === "NotReadableError") {
+        log("device is held by another app. Close the other app or accept that this OS will not share.", "warn");
+        return;
+      }
+      ptzOk = false;
+      try {
+        log("retrying without PTZ constraints to inspect the device…", "warn");
+        stream = await navigator.mediaDevices.getUserMedia({ video: { ...base } });
+      } catch (err2) {
+        log(`plain camera request also failed (${err2.name}): ${err2.message}`, "err");
+        return;
+      }
+    }
+
+    track = stream.getVideoTracks()[0];
+    el.video.srcObject = stream;
+    caps = typeof track.getCapabilities === "function" ? track.getCapabilities() : {};
+    current = {};
+    const s = track.getSettings();
+    for (const a of AXES) if (typeof s[a] === "number") current[a] = s[a];
+    for (const a of AXES) if (has(a) && typeof current[a] !== "number") current[a] = caps[a].min;
+
+    const found = AXES.filter(has);
+    log(`open: ${track.label || "unnamed device"}`, "ok");
+    log(found.length
+      ? `controllable: ${found.join(", ")}`
+      : "no pan/tilt/zoom capabilities reported by this camera", found.length ? "ok" : "warn");
+    if (ptzOk && !found.length) {
+      log("permission was granted but the camera exposes nothing to move.", "warn");
+    }
+    el.ctrlState.textContent = found.length ? found.join(" / ") : "no movable axes";
+    setLive(true);
+    paint();
+  }
+
+  function close(quiet) {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    stream = null; track = null; caps = {}; current = {};
+    el.video.srcObject = null;
+    el.monitor.classList.remove("hidden-preview");
+    el.previewBtn.textContent = "Hide preview";
+    el.ctrlState.textContent = "no track";
+    setLive(false);
+    $$(".axis-block input").forEach(i => i.disabled = true);
+    if (!quiet) log("camera released", "info");
+  }
+
+  // ---------- pad ----------
+  function padTo(clientX, clientY) {
+    if (!track) return;
+    const r = el.pad.getBoundingClientRect();
+    const fx = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+    const fy = Math.min(1, Math.max(0, (clientY - r.top) / r.height));
+    const next = {};
+    if (has("pan"))  next.pan  = caps.pan.min + fx * (caps.pan.max - caps.pan.min);
+    if (has("tilt")) next.tilt = caps.tilt.min + (1 - fy) * (caps.tilt.max - caps.tilt.min);
+    move(next);
+  }
+
+  let dragging = false;
+  el.pad.addEventListener("pointerdown", (e) => {
+    if (!track) return;
+    dragging = true;
+    el.pad.setPointerCapture(e.pointerId);
+    padTo(e.clientX, e.clientY);
+  });
+  el.pad.addEventListener("pointermove", (e) => { if (dragging) padTo(e.clientX, e.clientY); });
+  el.pad.addEventListener("pointerup", () => { dragging = false; });
+  el.pad.addEventListener("pointercancel", () => { dragging = false; });
+
+  el.pad.addEventListener("keydown", (e) => {
+    if (!track) return;
+    const map = { ArrowLeft: ["pan", -1], ArrowRight: ["pan", 1], ArrowUp: ["tilt", 1], ArrowDown: ["tilt", -1] };
+    const m = map[e.key];
+    if (!m) return;
+    e.preventDefault();
+    const [axis, dir] = m;
+    if (!has(axis)) return;
+    const span = caps[axis].max - caps[axis].min;
+    const delta = dir * span * (e.shiftKey ? 0.1 : 0.02);
+    move({ [axis]: clamp(axis, (current[axis] ?? caps[axis].min) + delta) });
+  });
+
+  // ---------- sliders ----------
+  for (const axis of AXES) {
+    const slider = $(`.axis-block[data-axis="${axis}"] input`);
+    slider.addEventListener("input", () => {
+      if (!track || !has(axis)) return;
+      move({ [axis]: Number(slider.value) });
+    });
+  }
+
+  // ---------- presets ----------
+  function paintPresets() {
+    $$(".preset", el.presets).forEach((b, i) => {
+      const p = presets[i];
+      b.classList.toggle("set", !!p);
+      $(".v", b).textContent = p
+        ? AXES.filter(a => a in p).map(a => `${a[0].toUpperCase()}${Math.round(p[a])}`).join(" ")
+        : "empty";
+    });
+  }
+
+  for (let i = 0; i < PRESET_COUNT; i++) {
+    const b = document.createElement("button");
+    b.className = "preset";
+    b.innerHTML = `<span class="n">PRESET ${i + 1}</span><span class="v">empty</span>`;
+    b.addEventListener("click", (e) => {
+      if (!track) { log("open the camera first", "warn"); return; }
+      if (e.shiftKey) {
+        const snapshot = {};
+        for (const a of AXES) if (has(a) && typeof current[a] === "number") snapshot[a] = current[a];
+        presets[i] = snapshot;
+        log(`preset ${i + 1} stored`, "ok");
+        paintPresets();
+      } else if (presets[i]) {
+        move({ ...presets[i] });
+        log(`preset ${i + 1} recalled`, "info");
+      } else {
+        log(`preset ${i + 1} is empty. Shift-click to store the current position.`, "warn");
+      }
+    });
+    el.presets.append(b);
+  }
+  paintPresets();
+
+  el.clearPresets.addEventListener("click", () => {
+    presets = new Array(PRESET_COUNT).fill(null);
+    paintPresets();
+    log("presets cleared", "info");
+  });
+
+  // ---------- buttons ----------
+  el.openBtn.addEventListener("click", async () => {
+    await open();
+    await listDevices();          // labels appear once permission is granted
+  });
+  el.closeBtn.addEventListener("click", () => close());
+  el.refreshBtn.addEventListener("click", listDevices);
+
+  el.previewBtn.addEventListener("click", () => {
+    const hidden = el.monitor.classList.toggle("hidden-preview");
+    el.previewBtn.textContent = hidden ? "Show preview" : "Hide preview";
+    log(hidden ? "preview hidden, track still open" : "preview shown", "info");
+  });
+
+  el.homeBtn.addEventListener("click", () => {
+    const next = {};
+    for (const a of ["pan", "tilt"]) if (has(a)) next[a] = (caps[a].min + caps[a].max) / 2;
+    move(next);
+    log("centring", "info");
+  });
+
+  el.capsBtn.addEventListener("click", () => {
+    log("getCapabilities(): " + JSON.stringify(
+      Object.fromEntries(AXES.filter(has).map(a => [a, caps[a]]))), "info");
+    log("getSettings(): " + JSON.stringify(
+      Object.fromEntries(Object.entries(track.getSettings())
+        .filter(([k]) => AXES.includes(k)))), "info");
+  });
+
+  // ---------- boot ----------
+  function boot() {
+    if (!window.isSecureContext || !navigator.mediaDevices) {
+      $("#secureBanner").hidden = false;
+      el.openBtn.disabled = true;
+      el.apiSupport.textContent = "unavailable";
+      log("insecure context, camera API blocked", "err");
+      return;
+    }
+    const sc = navigator.mediaDevices.getSupportedConstraints();
+    const supported = AXES.filter(a => sc[a]);
+    el.apiSupport.textContent = supported.length === 3
+      ? "browser supports pan/tilt/zoom"
+      : supported.length
+        ? "browser supports " + supported.join(", ") + " only"
+        : "browser has no PTZ constraints";
+    log(`browser constraint support: ${supported.length ? supported.join(", ") : "none"}`,
+        supported.length === 3 ? "ok" : "warn");
+    if (!supported.length) {
+      log("this browser cannot drive PTZ. Chrome or Edge on desktop is needed.", "err");
+    }
+    listDevices();
+    navigator.mediaDevices.addEventListener?.("devicechange", listDevices);
+    log("ready. Open the camera, then accept both prompts.", "info");
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
