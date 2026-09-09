@@ -286,6 +286,112 @@
     font-family:var(--serif);font-size:22px;color:var(--teal-dark);
   }
 
+  /* ---------- print document ---------- */
+  #printOverlay{
+    position:fixed;inset:0;z-index:40;
+    background:var(--paper);overflow-y:auto;
+  }
+  #printBar{
+    position:sticky;top:0;z-index:2;
+    display:flex;gap:8px;align-items:center;
+    padding:10px 22px;background:var(--card);
+    border-bottom:1px solid var(--line);
+  }
+  #printBar .note{color:var(--muted);font-size:12.5px;margin-left:auto}
+  #printDoc{
+    background:#fff;color:#000;
+    max-width:186mm;margin:22px auto 60px;
+    padding:18mm 16mm;
+    border:1px solid var(--line);
+  }
+
+  .pr-title{font-family:var(--serif);font-size:13px;margin:0;font-weight:400;color:#444}
+  .pr-client{font-family:var(--serif);font-size:30px;line-height:1.15;margin:2px 0 18px;font-weight:600}
+  .pr-meta{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:7px 28px;
+    border-top:1px solid #000;border-bottom:1px solid #ccc;
+    padding:12px 0;margin-bottom:16px;font-size:12.5px;
+  }
+  .pr-meta div{display:flex;gap:8px}
+  .pr-meta dt{color:#555;flex:0 0 42%;margin:0}
+  .pr-meta dd{margin:0;font-weight:600}
+  .pr-counts{font-size:12.5px;margin:0 0 4px;color:#333}
+  .pr-counts b{font-variant-numeric:tabular-nums}
+  .pr-lead{font-family:var(--serif);font-size:14px;line-height:1.6;max-width:70ch;color:#222}
+
+  .pr-section{
+    font-size:12.5px;color:#444;font-weight:600;
+    border-bottom:1px solid #000;padding-bottom:5px;
+    margin:26px 0 0;
+  }
+  .pr-rule{
+    break-inside:avoid;page-break-inside:avoid;
+    border-left:3px solid #999;
+    border-bottom:1px solid #ddd;
+    padding:12px 0 13px 13px;
+    margin:0;
+  }
+  .pr-rule.blocker{border-left-color:#9E2B25}
+  .pr-rule.flag{border-left-color:#B0740B}
+  .pr-rule.info{border-left-color:#3D6280}
+  .pr-rh{display:flex;justify-content:space-between;gap:14px;align-items:baseline;font-size:11.5px}
+  .pr-rid{font-family:var(--mono);font-weight:600;font-size:12px}
+  .pr-tags{color:#555;text-align:right;flex:none}
+  .pr-statement{font-family:var(--serif);font-size:14.5px;line-height:1.5;margin:6px 0 0;max-width:74ch}
+  .pr-quote{
+    font-family:var(--serif);font-style:italic;color:#333;
+    margin:8px 0 0;padding:0 0 0 12px;border-left:1px solid #bbb;
+    font-size:13px;max-width:70ch;
+  }
+  .pr-quote cite{display:block;font-style:normal;font-size:11px;color:#666;margin-top:3px}
+  .pr-fields{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:2px 24px;
+    margin:9px 0 0;font-size:11.5px;color:#333;
+  }
+  .pr-fields span{display:block}
+  .pr-fields b{color:#000;font-weight:600}
+  .pr-logic{font-family:var(--mono);font-size:11.5px;margin:8px 0 0;color:#111;word-break:break-word}
+  .pr-note{font-size:11.5px;margin:8px 0 0;color:#444;max-width:74ch}
+  .pr-note b{color:#000}
+  .pr-flagline{font-size:11.5px;color:#8a4a00;margin:7px 0 0}
+
+  table.pr-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+  table.pr-table th{
+    text-align:left;border-bottom:1px solid #000;padding:6px 8px 5px;
+    font-size:11px;font-weight:600;
+  }
+  table.pr-table td{border-bottom:1px solid #e0e0e0;padding:6px 8px;vertical-align:top}
+  table.pr-table thead{display:table-header-group}
+  table.pr-table tr{break-inside:avoid;page-break-inside:avoid}
+  table.pr-table .c-id{font-family:var(--mono);white-space:nowrap;width:20%}
+  table.pr-table .c-cl{width:16%;color:#444}
+  table.pr-table .c-tag{width:12%;white-space:nowrap;color:#444}
+
+  dialog#printDialog{
+    border:1px solid var(--line);border-radius:4px;padding:0;
+    max-width:430px;width:calc(100% - 40px);color:var(--ink);
+  }
+  dialog#printDialog::backdrop{background:rgba(23,33,29,.35)}
+  #printDialog .body{padding:20px 22px 8px}
+  #printDialog h2{font-family:var(--serif);font-size:19px;margin:0 0 4px;font-weight:600}
+  #printDialog p.sub{color:var(--muted);margin:0 0 18px;font-size:13px}
+  #printDialog fieldset{border:0;padding:0;margin:0 0 16px}
+  #printDialog legend{padding:0;font-size:12px;color:var(--muted);margin-bottom:6px}
+  #printDialog label.opt{display:flex;gap:8px;align-items:baseline;padding:3px 0;cursor:pointer}
+  #printDialog .foot{
+    display:flex;gap:8px;justify-content:flex-end;
+    padding:14px 22px;border-top:1px solid var(--line-soft);background:#FAFBF9;
+  }
+
+  @page{size:A4;margin:16mm 14mm}
+  @media print{
+    body{height:auto!important;overflow:visible!important;display:block!important;background:#fff}
+    .topbar,.docmeta,.coverage,.tabs,.split,.raw,#printBar,dialog{display:none!important}
+    #printOverlay{position:static!important;overflow:visible!important;background:#fff}
+    #printDoc{max-width:none;margin:0;padding:0;border:0}
+    .pr-rule{border-bottom-color:#ccc}
+  }
+
   @media (max-width:860px){
     body{height:auto;overflow:visible;display:block}
     .split{grid-template-columns:1fr;display:block}
@@ -306,6 +412,7 @@
     <button class="btn" id="btnNew">Start empty set</button>
     <button class="btn quiet" id="btnExample">Load example</button>
     <button class="btn" id="btnCopy">Copy YAML</button>
+    <button class="btn" id="btnPrint">Save as PDF</button>
     <button class="btn primary" id="btnSave">Save YAML</button>
     <input type="file" id="fileInput" accept=".yaml,.yml,.txt" hidden>
   </div>
@@ -345,6 +452,44 @@
     <button class="btn quiet" id="btnRefreshRaw">Discard changes</button>
   </p>
 </section>
+
+<dialog id="printDialog">
+  <div class="body">
+    <h2>Save as PDF</h2>
+    <p class="sub">Builds a paginated review document. Your browser turns it into a PDF from the print dialog.</p>
+    <fieldset>
+      <legend>Which rules to include</legend>
+      <label class="opt"><input type="radio" name="pscope" value="all" checked> Every rule in the set</label>
+      <label class="opt"><input type="radio" name="pscope" value="filtered"> Only rules matching the current filters</label>
+      <label class="opt"><input type="radio" name="pscope" value="review"> Only rules that need review</label>
+    </fieldset>
+    <fieldset>
+      <legend>How much detail</legend>
+      <label class="opt"><input type="radio" name="pmode" value="full" checked> Full record, one block per rule</label>
+      <label class="opt"><input type="radio" name="pmode" value="table"> Summary table, one row per rule</label>
+    </fieldset>
+    <fieldset id="pIncludes">
+      <legend>Include in the full record</legend>
+      <label class="opt"><input type="checkbox" id="pQuote" checked> Contract quote</label>
+      <label class="opt"><input type="checkbox" id="pLogic" checked> Logic expression</label>
+      <label class="opt"><input type="checkbox" id="pNote" checked> Reviewer notes and validation warnings</label>
+      <label class="opt"><input type="checkbox" id="pScopeF" checked> Scope filters and external data</label>
+    </fieldset>
+  </div>
+  <div class="foot">
+    <button class="btn quiet" id="pCancel">Cancel</button>
+    <button class="btn primary" id="pBuild">Build document</button>
+  </div>
+</dialog>
+
+<div id="printOverlay" hidden>
+  <div id="printBar">
+    <button class="btn primary" id="pPrint">Save as PDF</button>
+    <button class="btn" id="pBack">Back to editor</button>
+    <span class="note">In the print dialog choose Save as PDF as the destination. Turn on background graphics for the severity bars.</span>
+  </div>
+  <div id="printDoc"></div>
+</div>
 
 <script>
 "use strict";
@@ -1223,6 +1368,219 @@ window.addEventListener("keydown", e => {
 });
 window.addEventListener("beforeunload", e => {
   if (doc.rules.length){ e.preventDefault(); e.returnValue = ""; }
+});
+
+
+/* =========================================================
+   9. Print document
+   Builds a paginated review record. The browser produces the
+   PDF, which keeps the file dependency free and gives real
+   pagination and selectable text.
+   ========================================================= */
+
+function niceDate(d){
+  return d.toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+}
+function titleCase(s){
+  s = String(s || "").replace(/_/g," ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+const PRINT_LABELS = {
+  sow_specific:"SOW specific", msa_amendment:"MSA amendment", msa:"MSA",
+  standard_card:"Standard card", line_item:"Line item",
+  budget_total:"Budget total", labour_total:"Labour total", phase:"Phase"
+};
+function label(v){ return PRINT_LABELS[v] || titleCase(v); }
+function printBaseName(){
+  const base = (doc.client || "rule-set").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  return base + "-msa-rules-" + new Date().toISOString().slice(0,10);
+}
+
+function chooseRules(scope){
+  refreshIdCounts();
+  const all = doc.rules;
+  if (scope === "filtered") return all.filter(passesFilter);
+  if (scope === "review") return all.filter(r => ruleNeedsReview(r, all));
+  return all.slice();
+}
+
+function printHeader(rules, scopeLabel){
+  const n = rules.length;
+  const counts = { high:0, medium:0, low:0 };
+  const sev = { blocker:0, flag:0, info:0 };
+  let errs = 0;
+  rules.forEach(r => {
+    counts[ENUMS.confidence.includes(r.confidence) ? r.confidence : "low"]++;
+    if (sev[r.severity] !== undefined) sev[r.severity]++;
+    if (validateRule(r, doc.rules).errs.length) errs++;
+  });
+  const review = rules.filter(r => ruleNeedsReview(r, doc.rules)).length;
+
+  const meta = [
+    ["MSA reference", doc.msa_ref],
+    ["Rate card in scope", doc.rate_card],
+    ["Rules effective from", doc.effective_from],
+    ["Commercial owner", doc.reviewed_by],
+    ["Next review date", doc.review_date],
+    ["Document produced", niceDate(new Date())]
+  ].filter(x => x[1]);
+
+  let h = '<p class="pr-title">Contract compliance rule set</p>' +
+    '<h1 class="pr-client">' + esc(doc.client || "Unnamed client") + '</h1>';
+
+  if (meta.length){
+    h += '<dl class="pr-meta">' + meta.map(([k,v]) =>
+      '<div><dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd></div>').join("") + '</dl>';
+  }
+
+  h += '<p class="pr-counts"><b>' + n + '</b> rules included' +
+    (scopeLabel ? ", " + esc(scopeLabel) : "") + ". " +
+    '<b>' + sev.blocker + '</b> blocker, <b>' + sev.flag + '</b> flag, <b>' + sev.info + '</b> info. ' +
+    '<b>' + counts.high + '</b> high confidence, <b>' + counts.medium + '</b> medium, <b>' + counts.low + '</b> low.</p>';
+
+  h += '<p class="pr-counts"><b>' + review + '</b> still need review' +
+    (errs ? ', of which <b>' + errs + '</b> have problems that stop them being used' : '') + '.</p>';
+
+  h += '<p class="pr-lead">Rules below carry the clause they come from and the contract wording they rest on, ' +
+    'so each can be checked against the agreement. Anything marked medium or low confidence has not been ' +
+    'confirmed by a person and should not be relied on by the automated checker.</p>';
+  return h;
+}
+
+function printRule(r, opts){
+  const v = validateRule(r, doc.rules);
+  const conf = ENUMS.confidence.includes(r.confidence) ? r.confidence : "low";
+  let h = '<article class="pr-rule ' + esc(r.severity) + '">';
+  h += '<div class="pr-rh"><span class="pr-rid">' + esc(r.id || "untitled") + '</span>' +
+       '<span class="pr-tags">' + titleCase(r.severity) + ", " + esc(conf) + ' confidence, ' +
+       esc(r.check) + '</span></div>';
+  h += '<p class="pr-statement">' + esc(r.statement || "No statement recorded.") + '</p>';
+
+  if (opts.quote && r.quote.trim()){
+    h += '<blockquote class="pr-quote">' + esc(r.quote) +
+         (r.clause ? '<cite>' + esc(r.clause) + '</cite>' : '') + '</blockquote>';
+  } else if (r.clause){
+    h += '<p class="pr-note">Clause ' + esc(r.clause) + '</p>';
+  }
+
+  const fields = [
+    ["Applies to", label(r.applies_to)],
+    ["Precedence", label(r.precedence_layer)],
+    ["Effective", (r.effective_from || "not set") + (r.effective_to ? " to " + r.effective_to : " onwards")],
+    ["Tolerance", r.tolerance.type === "none" ? "None" :
+      titleCase(r.tolerance.type) + " " + r.tolerance.value]
+  ];
+  if (opts.scopeF){
+    const sc = Object.keys(r.scope).filter(k => r.scope[k] !== "");
+    if (sc.length) fields.push(["Scope", sc.map(k => k.replace(/_/g," ") + " is " + r.scope[k]).join("; ")]);
+    if (r.requires_external.length) fields.push(["Needs external data", r.requires_external.join(", ")]);
+  }
+  h += '<div class="pr-fields">' + fields.map(([k,val]) =>
+    '<span><b>' + esc(k) + '</b> ' + esc(val) + '</span>').join("") + '</div>';
+
+  if (opts.logic && r.check === "deterministic" && r.logic.trim()){
+    h += '<p class="pr-logic">' + esc(r.logic) + '</p>';
+  }
+  if (opts.note){
+    if (r.reviewer_note.trim()){
+      h += '<p class="pr-note"><b>Reviewer note</b> ' + esc(r.reviewer_note) + '</p>';
+    }
+    const issues = v.errs.concat(v.warns);
+    if (issues.length){
+      h += '<p class="pr-flagline">' + issues.map(esc).join(" ") + '</p>';
+    }
+  }
+  return h + '</article>';
+}
+
+function printTable(rules){
+  let h = '<table class="pr-table"><thead><tr>' +
+    '<th class="c-id">Rule</th><th class="c-cl">Clause</th><th>Statement</th>' +
+    '<th class="c-tag">Severity</th><th class="c-tag">Confidence</th></tr></thead><tbody>';
+  rules.forEach(r => {
+    h += '<tr><td class="c-id">' + esc(r.id) + '</td>' +
+      '<td class="c-cl">' + esc(r.clause) + '</td>' +
+      '<td>' + esc(r.statement) + '</td>' +
+      '<td class="c-tag">' + titleCase(r.severity) + '</td>' +
+      '<td class="c-tag">' + esc(r.confidence) +
+        (ruleNeedsReview(r, doc.rules) ? ", review" : "") + '</td></tr>';
+  });
+  return h + '</tbody></table>';
+}
+
+function buildPrintDoc(){
+  const scope = document.querySelector('input[name="pscope"]:checked').value;
+  const mode = document.querySelector('input[name="pmode"]:checked').value;
+  const opts = {
+    quote: $("pQuote").checked,
+    logic: $("pLogic").checked,
+    note: $("pNote").checked,
+    scopeF: $("pScopeF").checked
+  };
+  const rules = chooseRules(scope);
+  if (!rules.length){ toast("Nothing to include with those settings.", true); return false; }
+
+  const scopeLabel = scope === "filtered" ? "matching the current filters"
+    : scope === "review" ? "needing review" : "";
+
+  let h = printHeader(rules, scopeLabel);
+
+  if (mode === "table"){
+    h += '<p class="pr-section">All rules</p>' + printTable(rules);
+  } else {
+    const needs = rules.filter(r => ruleNeedsReview(r, doc.rules));
+    const clear = rules.filter(r => !ruleNeedsReview(r, doc.rules));
+    if (needs.length){
+      h += '<p class="pr-section">Need review, ' + needs.length + '</p>' +
+           needs.map(r => printRule(r, opts)).join("");
+    }
+    if (clear.length){
+      h += '<p class="pr-section">Cleared, ' + clear.length + '</p>' +
+           clear.map(r => printRule(r, opts)).join("");
+    }
+  }
+  $("printDoc").innerHTML = h;
+  return true;
+}
+
+function openPrintPreview(){
+  $("printOverlay").hidden = false;
+  document.body.style.overflow = "hidden";
+  $("pPrint").focus();
+}
+function closePrintPreview(){
+  $("printOverlay").hidden = true;
+  document.body.style.overflow = "";
+  $("btnPrint").focus();
+}
+function doPrint(){
+  const prev = document.title;
+  document.title = printBaseName();
+  const restore = () => { document.title = prev; window.removeEventListener("afterprint", restore); };
+  window.addEventListener("afterprint", restore);
+  setTimeout(restore, 4000);
+  window.print();
+}
+
+$("btnPrint").addEventListener("click", () => {
+  if (!doc.rules.length){ toast("There are no rules to print yet.", true); return; }
+  $("printDialog").showModal();
+});
+$("pCancel").addEventListener("click", () => $("printDialog").close());
+$("pBuild").addEventListener("click", () => {
+  if (buildPrintDoc()){ $("printDialog").close(); openPrintPreview(); }
+});
+$("pPrint").addEventListener("click", doPrint);
+$("pBack").addEventListener("click", closePrintPreview);
+document.querySelectorAll('input[name="pmode"]').forEach(el => el.addEventListener("change", () => {
+  $("pIncludes").style.opacity = document.querySelector('input[name="pmode"]:checked').value === "table" ? ".4" : "1";
+  $("pIncludes").querySelectorAll("input").forEach(i => { i.disabled = document.querySelector('input[name="pmode"]:checked').value === "table"; });
+}));
+window.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("printOverlay").hidden) closePrintPreview();
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "p" && doc.rules.length){
+    if ($("printOverlay").hidden){ e.preventDefault(); $("printDialog").showModal(); }
+  }
 });
 
 renderAll();
