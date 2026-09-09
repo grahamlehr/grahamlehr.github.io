@@ -37,7 +37,13 @@
     font-size:14px;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    /* Panes scroll on their own so a long ledger never pushes the editor away */
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
   }
+  .topbar,.docmeta,.coverage,.tabs{flex:none}
   button{font-family:inherit;font-size:inherit;cursor:pointer}
   input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   textarea{resize:vertical}
@@ -132,16 +138,22 @@
   .split{
     display:grid;
     grid-template-columns:minmax(280px,360px) 1fr;
-    align-items:start;
+    align-items:stretch;
     gap:0;
+    flex:1;
+    min-height:0;
   }
   .ledger{
     border-right:1px solid var(--line);
     background:var(--card);
-    min-height:calc(100vh - 200px);
+    overflow-y:auto;
+    min-height:0;
   }
+  .editor{overflow-y:auto;min-height:0}
+  .raw{flex:1;overflow-y:auto;min-height:0}
   .filters{
     display:flex;gap:6px;padding:12px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap;
+    position:sticky;top:0;z-index:3;background:var(--card);
   }
   .filters input[type=search]{
     flex:1 1 130px;min-width:0;
@@ -152,6 +164,8 @@
   }
 
   .groupname{
+    position:sticky;top:0;z-index:2;
+    background:var(--card);
     padding:11px 12px 5px;
     font-size:12px;
     color:var(--muted);
@@ -273,8 +287,10 @@
   }
 
   @media (max-width:860px){
-    .split{grid-template-columns:1fr}
-    .ledger{border-right:0;border-bottom:1px solid var(--line);min-height:0}
+    body{height:auto;overflow:visible;display:block}
+    .split{grid-template-columns:1fr;display:block}
+    .ledger{border-right:0;border-bottom:1px solid var(--line);overflow:visible;max-height:60vh;overflow-y:auto}
+    .editor,.raw{overflow:visible}
     .grid2,.grid3{grid-template-columns:1fr}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -452,10 +468,15 @@ function yamlParse(text){
         arr.push(child);
         continue;
       }
-      const m = body.match(/^([\w.\-\/ ]+?):(\s|$)/);
-      if (m && body[0] !== '"' && body[0] !== "'" && body[0] !== "[" && body[0] !== "{"){
-        // sequence item that is a map; re-inject the remainder as a map line
-        const itemIndent = indent + 2;
+      // A colon at the top level of the item means the item is a map.
+      // keyColon ignores colons inside quotes, so "- \"id\": \"X\"" is a map
+      // while "- \"note: see 4.3\"" stays a plain string.
+      const isMap = body[0] !== "[" && body[0] !== "{" && keyColon(body) !== -1;
+      if (isMap){
+        // Re-inject the remainder as a map line at the indent the file
+        // actually uses for this item's continuation lines.
+        let itemIndent = indent + 2;
+        if (pos < lines.length && lines[pos].indent > indent) itemIndent = lines[pos].indent;
         lines.splice(pos, 0, { indent: itemIndent, text: body, no: line.no });
         arr.push(parseMap(itemIndent));
       } else {
@@ -481,6 +502,10 @@ function yamlParse(text){
       if (rest === ""){
         if (pos < lines.length && lines[pos].indent > indent){
           obj[key] = parseBlock(lines[pos].indent);
+        } else if (pos < lines.length && lines[pos].indent === indent &&
+                   (lines[pos].text.startsWith("- ") || lines[pos].text === "-")){
+          // YAML allows a sequence to sit at the same indent as its key
+          obj[key] = parseSeq(indent);
         } else obj[key] = null;
       } else if (rest[0] === "|" || rest[0] === ">"){
         obj[key] = blockScalar(rest, indent);
@@ -623,10 +648,21 @@ function emitDoc(doc){
    3. Validation
    ========================================================= */
 
+// Rebuilt once per render pass. With a few hundred rules a per-rule scan
+// of the whole set on every keystroke is slow enough to feel laggy.
+let ID_COUNTS = new Map();
+function refreshIdCounts(){
+  ID_COUNTS = new Map();
+  (doc.rules || []).forEach(r => {
+    const k = String(r.id || "").trim();
+    ID_COUNTS.set(k, (ID_COUNTS.get(k) || 0) + 1);
+  });
+}
+
 function validateRule(r, all){
   const errs = [], warns = [];
   if (!r.id.trim()) errs.push("Rule id is missing.");
-  else if (all.filter(x => x.id.trim() === r.id.trim()).length > 1) errs.push("Rule id is used more than once.");
+  else if ((ID_COUNTS.get(r.id.trim()) || 0) > 1) errs.push("Rule id is used more than once.");
   if (!r.clause.trim()) errs.push("Clause reference is missing. Every rule must cite the clause it comes from.");
   if (!r.statement.trim()) errs.push("Statement is missing.");
   if (!ENUMS.severity.includes(r.severity)) errs.push("Severity is not one of blocker, flag or info.");
@@ -691,6 +727,7 @@ function renderMeta(){
 }
 
 function renderCoverage(){
+  refreshIdCounts();
   const rules = doc.rules;
   const n = rules.length;
   const counts = { high:0, medium:0, low:0 };
@@ -729,6 +766,7 @@ function passesFilter(r){
 }
 
 function renderList(){
+  refreshIdCounts();
   const all = doc.rules;
   const idx = all.map((r,i) => i).filter(i => passesFilter(all[i]));
   const needs = idx.filter(i => ruleNeedsReview(all[i], all));
@@ -776,6 +814,7 @@ function renderEditor(){
     box.innerHTML = '<p class="empty">Pick a rule from the ledger to review it. Rules are grouped so that anything with a gap, a conflict or less than full confidence sits at the top.</p>';
     return;
   }
+  refreshIdCounts();
   const r = doc.rules[selected];
   const v = validateRule(r, doc.rules);
   const wc = r.quote.trim() ? r.quote.trim().split(/\s+/).length : 0;
