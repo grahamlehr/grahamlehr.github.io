@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graham Lehr — Webtools</title>
+<meta name="description" content="Little webtools I've built with AIs to automate tasks. Everything runs in the browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231fe070'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<script>
+  // Apply saved or system theme before first paint.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('sg-theme'); } catch (e) {}
+    if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<style>
+/* ── Signal design system: tokens ─────────────────────────────── */
+:root {
+  --neutral-0: #ffffff; --neutral-50: #f5f5f2; --neutral-100: #ebebe6; --neutral-200: #d6d6cf;
+  --neutral-300: #b8b8b0; --neutral-400: #8a8a83; --neutral-500: #6b6b65; --neutral-600: #55554f;
+  --neutral-700: #3a3a36; --neutral-800: #22221f; --neutral-900: #0e0e0c;
+  --green-100: #e6feef; --green-300: #86f7b0; --green-400: #4cf08d; --green-500: #1fe070;
+  --green-600: #12b85a; --green-800: #086534;
+  --blue-300: #a9a9ff; --blue-400: #7777ff; --blue-500: #3d3dff;
+
+  --bg: var(--neutral-50);
+  --surface: var(--neutral-0);
+  --surface-2: var(--neutral-100);
+  --fg-1: var(--neutral-900);
+  --fg-2: var(--neutral-600);
+  --fg-3: var(--neutral-400);
+  --rule: var(--neutral-900);
+  --hairline: var(--neutral-200);
+  --accent: var(--green-500);
+  --accent-hover: var(--green-400);
+  --accent-press: var(--green-600);
+  --on-accent: var(--neutral-900);
+  --accent-text: var(--green-800);
+  --accent-tint: var(--green-100);
+  --focus-ring: var(--blue-500);
+  --selection: var(--green-300);
+
+  --font-sans: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --weight-regular: 400; --weight-medium: 500; --weight-semibold: 600; --weight-bold: 700;
+  --text-display: 80px; --text-h1: 56px; --text-h2: 40px; --text-h3: 28px; --text-h4: 20px;
+  --text-lead: 20px; --text-body: 16px; --text-small: 14px; --text-meta: 12px; --text-micro: 11px;
+  --leading-tight: 0.95; --leading-heading: 1.08; --leading-body: 1.5;
+  --tracking-display: -0.045em; --tracking-heading: -0.025em; --tracking-body: -0.005em; --tracking-label: 0.06em;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px;
+  --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px; --space-10: 128px;
+  --grid-gutter: 24px; --grid-margin: 32px; --grid-max: 1440px;
+  --border-rule: 2px;
+  --control-sm: 32px; --control-md: 40px;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 100ms; --duration: 180ms;
+}
+[data-theme="dark"] {
+  --bg: var(--neutral-900);
+  --surface: var(--neutral-800);
+  --surface-2: var(--neutral-700);
+  --fg-1: var(--neutral-50);
+  --fg-2: var(--neutral-300);
+  --fg-3: var(--neutral-500);
+  --rule: var(--neutral-50);
+  --hairline: var(--neutral-700);
+  --accent-press: var(--green-300);
+  --accent-text: var(--green-400);
+  --accent-tint: color-mix(in srgb, var(--green-500) 16%, transparent);
+  --focus-ring: var(--green-400);
+  --selection: color-mix(in srgb, var(--green-500) 40%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --duration-fast: 0ms; --duration: 0ms; }
+}
+
+/* ── Base ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg-1);
+  font-family: var(--font-sans); font-size: var(--text-body);
+  line-height: var(--leading-body); letter-spacing: var(--tracking-body);
+}
+h1, h2, h3 { margin: 0; font-weight: var(--weight-semibold); line-height: var(--leading-heading); letter-spacing: var(--tracking-heading); text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 4px; transition: background var(--duration-fast) var(--ease); }
+a:hover { background: var(--accent); color: var(--on-accent); text-decoration-color: transparent; }
+svg { display: block; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+::selection { background: var(--selection); color: var(--neutral-900); }
+
+/* ── Components (.sg-*) ───────────────────────────────────────── */
+.sg-label { font-family: var(--font-mono); font-size: var(--text-meta); font-weight: var(--weight-medium); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-2); }
+.sg-index { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--fg-1); }
+.sg-display { font-size: var(--text-display); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); font-weight: var(--weight-semibold); }
+.sg-lead { font-size: var(--text-lead); line-height: 1.4; color: var(--fg-1); letter-spacing: -0.01em; }
+.sg-muted { color: var(--fg-2); }
+.sg-mark { display: inline-block; line-height: 0.95; background: var(--accent); color: var(--on-accent); padding: 0 0.08em; }
+
+.sg-btn {
+  display: inline-flex; align-items: center; justify-content: flex-start; gap: var(--space-2);
+  height: var(--control-md); padding: 0 var(--space-4);
+  font: var(--weight-medium) var(--text-small)/1 var(--font-sans); letter-spacing: -0.005em;
+  color: var(--fg-1); background: transparent; border: var(--border-rule) solid transparent; border-radius: 0;
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
+}
+.sg-btn svg { flex: none; }
+.sg-btn__label { flex: 1; text-align: left; }
+.sg-btn--secondary { border-color: var(--fg-1); }
+.sg-btn--secondary:hover { background: var(--fg-1); color: var(--bg); }
+.sg-btn--secondary:active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sg-btn--ghost { padding: 0 var(--space-2); }
+.sg-btn--ghost:hover { background: var(--surface-2); color: var(--fg-1); }
+.sg-btn--ghost:active { background: var(--accent-tint); }
+.sg-btn--sm { height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--text-meta); }
+.sg-btn--icon { width: var(--control-md); padding: 0; justify-content: center; }
+.sg-btn--icon.sg-btn--sm { width: var(--control-sm); }
+
+.sg-tag { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; font: var(--weight-medium) var(--text-micro)/1 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; border: 1px solid var(--fg-1); color: var(--fg-1); white-space: nowrap; }
+.sg-tag--muted { border-color: var(--hairline); color: var(--fg-2); }
+
+.sg-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4) 0 0; border-top: var(--border-rule) solid var(--rule); color: inherit; text-decoration: none; }
+.sg-card__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+.sg-card__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); letter-spacing: -0.015em; line-height: 1.15; }
+.sg-card__body { font-size: var(--text-small); color: var(--fg-2); line-height: 1.5; display: flex; flex-direction: column; gap: var(--space-2); }
+.sg-card__foot { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: auto; padding-top: var(--space-2); }
+
+.sg-section { display: grid; grid-template-columns: 80px minmax(0,1fr) auto; gap: var(--space-5); align-items: baseline; padding-top: var(--space-3); border-top: var(--border-rule) solid var(--rule); }
+
+.sg-nav { display: flex; align-items: center; gap: var(--space-5); height: 56px; padding: 0 var(--grid-margin); border-bottom: var(--border-rule) solid var(--rule); background: var(--bg); }
+.sg-nav__brand { font-weight: var(--weight-bold); font-size: var(--text-body); letter-spacing: -0.02em; margin-right: auto; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.sg-nav__brand:hover { background: none; color: inherit; }
+.sg-nav__link { font-size: var(--text-small); text-decoration: none; padding: 4px 0; }
+.sg-nav__link:hover { background: none; color: inherit; box-shadow: inset 0 -2px 0 var(--accent); }
+
+.sg-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--grid-gutter); }
+.sg-container { max-width: var(--grid-max); margin: 0 auto; padding: 0 var(--grid-margin); }
+
+/* ── Page layout ──────────────────────────────────────────────── */
+.nav { position: sticky; top: 0; z-index: 10; }
+.brand-mark { width: 12px; height: 12px; background: var(--accent); flex: none; }
+.theme-toggle .icon-sun { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+.hero { padding-top: var(--space-9); padding-bottom: var(--space-9); align-items: end; }
+.hero__meta { grid-column: 1 / 4; }
+.hero__title { grid-column: 4 / 13; font-size: clamp(48px, 8vw, 120px); }
+.hero__intro { grid-column: 4 / 10; display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-6); }
+
+.section { padding-bottom: var(--space-9); scroll-margin-top: 72px; }
+.section h2 { font-size: var(--text-h3); }
+.section__header { margin-bottom: var(--space-6); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-7) var(--grid-gutter); }
+
+.footer { border-top: var(--border-rule) solid var(--rule); padding-top: var(--space-4); padding-bottom: var(--space-8); align-items: baseline; }
+.footer__meta { grid-column: 1 / 4; }
+.footer__body { grid-column: 4 / 10; font-size: var(--text-small); }
+.footer__links { grid-column: 10 / 13; display: flex; gap: var(--space-2); justify-content: flex-end; }
+
+@media (max-width: 767px) {
+  :root { --grid-margin: 16px; }
+  .sg-nav { gap: var(--space-4); }
+  .nav__links { display: none; }
+  .hero { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+  .hero__meta, .hero__title, .hero__intro,
+  .footer__meta, .footer__body, .footer__links { grid-column: 1 / -1; }
+  .hero__intro { margin-top: 0; }
+  .footer__links { justify-content: flex-start; }
+  .sg-section { grid-template-columns: 48px minmax(0,1fr) auto; gap: var(--space-3); }
+  .section { padding-bottom: var(--space-8); }
+  .cards { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+}
+</style>
+</head>
+<body>
+
+<nav class="sg-nav nav" aria-label="Main">
+  <a class="sg-nav__brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Graham Lehr</a>
+  <a class="sg-nav__link nav__links" href="#tools">Tools</a>
+  <a class="sg-nav__link nav__links" href="#assets">Asset creation</a>
+  <button class="sg-btn sg-btn--ghost sg-btn--icon sg-btn--sm theme-toggle" type="button" aria-label="Toggle theme">
+    <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+  </button>
+</nav>
+
+<main id="top" class="sg-container">
+
+  <header class="sg-grid hero">
+    <div class="sg-label hero__meta">Index / Webtools</div>
+    <h1 class="sg-display hero__title">Little tools, built with <span class="sg-mark">AI</span>.</h1>
+    <div class="hero__intro">
+      <p class="sg-lead">Little webtools I've built with AIs to automate tasks. Maybe they'll be useful for you too.</p>
+      <p class="sg-muted">Do what you want with them, but I make no promises that they'll always work etc etc.</p>
+    </div>
+  </header>
+
+  <!-- 01 Tools -->
+  <section id="tools" class="section" aria-labelledby="tools-title">
+    <div class="sg-section section__header">
+      <span class="sg-index">01</span>
+      <h2 id="tools-title">Tools</h2>
+      <span class="sg-label">6 tools</span>
+    </div>
+
+    <div class="cards">
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">01.1</span><span class="sg-label">In-browser</span></div>
+        <h3 class="sg-card__title">PDF Joiner</h3>
+        <div class="sg-card__body">
+          <p>Sometimes you need to stitch two or more PDFs together and don't have access to Acrobat, and don't want to upload your files to some random cloud service. This stitches them and does it all in the browser using pdf-lib.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="tools/pdf-joiner-v2.html"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">01.2</span><span class="sg-label">Experiment</span></div>
+        <h3 class="sg-card__title">Noise</h3>
+        <div class="sg-card__body">
+          <p>An experiment to make a password generator.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="noise/"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">01.3</span><span class="sg-label">In-browser</span></div>
+        <h3 class="sg-card__title">MD to PDF</h3>
+        <div class="sg-card__body">
+          <p>A full-featured, browser-based Markdown editor and converter that does everything locally.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="tools/MD-2-PDF.html"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">01.4</span><span class="sg-label">DWG / DXF</span></div>
+        <h3 class="sg-card__title">AeroCAD DWG Viewer</h3>
+        <div class="sg-card__body">
+          <p>A simple DWG or DXF viewer for when you need to quickly check that what you've received is correct without having access to Vectorworks or AutoCAD. Set zoom, toggle layers and save to PDF or PNG.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="AeroCAD/"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">01.5</span><span class="sg-label">PPTX → DOCX</span></div>
+        <h3 class="sg-card__title">PowerPoint notes to cue cards</h3>
+        <div class="sg-card__body">
+          <p>This one is niche, but it takes the notes from PowerPoint slides and spits out a Word document formatted for different cue card sizes.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="tools/PPTX-Notes-to-Cue-Cards.html"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">01.6</span><span class="sg-label">PPTX / PDF</span></div>
+        <h3 class="sg-card__title">S⁴ — Simple Site-visit Slide Sorter</h3>
+        <div class="sg-card__body">
+          <p>You're jetlagged, you've seen so many hotels they all blur into one, and now you need to do something with hundreds of photos in your camera roll.</p>
+          <p>Sort by date, day or location (<a href="https://support.apple.com/en-gb/guide/personal-safety/ips0d7a5df82/web" target="_blank" rel="noopener">if you share photos with location</a>) and export to PPTX or PDF.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="tools/s4-app.html"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 02 Asset creation -->
+  <section id="assets" class="section" aria-labelledby="assets-title">
+    <div class="sg-section section__header">
+      <span class="sg-index">02</span>
+      <h2 id="assets-title">Asset creation</h2>
+      <span class="sg-label">4 tools</span>
+    </div>
+
+    <div class="cards">
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">02.1</span><span class="sg-label">Single / batch</span></div>
+        <h3 class="sg-card__title">QRui — QR code maker</h3>
+        <div class="sg-card__body">
+          <p>Makes single QR codes or batches of them. Made for Porto's favourite producer. Portuguese-flavoured, custard tarts not included.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="assets/QRui.html"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">02.2</span><span class="sg-label">PNG</span></div>
+        <h3 class="sg-card__title">Digital signage maker</h3>
+        <div class="sg-card__body">
+          <p>A quick way to make PNGs for digital signage at events.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="assets/Digital-Signage-Maker.html"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">02.3</span><span class="sg-label">2 versions</span></div>
+        <h3 class="sg-card__title">Image banner maker</h3>
+        <div class="sg-card__body">
+          <p>A quick way to make images for the SpotMe event app.</p>
+          <p>Two versions from the same spec: one made with Gemini 3.5 Flash in Antigravity, and one with GPT-5.5 in Codex.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="assets/SpotMe-Banner-Gemini.html"><span class="sg-btn__label">Gemini</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="assets/spotme-banner-GPT5.5.html"><span class="sg-btn__label">GPT-5.5</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="sg-card">
+        <div class="sg-card__head"><span class="sg-index">02.4</span><span class="sg-label">Print</span></div>
+        <h3 class="sg-card__title">Tent Card Studio</h3>
+        <div class="sg-card__body">
+          <p>Does what it says on the tin.</p>
+        </div>
+        <div class="sg-card__foot">
+          <a class="sg-btn sg-btn--secondary sg-btn--sm" href="assets/TentCardGenerator.html"><span class="sg-btn__label">Open</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer class="sg-grid footer">
+    <div class="sg-label footer__meta">grahamlehr.github.io</div>
+    <p class="sg-muted footer__body">Everything here runs in your browser. No promises, no warranty, no uploads to random cloud services.</p>
+    <div class="footer__links">
+      <a class="sg-btn sg-btn--ghost sg-btn--sm" href="https://github.com/grahamlehr/grahamlehr.github.io"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg><span class="sg-btn__label">Source</span></a>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+  document.querySelector('.theme-toggle').addEventListener('click', function () {
+    var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('sg-theme', next); } catch (e) {}
+  });
+</script>
+</body>
+</html>
