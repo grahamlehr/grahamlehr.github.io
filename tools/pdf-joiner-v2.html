@@ -869,9 +869,9 @@
     const outputFilename = document.getElementById('output-filename');
     
     // Dashboard elements
-    const dbCount = document.getElementById('db-count');
-    const dbPages = document.getElementById('db-pages');
-    const dbSize = document.getElementById('db-size');
+    const dbCount = document.getElementById('dashboard-count');
+    const dbPages = document.getElementById('dashboard-pages');
+    const dbSize = document.getElementById('dashboard-size');
 
     // Modal elements
     const progressModal = document.getElementById('progress-modal');
@@ -1297,7 +1297,7 @@
           await new Promise(r => setTimeout(r, 80));
 
           // Load target file arraybuffer into pdf-lib
-          const donorPdf = await PDFLib.PDFDocument.load(file.arrayBuffer);
+          const donorPdf = await PDFLib.PDFDocument.load(file.arrayBuffer, { ignoreEncryption: true });
           const maxPages = donorPdf.getPageCount();
 
           // Calculate which pages to extract
