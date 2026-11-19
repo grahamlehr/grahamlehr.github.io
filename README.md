@@ -37,9 +37,9 @@ This one is Niche, but it takes the notes from PowerPoint slides and spits out a
 You're jetlagged, you've seen so many hotels they all blur into one, and now you need to do something with hundreds of photos in your camera roll.
 Enter [S⁴ - The Simple Site-visit Slide Sorter](https://grahamlehr.github.io/tools/s4-app.html). Sort by date, day, location [(if you share photos with location)](https://support.apple.com/en-gb/guide/personal-safety/ips0d7a5df82/web) and export to PPTX or PDF.
 
-**Showtime Countdown Timer**
+**Easy Countdown**
 
-[Showtime](https://grahamlehr.github.io/tools/countdown.html) is a full screen countdown timer for event screens. Add a background image or video, pick a font and a timer style, go full screen and start it with the space bar. Final ten second countdown, confetti and fireworks are optional.
+[Easy Countdown](https://grahamlehr.github.io/countdown/) is a countdown timer that just works, with loads of options to customise it: your own background image or video, fonts, timer styles, a big final ten seconds and confetti. Go full screen and start it with the space bar. No adverts, no tracking.
 
 ## Asset Creation
 
