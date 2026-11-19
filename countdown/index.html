@@ -150,7 +150,7 @@ input[type=checkbox]{width:17px;height:17px;accent-color:#ff4d2e;flex:0 0 auto!i
 .grid button:hover{background:#25252e}
 .grid button.on{border-color:#ff4d2e;background:#2a1712}
 .grid button span{font-size:21px;line-height:1;font-weight:700;font-synthesis:none}
-.grid button small{font:400 10.5px system-ui,sans-serif;color:#8d8d9a}
+.grid button small{font:400 10.5px system-ui,sans-serif;color:#8d8d9a;max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .grid.styles{grid-template-columns:repeat(3,1fr)}
 .grid.styles button{height:36px;font-size:13px}
 .out{flex:0 0 40px!important;text-align:right;color:#8d8d9a;font-variant-numeric:tabular-nums}
@@ -217,6 +217,9 @@ input[type=checkbox]{width:17px;height:17px;accent-color:#ff4d2e;flex:0 0 auto!i
   <section>
     <h2>Font</h2>
     <div class="grid" id="fonts"></div>
+    <div class="row" style="margin-bottom:6px"><button class="btn" id="pickFont">Upload your own font&hellip;</button><button class="btn icon" id="unfont" title="Remove your font" aria-label="Remove your font" hidden>&#10005;</button></div>
+    <input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf" hidden>
+    <p class="note" id="fontNote" style="margin-bottom:16px">TrueType or OpenType (.ttf, .otf). It stays on this computer.</p>
     <h2>Timer style</h2>
     <div class="grid styles" id="styles"></div>
     <div class="row"><label>Text colour</label><input type="color" data-k="color"><label style="flex:0 0 auto;color:#b9b9c4">Accent</label><input type="color" data-k="accent"></div>
@@ -315,6 +318,7 @@ const DEF={mode:'duration',h:0,m:10,s:0,until:'',title:'',endMsg:"Time's up",fon
 const KEY='easy-countdown-v1';
 let S={...DEF};
 try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{}
+const CUSTOM='Uploaded font',wantCustom=S.font===CUSTOM;
 if(!FONTS.some(f=>f.n===S.font))S.font=DEF.font;
 if(!S.until){const d=new Date(Date.now()+36e5);S.until=String(d.getHours()).padStart(2,'0')+':00'}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}};
@@ -422,7 +426,10 @@ function colors(){const c=lvl==='crit'?'#ff3b30':lvl==='warn'?'#ffb020':null;
 function fill(){$$('[data-k]').forEach(el=>{const v=S[el.dataset.k];if(el.type==='checkbox')el.checked=!!v;else el.value=v})}
 
 /* ---------- Panel wiring ---------- */
-$('#fonts').innerHTML=FONTS.map(f=>`<button data-v="${f.n}"><span style="font-family:'${f.n}'">12:34</span><small>${f.label||f.n}</small></button>`).join('');
+function renderFonts(){const box=$('#fonts');box.textContent='';
+  for(const f of FONTS){const b=document.createElement('button'),s=document.createElement('span'),l=document.createElement('small');
+    b.dataset.v=f.n;b.classList.toggle('on',f.n===S.font);s.style.fontFamily=`"${f.n}"`;s.textContent='12:34';l.textContent=f.label||f.n;b.append(s,l);box.append(b)}}
+renderFonts();
 $('#styles').innerHTML=STYLES.map(([v,l])=>`<button data-v="${v}">${l}</button>`).join('');
 $('#presets').innerHTML=[1,2,5,10,15,20,30,45,60].map(m=>`<button data-m="${m}">${m} min</button>`).join('');
 $('#fonts').onclick=e=>{const b=e.target.closest('button');if(b){S.font=b.dataset.v;apply()}};
@@ -457,8 +464,27 @@ function setMedia(file,persist){if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaU
 $('#pick').onclick=()=>$('#file').click();
 $('#file').onchange=e=>{const f=e.target.files[0];if(f)setMedia(f,true);e.target.value=''};
 $('#unpick').onclick=()=>setMedia(null,true);
+
+/* ---------- Your own font (TrueType / OpenType) ---------- */
+const FONT_HINT='TrueType or OpenType (.ttf, .otf). It stays on this computer.';let customFace=null;
+async function setFont(file,persist,select=persist){const note=$('#fontNote'),i=FONTS.findIndex(f=>f.n===CUSTOM);
+  if(file){let face;
+    try{face=new FontFace(CUSTOM,await file.arrayBuffer());await face.load()}
+    catch{note.textContent='That file could not be read as a font. Please try a .ttf or .otf file.';return}
+    if(customFace)document.fonts.delete(customFace);document.fonts.add(face);customFace=face;
+    const e={n:CUSTOM,w:400,label:(file.name||'Your font').replace(/\.[^.]+$/,'')};i<0?FONTS.push(e):FONTS[i]=e;
+    if(persist)idb('readwrite',s=>s.put(file,'font')).catch(()=>{});
+    if(select)S.font=CUSTOM}
+  else{if(customFace)document.fonts.delete(customFace);customFace=null;if(i>=0)FONTS.splice(i,1);
+    if(S.font===CUSTOM)S.font=DEF.font;idb('readwrite',s=>s.delete('font')).catch(()=>{})}
+  note.textContent=FONT_HINT;$('#unfont').hidden=!customFace;renderFonts();sig='';apply()}
+const isFont=f=>/\.(ttf|otf|woff2?)$/i.test(f.name);
+$('#pickFont').onclick=()=>$('#fontFile').click();
+$('#fontFile').onchange=e=>{const f=e.target.files[0];if(f)setFont(f,true);e.target.value=''};
+$('#unfont').onclick=()=>setFont(null,true);
+idb('readonly',s=>s.get('font')).then(f=>{if(f)setFont(f,false,wantCustom)}).catch(()=>{});
 addEventListener('dragover',e=>e.preventDefault());
-addEventListener('drop',e=>{e.preventDefault();const f=[...e.dataTransfer.files].find(f=>/^(image|video)\//.test(f.type));if(f)setMedia(f,true)});
+addEventListener('drop',e=>{e.preventDefault();const ff=[...e.dataTransfer.files].find(isFont);if(ff)return setFont(ff,true);const f=[...e.dataTransfer.files].find(f=>/^(image|video)\//.test(f.type));if(f)setMedia(f,true)});
 idb('readonly',s=>s.get('bg')).then(f=>{if(f)setMedia(f,false)}).catch(()=>{});
 
 /* ---------- Keyboard and chrome ---------- */
