@@ -395,7 +395,7 @@ let S={...DEF};
 try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{}
 /* A browser source link (#go=...) carries its own settings, starts by itself and leaves the saved settings alone */
 let LINK=false;
-{const m=location.hash.match(/^#go=([\w-]+)/);
+{const m=location.hash.match(/[#&]go=([\w-]+)/);
   if(m)try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));
     S={...DEF};for(const k in o)if(k in DEF&&typeof o[k]===typeof DEF[k])S[k]=o[k];LINK=true}catch{}}
 const BARE=LINK||!!window.obsstudio;
@@ -535,10 +535,15 @@ $$('[data-seg]').forEach(seg=>seg.onclick=e=>{const b=e.target.closest('button')
   if(k==='key'&&v!==S.key&&v!=='off')S.keyGlow=v==='green'||v==='blue'?25:100; /* a tight glow keys best on a chroma colour */
   S[k]=v;fill();apply();if(k==='tab')$('#pbody').scrollTop=0;if(k==='mode'&&T.status!=='idle')reset()});
 $('#keyOff').onclick=()=>{S.key='off';apply()};
+const linkName=()=>['Easy Countdown',S.mode==='until'?'to '+S.until:fmt(durMs(),false),STYLES.find(x=>x[0]===S.style)[1],
+  ...(keyOn()?[S.key==='clear'?'Transparent':S.key[0].toUpperCase()+S.key.slice(1)+' key']:[]),...(S.title.trim()?['"'+S.title.trim()+'"']:[])].join(' \u00b7 ');
 $('#copyLink').onclick=async()=>{const d={};for(const k in DEF)if(!/^(tab|autoFs|exp)/.test(k)&&S[k]!==DEF[k])d[k]=S[k];
-  const url=location.href.split('#')[0]+'#go='+btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  let ok=true;try{await navigator.clipboard.writeText(url)}catch{ok=false;prompt('Copy this link:',url)}
-  $('#linkNote').textContent=(ok?'Link copied. ':'')+'Add it as a browser source at 1920 x 1080. The countdown starts when the source loads, so set the source to refresh when its scene becomes active.'
+  const url=location.href.split('#')[0]+'#'+linkName().replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'')+'&go='+btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  /* copied as a named link for chat apps (rich text) and as the bare URL for a browser source field (plain text) */
+  let ok=true;try{await navigator.clipboard.write([new ClipboardItem({'text/plain':new Blob([url],{type:'text/plain'}),
+      'text/html':new Blob([`<a href="${url}">${linkName().replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';')}</a>`],{type:'text/html'})})])}
+    catch{try{await navigator.clipboard.writeText(url)}catch{ok=false;prompt('Copy this link:',url)}}
+  $('#linkNote').textContent=(ok?`Link copied as "${linkName()}". `:'')+'Add it as a browser source at 1920 x 1080. The countdown starts when the source loads, so set the source to refresh when its scene becomes active.'
     +(S.key==='clear'?'':' Choose Clear above for a transparent background with no keying needed.')
     +(S.bg==='media'&&!keyOn()?' Your own background file cannot travel with the link.':'')};
 $('#panel').addEventListener('input',e=>{const el=e.target,k=el.dataset.k;if(!k)return;
@@ -877,7 +882,7 @@ function frame(t){const dt=Math.min(.05,(t-lastT)/1000);lastT=t;
   if(l!==lvl){lvl=l;colors()}
   drawAmb(actx,dt,t/1000,true);drawFx(fctx,dt,true);requestAnimationFrame(frame)}
 
-if(LINK)document.body.classList.remove('panel-open');
+if(LINK){document.body.classList.remove('panel-open');document.title=linkName()}
 fill();sizeCanvas();apply();if(LINK)start();else chrome();
 document.fonts.ready.then(()=>{sig='';layout()});
 requestAnimationFrame(frame);
