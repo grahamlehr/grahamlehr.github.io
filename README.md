@@ -39,7 +39,7 @@ Enter [S⁴ - The Simple Site-visit Slide Sorter](https://grahamlehr.github.io/t
 
 **Easy Countdown**
 
-[Easy Countdown](https://grahamlehr.github.io/countdown/) is a countdown timer that just works, with loads of options to customise it: your own background image or video, fonts, timer styles, a big final ten seconds and confetti. Go full screen and start it with the space bar, or export the countdown as an MP4 to drop into your show file. No adverts, no tracking.
+[Easy Countdown](https://grahamlehr.github.io/countdown/) is a countdown timer that just works, with loads of options to customise it: your own background image or video, fonts, timer styles, a big final ten seconds and confetti. Go full screen and start it with the space bar, or export the countdown as an MP4 to drop into your show file. Overlay mode puts it on green, blue or black for a chroma or luma key, or on a transparent background as an OBS / vMix browser source or a WebM with alpha. No adverts, no tracking.
 
 ## Asset Creation
 
